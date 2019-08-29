@@ -16,10 +16,10 @@ jobs:
           command: make deepo
       - run:
             name: Run tests
-            command: true
+            command: echo Test
       - deploy:
           name: Push application Docker image
-          command: true
+          command: echo Docker push
 workflows:
   version: 2
   main:
