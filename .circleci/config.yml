@@ -1,0 +1,26 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: docker:17.05.0-ce-git
+
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Build application Docker image
+          command: |
+            make deepo
+    - run:
+          name: Run tests
+          command: |
+            true
+      - deploy:
+          name: Push application Docker image
+          command: |
+            true
+workflows:
+  version: 2
+  main:
+    jobs:
+      - build
