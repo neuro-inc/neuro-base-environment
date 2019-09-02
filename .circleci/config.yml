@@ -9,17 +9,16 @@ jobs:
       - setup_remote_docker
       - run:
           name: Install dependencies
-          command: |
-            apk add --no-cache make python3
+          command: apk add --no-cache make python3
       - run:
           name: Build application Docker image
-          command: make deepo
+          command: make image
       - run:
             name: Run tests
-            command: echo Test
+            command: make test
       - deploy:
           name: Push application Docker image
-          command: echo Docker push
+          command: make docker_push
 workflows:
   version: 2
   main:
