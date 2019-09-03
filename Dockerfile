@@ -124,10 +124,7 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 # ------------------------------------------------------------------
 
 # Install openssh
-RUN apt-get update &&  \
-   ${APT_INSTALL} openssh-server && \
-   apt-get clean && \
-   rm /var/lib/apt/lists/*_*
+  $APT_INSTALL openssh-server
 
 # Setup environment for ssh session
 RUN echo "export PATH=$PATH" >> /etc/profile && \
