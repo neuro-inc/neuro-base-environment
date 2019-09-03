@@ -8,7 +8,7 @@
 # jupyterlab    latest (pip)
 # ==================================================================
 
-FROM ubuntu:18.04
+FROM nvidia/cuda:10.0-cudnn7-devel-ubuntu18.04
 ENV LANG C.UTF-8
 RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
     PIP_INSTALL="python -m pip --no-cache-dir install --upgrade" && \
@@ -100,7 +100,7 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
     "git+https://github.com/pytorch/vision/archive/v0.4.0.zip" && \
     $PIP_INSTALL \
         torch_nightly -f \
-        https://download.pytorch.org/whl/nightly/cpu/torch_nightly.html \
+        https://download.pytorch.org/whl/nightly/cu100/torch_nightly.html \
         && \
 
 # ==================================================================
@@ -108,7 +108,7 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 # ------------------------------------------------------------------
 
     $PIP_INSTALL \
-        tf-nightly-2.0-preview \
+        tf-nightly-gpu-2.0-preview \
         && \
 
 # ==================================================================
@@ -130,21 +130,22 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 
 EXPOSE 8888 6006
 
+
 # ==================================================================
 # SSH
 # ------------------------------------------------------------------
 # Install openssh
 RUN apt-get update &&  \
-    ${APT_INSTALL} openssh-server && \
-    apt-get clean && \
-    rm /var/lib/apt/lists/*_*
+   ${APT_INSTALL} openssh-server && \
+   apt-get clean && \
+   rm /var/lib/apt/lists/*_*
 
 # Setup environment for ssh session
 RUN echo "export PATH=$PATH" >> /etc/profile && \
-  echo "export LANG=$LANG" >> /etc/profile && \
-  echo "export LANGUAGE=$LANGUAGE" >> /etc/profile && \
-  echo "export LC_ALL=$LC_ALL" >> /etc/profile && \
-  echo "export PYTHONIOENCODING=$PYTHONIOENCODING" >> /etc/profile
+ echo "export LANG=$LANG" >> /etc/profile && \
+ echo "export LANGUAGE=$LANGUAGE" >> /etc/profile && \
+ echo "export LC_ALL=$LC_ALL" >> /etc/profile && \
+ echo "export PYTHONIOENCODING=$PYTHONIOENCODING" >> /etc/profile
 
 # Create folder for openssh fifos
 RUN mkdir -p /var/run/sshd
