@@ -165,7 +165,7 @@ make \$1\n" > /tmp/entrypoint.sh
 # config & cleanup
 # ------------------------------------------------------------------
 
-    ldconfig && \
+RUN ldconfig && \
     apt-get clean && \
     apt-get autoremove && \
     rm -rf /var/lib/apt/lists/* /tmp/* ~/*
