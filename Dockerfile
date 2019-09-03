@@ -153,13 +153,6 @@ PermitEmptyPasswords yes\n" > /etc/ssh/sshd_config
 # ssh port
 EXPOSE 22
 
-## Setup entrypoint
-RUN echo "#!/usr/bin/env bash\n\
-cd /app\n\
-ldconfig\n\
-/usr/sbin/sshd -De &\n\
-make \$1\n" > /tmp/entrypoint.sh
-
 
 # ==================================================================
 # config & cleanup
@@ -172,7 +165,12 @@ RUN ldconfig && \
 
 EXPOSE 8888 6006
 
+## Setup entrypoint
+RUN echo "#!/usr/bin/env bash\n\
+cd /app\n\
+ldconfig\n\
+/usr/sbin/sshd -De &\n\
+make \$1\n" > /tmp/entrypoint.sh
 
-RUN pip --version
 RUN chmod +x /tmp/entrypoint.sh
 ENTRYPOINT ["bash", "/tmp/entrypoint.sh"]
