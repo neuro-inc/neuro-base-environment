@@ -97,7 +97,7 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
     	torch \
         && \
     $PIP_INSTALL \
-    "git+https://github.com/pytorch/vision.git" && \
+    "git+https://github.com/pytorch/vision/archive/v0.4.0.zip" && \
     $PIP_INSTALL \
         torch_nightly -f \
         https://download.pytorch.org/whl/nightly/cpu/torch_nightly.html \
