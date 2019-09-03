@@ -164,7 +164,6 @@ EXPOSE 8888 6006
 
 ## Setup entrypoint
 RUN echo "#!/usr/bin/env bash\n\
-cd /app\n\
 ldconfig\n\
 /usr/sbin/sshd -De &\n\
 make \$1\n" > /tmp/entrypoint.sh
