@@ -120,20 +120,9 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
         && \
 
 # ==================================================================
-# config & cleanup
-# ------------------------------------------------------------------
-
-    ldconfig && \
-    apt-get clean && \
-    apt-get autoremove && \
-    rm -rf /var/lib/apt/lists/* /tmp/* ~/*
-
-EXPOSE 8888 6006
-
-
-# ==================================================================
 # SSH
 # ------------------------------------------------------------------
+
 # Install openssh
 RUN apt-get update &&  \
    ${APT_INSTALL} openssh-server && \
@@ -161,7 +150,7 @@ ChallengeResponseAuthentication yes\n\
 PermitRootLogin yes \n\
 PermitEmptyPasswords yes\n" > /etc/ssh/sshd_config
 
-# ssh
+# ssh port
 EXPOSE 22
 
 ## Setup entrypoint
@@ -170,6 +159,19 @@ cd /app\n\
 ldconfig\n\
 /usr/sbin/sshd -De &\n\
 make \$1\n" > /tmp/entrypoint.sh
+
+
+# ==================================================================
+# config & cleanup
+# ------------------------------------------------------------------
+
+    ldconfig && \
+    apt-get clean && \
+    apt-get autoremove && \
+    rm -rf /var/lib/apt/lists/* /tmp/* ~/*
+
+EXPOSE 8888 6006
+
 
 RUN pip --version
 RUN chmod +x /tmp/entrypoint.sh
