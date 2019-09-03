@@ -37,7 +37,7 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
         unrar \
         && \
 
-    $GIT_CLONE https://github.com/Kitware/CMake ~/cmake && \
+    git clone https://github.com/Kitware/CMake ~/cmake && \
     cd ~/cmake && \
     git checkout release && \
     ./bootstrap && \
