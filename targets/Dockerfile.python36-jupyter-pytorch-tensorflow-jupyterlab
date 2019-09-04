@@ -120,7 +120,7 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
         && \
 
 # ==================================================================
-# SSH
+# SSH: prepare environment
 # ------------------------------------------------------------------
 
 # Install openssh
@@ -136,17 +136,6 @@ RUN echo "export PATH=$PATH" >> /etc/profile && \
 # Create folder for openssh fifos
 RUN mkdir -p /var/run/sshd
 
-# Disable password for root
-RUN sed -i -re 's/^root:[^:]+:/root::/' /etc/shadow
-RUN sed -i -re 's/^root:.*$/root::0:0:System Administrator:\/root:\/bin\/bash/' /etc/passwd
-
-# Permit root login over ssh
-RUN echo "Subsystem    sftp    /usr/lib/sftp-server \n\
-PasswordAuthentication yes\n\
-ChallengeResponseAuthentication yes\n\
-PermitRootLogin yes \n\
-PermitEmptyPasswords yes\n" > /etc/ssh/sshd_config
-
 # ssh port
 EXPOSE 22
 
@@ -161,12 +150,3 @@ RUN ldconfig && \
     rm -rf /var/lib/apt/lists/* /tmp/* ~/*
 
 EXPOSE 8888 6006
-
-## Setup entrypoint
-RUN echo "#!/usr/bin/env bash\n\
-ldconfig\n\
-/usr/sbin/sshd -De &\n\
-make \$1\n" > /tmp/entrypoint.sh
-
-RUN chmod +x /tmp/entrypoint.sh
-ENTRYPOINT ["bash", "/tmp/entrypoint.sh"]

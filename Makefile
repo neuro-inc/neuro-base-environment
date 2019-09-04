@@ -4,6 +4,7 @@ IMAGE_NAME?=neuromation/base-2
 image:
 	# git clone https://github.com/ufoym/deepo.git
 	# python3 deepo/generator/generate.py Dockerfile tensorflow pytorch jupyter jupyterlab python==3.6
+	# (apply manual changes)
 	docker build -t $(IMAGE_NAME) -f targets/Dockerfile.python36-jupyter-pytorch-tensorflow-jupyterlab .
 
 .PHONY: test
