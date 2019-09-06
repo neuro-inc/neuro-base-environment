@@ -164,6 +164,7 @@ EXPOSE 8888 6006
 
 ## Setup entrypoint
 RUN echo "#!/usr/bin/env bash\n\
+: \"${PLATFORMAPI_SERVICE_HOST:?The image should only run in Neuromation platform due to insecure SSH configuration. Set environment variable PLATFORMAPI_SERVICE_HOST to any non-empty value to override this check.}\"\n\
 ldconfig\n\
 /usr/sbin/sshd -De &\n\
 make \$1\n" > /tmp/entrypoint.sh
