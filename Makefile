@@ -8,7 +8,7 @@ image:
 
 .PHONY: test
 test:
-	docker run -t $(IMAGE_NAME) -e PLATFORMAPI_SERVICE_HOST=test /bin/true
+	docker run -e PLATFORMAPI_SERVICE_HOST=test -t $(IMAGE_NAME) /bin/true
 
 .PHONY: docker_push
 docker_push:
