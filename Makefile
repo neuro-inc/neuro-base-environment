@@ -8,7 +8,7 @@ image:
 
 .PHONY: test
 test:
-	docker run -t $(IMAGE_NAME) /bin/true
+	docker run -t $(IMAGE_NAME) -e PLATFORMAPI_SERVICE_HOST=test /bin/true
 
 .PHONY: docker_push
 docker_push:
@@ -16,5 +16,6 @@ docker_push:
 
 .PHONY: clean
 clean:
-	rm -rf deepo
-	rm Dockerfile
+	echo clean
+	# rm -rf deepo
+	# rm Dockerfile
