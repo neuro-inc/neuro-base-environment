@@ -6,4 +6,4 @@ ldconfig
 
 /usr/sbin/sshd -De &
 
-$1
+exec "$@"
