@@ -9,13 +9,3 @@ image:
 .PHONY: test
 test:
 	docker run -e PLATFORMAPI_SERVICE_HOST=test -t $(IMAGE_NAME) /bin/true
-
-.PHONY: docker_push
-docker_push:
-	echo docker push $(IMAGE_NAME)
-
-.PHONY: clean
-clean:
-	echo clean
-	# rm -rf deepo
-	# rm Dockerfile
