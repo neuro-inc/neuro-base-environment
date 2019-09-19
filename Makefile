@@ -1,4 +1,4 @@
-IMAGE_NAME?=neuromation/base-2
+IMAGE_NAME?=neuromation/base
 
 .PHONY: image
 image:
