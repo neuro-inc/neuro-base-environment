@@ -1,11 +1,11 @@
 # ==================================================================
 # module list
 # ------------------------------------------------------------------
-# python        3.6    (apt)
-# jupyter       latest (pip)
-# pytorch       latest (pip)
-# tensorflow    latest (pip)
-# jupyterlab    latest (pip)
+# python        3.6       (apt)
+# jupyter       latest    (pip)
+# jupyterlab    latest    (pip)
+# pytorch       1.2.0     (pip)
+# tensorflow    2.0.0-rc1 (pip)
 # ==================================================================
 
 FROM nvidia/cuda:10.0-cudnn7-devel-ubuntu18.04
@@ -94,21 +94,19 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
         enum34 \
         pyyaml \
         typing \
-    	torch \
         && \
     $PIP_INSTALL \
-    "https://github.com/pytorch/vision/archive/v0.4.0.zip" && \
-    $PIP_INSTALL \
-        torch_nightly -f \
-        https://download.pytorch.org/whl/nightly/cu100/torch_nightly.html \
+        torch==1.2.0 \
         && \
+    $PIP_INSTALL \
+        torchvision==0.4.0 && \
 
 # ==================================================================
 # tensorflow
 # ------------------------------------------------------------------
 
     $PIP_INSTALL \
-        tf-nightly-gpu-2.0-preview \
+        tensorflow==2.0.0-rc1 \
         && \
 
 # ==================================================================
