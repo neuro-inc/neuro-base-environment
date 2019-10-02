@@ -66,12 +66,12 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
         setuptools \
         && \
     $PIP_INSTALL \
-        numpy \
+        numpy=1.16.4 \
         scipy \
         pandas \
         cloudpickle \
-        scikit-learn \
-        matplotlib \
+        scikit-learn=0.21.2 \
+        matplotlib=3.1.0 \
         Cython \
         && \
 
@@ -107,6 +107,7 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 
     $PIP_INSTALL \
         tensorflow==2.0.0-rc1 \
+        tensorboardX==1.2 \
         && \
 
 # ==================================================================
