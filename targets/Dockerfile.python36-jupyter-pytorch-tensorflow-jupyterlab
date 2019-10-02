@@ -66,13 +66,13 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
         setuptools \
         && \
     $PIP_INSTALL \
-        numpy=1.16.4 \
-        scipy=1.3.1 \
-        pandas=0.25.1 \
-        cloudpickle=1.2.1 \
-        scikit-learn=0.21.2 \
-        matplotlib=3.1.0 \
-        Cython=0.29.13 \
+        numpy==1.16.4 \
+        scipy==1.3.1 \
+        pandas==0.25.1 \
+        cloudpickle==1.2.1 \
+        scikit-learn==0.21.2 \
+        matplotlib==3.1.0 \
+        Cython==0.29.13 \
         && \
 
 # ==================================================================
@@ -80,7 +80,7 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 # ------------------------------------------------------------------
 
     $PIP_INSTALL \
-        jupyter=1.0.0 \
+        jupyter==1.0.0 \
         && \
 
 # ==================================================================
@@ -88,12 +88,12 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 # ------------------------------------------------------------------
 
     $PIP_INSTALL \
-        future=0.17.1 \
-        numpy=1.17.1 \
-        protobuf=3.9.1 \
-        enum34=1.1.6 \
-        pyyaml=18.1.0 \
-        typing=3.7.4.1 \
+        future==0.17.1 \
+        numpy==1.17.1 \
+        protobuf==3.9.1 \
+        enum34==1.1.6 \
+        pyyaml==18.1.0 \
+        typing==3.7.4.1 \
         && \
     $PIP_INSTALL \
         torch==1.2.0 \
@@ -115,7 +115,7 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 # ------------------------------------------------------------------
 
     $PIP_INSTALL \
-        jupyterlab=1.1.0 \
+        jupyterlab==1.1.0 \
         && \
 
 # ==================================================================
