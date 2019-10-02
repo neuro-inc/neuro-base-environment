@@ -1,6 +1,6 @@
 IMAGE_NAME?=neuromation/base
 DOCKERFILE=targets/Dockerfile.python36-jupyter-pytorch-tensorflow-jupyterlab
-TEST_COMMAND=python -c $$"`./parse_pip_packages.py $(DOCKERFILE)`" 
+TEST_COMMAND=bash -c $$"`./get_pip_check_command.py $(DOCKERFILE)`"
 
 .PHONY: image
 image:
