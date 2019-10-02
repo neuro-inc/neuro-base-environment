@@ -4,13 +4,13 @@ import re
 import sys
 import typing as t
 
-PIP_REPLACEMENTS = {
+PIP_MODULE_NAMES = {
     "scikit-learn": "sklearn",
     "protobuf": "google",
     "enum34": "enum",
     "pyyaml": "yaml",
 }
-BASH_ONLY_PACKAGES = {
+BASH_COMMANDS = {
     "jupyterlab": "jupyter-lab --version",
 }
 
@@ -23,16 +23,18 @@ def _get_pip_check_commands(dockerfile_lines: t.Iterable[str]) -> t.List[str]:
     for line in dockerfile_lines:
         if f"${verb}" in line:
             in_pip_section = True
-        if in_pip_section:
-            packages = pattern.findall(line)
-            for p in packages:
-                if p != verb:
-                    p_name = PIP_REPLACEMENTS.get(p, p)
-                    cmd = BASH_ONLY_PACKAGES.get(p_name, f"python -c 'import {p_name}'")
-                    result.append(cmd)
-            if "&&" in line:
-                in_pip_section = False
-    return result 
+        if not in_pip_section:
+            continue
+        packages = pattern.findall(line)
+        for p in packages:
+            if p == verb:
+                continue
+            module = PIP_MODULE_NAMES.get(p, p)
+            cmd = BASH_COMMANDS.get(module, f"python -c 'import {module}'")
+            result.append(cmd)
+        if "&&" in line:
+            in_pip_section = False
+    return result
 
 
 if __name__ == "__main__":
