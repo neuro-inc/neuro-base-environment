@@ -92,7 +92,7 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
         numpy==1.17.1 \
         protobuf==3.9.1 \
         enum34==1.1.6 \
-        pyyaml==18.1.0 \
+        pyyaml==5.1.2 \
         typing==3.7.4.1 \
         && \
     $PIP_INSTALL \
