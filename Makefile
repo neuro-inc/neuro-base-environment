@@ -1,6 +1,6 @@
 IMAGE_NAME?=neuromation/base
 DOCKERFILE=targets/Dockerfile.python36-jupyter-pytorch-tensorflow-jupyterlab
-TEST_COMMAND=bash -c $$"`./get_pip_check_command.py $(DOCKERFILE)`"
+PIP_CHECK_COMMANDS=`./get_pip_check_command.py $(DOCKERFILE)`
 
 .PHONY: image
 image:
@@ -10,4 +10,5 @@ image:
 
 .PHONY: test
 test:
-	docker run -e PLATFORMAPI_SERVICE_HOST=test -t $(IMAGE_NAME) $(TEST_COMMAND) 
+	echo $(PIP_CHECK_COMMANDS)
+	docker run -e PLATFORMAPI_SERVICE_HOST=test -t $(IMAGE_NAME) bash -c $$"$(PIP_CHECK_COMMANDS)"
