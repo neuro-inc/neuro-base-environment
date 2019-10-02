@@ -10,5 +10,5 @@ image:
 
 .PHONY: test
 test:
-	echo $(PIP_CHECK_COMMANDS)
+	@echo $(PIP_CHECK_COMMANDS)
 	docker run -e PLATFORMAPI_SERVICE_HOST=test -t $(IMAGE_NAME) bash -c $$"$(PIP_CHECK_COMMANDS)"
