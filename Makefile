@@ -1,10 +1,9 @@
 IMAGE_NAME?=neuromation/base
 DOCKERFILE=targets/Dockerfile.python36-jupyter-pytorch-tensorflow-jupyterlab
-PIP_CHECK_COMMANDS=`python get_pip_check_command.py $(DOCKERFILE)`
+PIP_CHECK_COMMANDS=`python3 get_pip_check_command.py $(DOCKERFILE)`
 
 .PHONY: image
 image:
-	sleep 30m
 	$(PIP_CHECK_COMMANDS)
 	# git clone https://github.com/ufoym/deepo.git
 	# python3 deepo/generator/generate.py Dockerfile tensorflow pytorch jupyter jupyterlab python==3.6

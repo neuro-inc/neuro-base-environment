@@ -1,5 +1,3 @@
-#!/bin/env python
-
 import re
 import sys
 import typing as t
