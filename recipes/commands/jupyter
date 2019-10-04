@@ -1,0 +1,2 @@
+jupyter --help
+jupyter nbextension list

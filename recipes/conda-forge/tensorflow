@@ -1,0 +1,222 @@
+{% set version = "1.13.2" %}
+
+{% set pyver = "cp{}{}".format(PY_VER[0], PY_VER[2]) %}
+{% set platform = "macosx_10_11_x86_64" %}  # [osx]
+{% set platform = "win_amd64" %}  # [win]
+{% set fn = "{}-{}-{}-{}m-{}.whl".format("tensorflow", version, pyver, pyver, platform) %}  # [not linux]
+{% set fn = "tensorflow-{{ version }}.tar.gz" %}  # [linux]
+
+package:
+  name: tensorflow
+  version: {{ version }}
+
+source:
+  fn: {{ fn }}
+  url: https://github.com/tensorflow/tensorflow/archive/v{{ version }}.tar.gz  # [linux]
+  sha256: abe3bf0c47845a628b7df4c57646f41a10ee70f914f1b018a5c761be75e1f1a9  # [linux]
+  url: https://pypi.io/packages/{{ pyver }}/t/tensorflow/{{ fn }}  # [not linux]
+  sha256: ffff3545f0ade3c1d2919dfb8c9399a923d929d221e349fcd4ae5f69774996e1  # [osx and py==27]
+  sha256: 8e02c7fab31a02396cd926412762f8fd9cae3cb653be3c57797b85a95834be79  # [osx and py==36]
+  sha256: ef1566863acdfb84924e8bbfcafc8da90933ba4313f094a74086b083c7a4f776  # [osx and py==37]
+  sha256: 1e6ab2b4e2ece7747b787a5e85d01aeb8b47677fa15453417a485cde904635f7  # [win and py==36]
+  sha256: 0beda4bf6a5af64905b93988e3b878e91b13e44b42d16df439fbd3112062754d  # [win and py==37]
+
+  patches:
+    - patches/0001-add-rt-to-linkopts.patch                                     # [linux]
+    - patches/0002-stable-image-rotate-test.patch                               # [linux]
+    - patches/0003-relax-tolerence-in-special_math_test.patch                   # [linux]
+    - patches/0004-skip-read-only-debugger_cli_common-test.patch                # [linux]
+    - patches/0005-fix-lookup_ops-test.patch                                    # [linux]
+    - patches/0006-relax-precision-in-matrix_log_op_test.patch                  # [linux]
+    #- patches/0007-Add-init-symbol-names-prefixed-with-an-underscore.patch      # [osx]
+    #- patches/0008-Add-alternate-clock_gettime-implementation-for-macOS.patch   # [osx]
+    - patches/unbundle_llvm.patch                                               # [linux]
+
+build:
+  number: 0
+  skip: True  # [not x86_64]
+  skip: True  # [win and vc<14]
+
+requirements:
+  build:
+    - {{ compiler('c') }}       # [linux]
+    - {{ compiler('cxx') }}     # [linux]
+    - bazel >=0.19.0,<=0.21.0   # [linux]
+    - nasm                      # [linux]
+  host:
+    # conda build requirements
+    - python
+    - pip
+    - setuptools <=39.1.0
+    - swig                      # [linux]
+    # requirements specified by the package itself
+    - absl-py >=0.1.6
+    - astor >=0.6.0
+    - gast >=0.2.0
+    - keras-applications >=1.0.6
+    - keras-preprocessing >=1.0.5
+    - llvmdev >=8.0.0,<9.0.0    # [linux]
+    - zlib                      # [linux]
+    - libpng                    # [linux]
+    - libcurl                   # [linux]
+    - nsync  # [linux]
+    - numpy 1.16.1
+    - six >=1.10.0
+    - protobuf >=3.6.1
+    - termcolor >=1.1.0
+    - grpcio >=1.8.6
+    - wheel >=0.26              # [linux]
+    - mock >=2.0.0  # [py==27]
+    - backports.weakref >=1.0rc1  # [py==27]
+    - enum34 >=1.1.6  # [py==27]
+    - tensorflow-estimator >=1.13.0,<1.14.0a0
+  run:
+    - {{ pin_subpackage('tensorflow-base', exact=True) }}
+
+outputs:
+  - name: tensorflow-base
+    script: build_pkg.sh  # [linux]
+    script: build_pkg_osx.sh  # [osx]
+    script: build_pkg.bat  # [win]
+    build:
+      entry_points:
+        - freeze_graph = tensorflow.python.tools.freeze_graph:run_main
+        - toco_from_protos = tensorflow.lite.toco.python.toco_from_protos:main
+        - tflite_convert = tensorflow.lite.python.tflite_convert:main
+        - toco = tensorflow.lite.python.tflite_convert:main
+        - saved_model_cli = tensorflow.python.tools.saved_model_cli:main
+        - tf_upgrade_v2 = tensorflow.tools.compatibility.tf_upgrade_v2_main:main
+        - tensorboard = tensorboard.main:run_main
+    requirements:
+      # build requirements needs to pick up the compiler run_exports
+      build:
+        - {{ compiler('c') }}       # [linux]
+        - {{ compiler('cxx') }}     # [linux]
+      host:
+        # conda build requirements
+        - python
+        - pip
+        - setuptools <=39.1.0
+        # requirements specified by the package itself
+        - absl-py >=0.1.6
+        - astor >=0.6.0
+        - gast >=0.2.0
+        - keras-applications >=1.0.6
+        - keras-preprocessing >=1.0.5
+        - numpy 1.16.1
+        - six >=1.10.0
+        - protobuf >=3.6.1
+        - termcolor >=1.1.0
+        - grpcio >=1.8.6
+        - wheel >=0.26              # [unix]
+        - mock >=2.0.0  # [py==27]
+        - backports.weakref >=1.0rc1  # [py==27]
+        - enum34 >=1.1.6  # [py==27]
+        - tensorflow-estimator >=1.13.0,<1.14.0a0
+        # pin
+        - zlib                     # [linux]
+        - libpng                    # [linux]
+        - libcurl                   # [linux]
+      run:
+        - python
+        - absl-py >=0.1.6
+        - astor >=0.6.0
+        - gast >=0.2.0
+        - keras-applications >=1.0.6
+        - keras-preprocessing >=1.0.5
+        - {{ pin_compatible('numpy') }}  # [linux]
+        - numpy >=1.16.1            # [not linux]
+        - six >=1.10.0
+        - zlib  # [linux]
+        - libpng  # [linux]
+        - libcurl  # [linux]
+        - protobuf >=3.6.1
+        - termcolor >=1.1.0
+        - grpcio >=1.8.6
+        - mock >=2.0.0  # [py==27]
+        - backports.weakref >=1.0rc1  # [py==27]
+        - enum34 >=1.1.6  # [py==27]
+        - tensorflow-estimator >=1.13.0,<1.14.0a0
+        - tensorboard >=1.13.0,<1.14.0a0
+    test:
+      imports:
+        - tensorflow
+      commands:
+        - freeze_graph --help
+        - saved_model_cli --help
+        - tflite_convert --help  # [not win]
+        - toco_from_protos --help  # [not win]
+        - toco --help  # [not win]
+
+  - name: libtensorflow
+    script: cp_libtensorflow.sh  # [unix]
+    build:
+      skip: true  # [not linux]
+    requirements:
+      # build requirements needs to pick up the compiler run_exports
+      build:
+        - {{ compiler('c') }}       # [linux]
+        - {{ compiler('cxx') }}     # [linux]
+      # host requirements to pick up run_exports
+      host:
+        - libcurl  # [linux]
+        - zlib  # [linux]
+
+    test:
+      files:
+        - test_c.c
+      requires:
+        - {{ compiler('c') }}
+      commands:
+        - test -f $PREFIX/lib/libtensorflow.so  # [not win]
+        - $CC -o test_c -L${PREFIX}/lib/ -ltensorflow -I${PREFIX}/include/ test_c.c && ./test_c  # [not win]
+
+  - name: libtensorflow_cc
+    script: cp_libtensorflow_cc.sh  # [unix]
+    build:
+      skip: true  # [not linux]
+    requirements:
+      # build requirements needs to pick up the compiler run_exports
+      build:
+        - {{ compiler('c') }}       # [linux]
+        - {{ compiler('cxx') }}     # [linux]
+      # host requirements to pick up run_exports
+      host:
+        - libcurl  # [linux]
+        - zlib  # [linux]
+      run:
+        - libprotobuf >=3.6.1,<3.7
+        - nsync
+    test:
+      files:
+        - test_cc.cc
+      requires:
+        - {{ compiler('cxx') }}
+      commands:
+        - test -f $PREFIX/lib/libtensorflow_cc.so  # [not win]
+        - $CXX -std=c++11 -o test_cc -L${PREFIX}/lib/ -ltensorflow_cc -ltensorflow_framework -lrt -I${PREFIX}/include/ test_cc.cc && ./test_cc  # [not win]
+
+about:
+  home: http://tensorflow.org/
+  license: Apache 2.0
+  license_file: LICENSE
+  license_family: Apache
+  summary: TensorFlow is an open source machine learning framework for everyone.
+  description: |
+    TensorFlow provides multiple APIs.The lowest level API, TensorFlow Core
+    provides you with complete programming control.
+    Base package contains only tensorflow, not tensorflow-tensorboard.
+  dev_url: https://github.com/tensorflow/tensorflow
+  doc_url: https://www.tensorflow.org/get_started/get_started
+  doc_source_url: https://github.com/tensorflow/tensorflow/tree/master/tensorflow/docs_src
+
+extra:
+  recipe-maintainers:
+    - jjhelmus
+    - waitingkuo
+    - ghego
+    - hajapy
+    - gilbertfrancois
+    - dougalsutherland
+    - farhantejani
+    - njzjz

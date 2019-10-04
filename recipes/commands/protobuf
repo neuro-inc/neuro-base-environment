@@ -1,0 +1,2 @@
+python -c "from google.protobuf.internal import api_implementation; assert api_implementation.Type() == 'cpp'"
+python -c "from google.protobuf.internal import api_implementation; assert api_implementation.Type() == 'python'"
