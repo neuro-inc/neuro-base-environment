@@ -89,6 +89,7 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 
     $PIP_INSTALL \
         future==0.17.1 \
+        numpy==1.17.1 \
         protobuf==3.9.1 \
         enum34==1.1.6 \
         pyyaml==5.1.2 \
