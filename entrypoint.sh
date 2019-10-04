@@ -6,4 +6,4 @@ ldconfig
 
 /usr/sbin/sshd -De &
 
-exec "$@"
+exec timeout $JOB_TIMEOUT "$@"
