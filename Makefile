@@ -1,6 +1,7 @@
 IMAGE_NAME?=neuromation/base
 DOCKERFILE?=targets/Dockerfile.python36-jupyter-pytorch-tensorflow-jupyterlab
 DOCKER_RUN=docker run -e PLATFORMAPI_SERVICE_HOST=test
+TEST_COMMAND?=python ./run_tests.py
 
 .PHONY: image
 image:
@@ -15,4 +16,4 @@ generate-recipes:
 
 .PHONY: test
 test:
-	$(DOCKER_RUN) -v `pwd`/testing:/testing:ro -w /testing -t $(IMAGE_NAME) python run_tests.py
+	$(DOCKER_RUN) -v `pwd`/testing:/testing:ro -w /testing -t $(IMAGE_NAME) $(TEST_COMMAND) 
