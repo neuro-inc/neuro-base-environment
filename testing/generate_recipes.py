@@ -12,12 +12,15 @@ PIP_INSTALL_COMMANDS = {"$PIP_INSTALL"}
 PIP_COMMAND_SEPARATORS = {"&&"}
 META_YML_URL_PATTERN = "https://raw.githubusercontent.com/conda-forge/{pip}-feedstock/master/recipe/meta.yaml"
 
+CURRENT_DIR = Path(__file__).parent
+RECIPES_PATH = CURRENT_DIR / "recipes"
+DUMP_META_FILE_PATH = RECIPES_PATH / "all"
+
 
 def get_paths() -> Dict[str, Path]:
-    recipes_dir = Path(__file__).parent / "recipes"
     paths = dict()
     for key in ["imports", "requires", "commands"]:
-        path = recipes_dir / key
+        path = RECIPES_PATH / key
         paths[key] = path
     return paths
 
@@ -52,7 +55,7 @@ async def _download_meta_yml(pip: str) -> str:
             return await resp.text()
 
 
-def _parse_yml_jinja_text(text: str) -> Dict[str, Any]:
+def _parse_yaml_jinja_text(text: str) -> Dict[str, Any]:
     text = text.replace("{%", "# {%")
     text = re.sub(r"{.*}", "PLACEHOLDER", text)
     return yaml.safe_load(text)
@@ -88,21 +91,24 @@ def _dump_tests(pip: str, tests_dict: Dict[str, Any]) -> None:
         path.write_text("\n".join(tests))
 
 
-async def generate_recipes(src: str) -> None:
-    text = Path(src).read_text()
-    pips = _get_pip_packages(text)
+async def generate_recipes(dockerfile_path: str) -> None:
+    dockerfile_text = Path(dockerfile_path).read_text()
+    pips = _get_pip_packages(dockerfile_text)
 
     for pip in pips:
         try:
-            meta = await _download_meta_yml(pip)
-            meta_dict = _parse_yml_jinja_text(meta)
+            meta_text = await _download_meta_yml(pip)
+            pip_dump_path = DUMP_META_FILE_PATH / pip
+            pip_dump_path.write_text(meta_text)
+
+            meta_dict = _parse_yaml_jinja_text(meta_text)
             test_dict = _get_tests_dict(pip, meta_dict)
             _dump_tests(pip, test_dict)
             print(f"dumped: {pip}")
         except asyncio.CancelledError:
             raise
         except Exception as e:
-            print(f"ERROR: Could not load meta for {pip}: {repr(e)}")
+            print(f"ERROR: Could not load meta for {pip}: {e}")
             continue
 
 

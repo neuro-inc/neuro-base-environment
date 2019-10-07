@@ -1,7 +1,7 @@
 {% set version = "1.13.2" %}
 
 {% set pyver = "cp{}{}".format(PY_VER[0], PY_VER[2]) %}
-{% set platform = "macosx_10_11_x86_64" %}  # [osx]
+{% set platform = "macosx_10_11_x86_64" %}  # [osx] 
 {% set platform = "win_amd64" %}  # [win]
 {% set fn = "{}-{}-{}-{}m-{}.whl".format("tensorflow", version, pyver, pyver, platform) %}  # [not linux]
 {% set fn = "tensorflow-{{ version }}.tar.gz" %}  # [linux]
