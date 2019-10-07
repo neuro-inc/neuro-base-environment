@@ -98,9 +98,6 @@ async def generate_recipes(dockerfile_path: str) -> None:
     for pip in pips:
         try:
             meta_text = await _download_meta_yml(pip)
-            pip_dump_path = DUMP_META_FILE_PATH / pip
-            pip_dump_path.write_text(meta_text)
-
             meta_dict = _parse_yaml_jinja_text(meta_text)
             test_dict = _get_tests_dict(pip, meta_dict)
             _dump_tests(pip, test_dict)
