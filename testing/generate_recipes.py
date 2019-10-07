@@ -1,10 +1,9 @@
-import asyncio
 import re
 import sys
+import urllib.request
 from pathlib import Path
 from typing import Any, Dict, List
 
-import aiohttp
 import yaml
 
 PIP_MODULE_REGEX = re.compile(r"\s([a-z][^\s=]*)", re.IGNORECASE)
@@ -47,12 +46,11 @@ def _get_pip_packages(dockerfile_text: str) -> List[str]:
     return pips
 
 
-async def _download_meta_yml(pip: str) -> str:
+def _download_meta_yml(pip: str) -> str:
     url = META_YML_URL_PATTERN.format(pip=pip)
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url) as resp:
-            assert resp.status == 200, f"error {url}, status: {resp.status}"
-            return await resp.text()
+    with urllib.request.urlopen(url) as resp:
+        assert resp.status == 200, f"error {url}, status: {resp.status}"
+        return resp.read().decode()
 
 
 def _parse_yaml_jinja_text(text: str) -> Dict[str, Any]:
@@ -91,19 +89,17 @@ def _dump_tests(pip: str, tests_dict: Dict[str, Any]) -> None:
         path.write_text("\n".join(tests))
 
 
-async def generate_recipes(dockerfile_path: str) -> None:
+def generate_recipes(dockerfile_path: str) -> None:
     dockerfile_text = Path(dockerfile_path).read_text()
     pips = _get_pip_packages(dockerfile_text)
 
     for pip in pips:
         try:
-            meta_text = await _download_meta_yml(pip)
+            meta_text = _download_meta_yml(pip)
             meta_dict = _parse_yaml_jinja_text(meta_text)
             test_dict = _get_tests_dict(pip, meta_dict)
             _dump_tests(pip, test_dict)
             print(f"dumped: {pip}")
-        except asyncio.CancelledError:
-            raise
         except Exception as e:
             print(f"ERROR: Could not load meta for {pip}: {e}")
             continue
@@ -111,4 +107,4 @@ async def generate_recipes(dockerfile_path: str) -> None:
 
 if __name__ == "__main__":
     dockerfile_path = sys.argv[1]
-    asyncio.run(generate_recipes(dockerfile_path))
+    generate_recipes(dockerfile_path)
