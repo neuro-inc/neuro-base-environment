@@ -16,13 +16,18 @@ jobs:
       - run:
             name: Run tests
             command: make test
-      - deploy:
-          name: Publish Docker Image to Docker Hub
-          command: |
-            docker login -u "$DOCKERHUB_NAME" -p "$DOCKERHUB_PASSWORD"
-            docker push neuromation/base:latest
+  deploy:
+    name: Publish Docker Image to Docker Hub
+    command: |
+      docker login -u "$DOCKERHUB_NAME" -p "$DOCKERHUB_PASSWORD"
+      docker push neuromation/base:latest
+
 workflows:
   version: 2
   main:
     jobs:
       - build
+      - deploy:
+          filters:
+            branches:
+              only: master
