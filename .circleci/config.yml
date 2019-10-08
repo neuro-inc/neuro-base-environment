@@ -2,7 +2,7 @@ version: 2
 
 defaults: &defaults
   docker:
-    - image: docker:17.05.0-ce-git
+    - image: docker:19.03-rc-git
   working_directory: /template-base-image
 
 jobs:
