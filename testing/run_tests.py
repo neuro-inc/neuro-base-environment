@@ -23,11 +23,11 @@ def get_output_files():
         stdout.unlink()
     if stderr.exists():
         stderr.unlink()
-    return stdout.open("a"), stderr.open("a")
+    # return stdout.open("a"), stderr.open("a")
+    return stdout, stderr
 
 
 STDOUT_DUMP_FILE, STDERR_DUMP_FILE = get_output_files()
-STDOUT_DUMP_FILE.write("STARTING WRITE")
 
 PATHS = get_paths()
 
@@ -63,11 +63,14 @@ def run_tests(commands: List[str]) -> None:
             info = f"[.] Running command: `{cmd}`"
             print(info)
             try:
-                STDOUT_DUMP_FILE.write(">>> " + info + "\n")
-                STDERR_DUMP_FILE.write(">>> " + info + "\n")
-                p = subprocess.run(
-                    shlex.split(cmd), stdout=STDOUT_DUMP_FILE, stderr=STDERR_DUMP_FILE
-                )
+                with STDOUT_DUMP_FILE.open("a") as f_stdout, STDERR_DUMP_FILE.open(
+                    "a"
+                ) as f_stderr:
+                    f_stdout.write(">>> " + info + "\n")
+                    f_stderr.write(">>> " + info + "\n")
+                    p = subprocess.run(
+                        shlex.split(cmd), stdout=f_stdout, stderr=f_stderr
+                    )
                 total_run.append(cmd)
                 assert p.returncode == 0, f"non-zero exit code: {p.returncode}"
                 print(f"[+] Success.")
