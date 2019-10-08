@@ -12,11 +12,11 @@ jobs:
       - checkout
       - setup_remote_docker
       - run: &install_dependencies
-            name: Install dependencies
-            command: apk add --no-cache make python3
+          name: Install dependencies
+          command: apk add --no-cache make python3
       - run: &build_image
-            name: Build application Docker image
-            command: make image
+          name: Build application Docker image
+          command: make image
       - run:
             name: Run tests
             command: make test
