@@ -6,4 +6,4 @@ ldconfig
 
 /usr/sbin/sshd -De &
 
-exec timeout $JOB_TIMEOUT "$@"
+exec timeout $JOB_TIMEOUT "$@" || [ $? -eq 124 ] && echo "Job timeout exceeded: JOB_TIMEOUT=$JOB_TIMEOUT"
