@@ -30,6 +30,7 @@ jobs:
       - run:
             name: Run tests
             command: make test  DOCKER_MOUNT_OPTION="--volumes-from=configs"
+            no_output_timeout: 30m
 
   deploy:
     <<: *defaults

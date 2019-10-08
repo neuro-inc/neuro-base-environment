@@ -57,6 +57,8 @@ def get_commands() -> List[str]:
 
 
 def run_tests(commands: List[str]) -> None:
+    def timestamp() -> str:
+
     total_run, succeeded, failed = [], [], []
     try:
         for cmd in commands:

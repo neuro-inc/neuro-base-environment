@@ -10,7 +10,7 @@ DOCKER_COMMAND?=python ./run_tests.py
 image:
 	# git clone https://github.com/ufoym/deepo.git
 	# python3 deepo/generator/generate.py Dockerfile tensorflow pytorch jupyter jupyterlab python==3.6
-# 	docker build -t $(IMAGE) -f $(DOCKERFILE) .
+	docker build -t $(IMAGE) -f $(DOCKERFILE) .
 	@echo ok
 
 
