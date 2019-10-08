@@ -4,10 +4,6 @@ from typing import Iterator, List
 from pathlib import Path
 from generate_recipes import get_paths
 
-PATHS = get_paths()
-
-CURRENT_DIR = Path(__file__).parent
-OUTPUT_FILE = CURRENT_DIR / "logs" / "output.txt"
 
 DEFAULT_DELIMITER = "\n"
 COMMAND_FACTORIES = {
@@ -15,6 +11,25 @@ COMMAND_FACTORIES = {
     "requires": lambda arg: f"pip install -U {arg.replace(' ', '')}",
     "commands": lambda arg: 'bash -c "' + arg.replace('"', '\\"') + '"',
 }
+
+
+def get_output_files():
+    current_dir = Path(__file__).parent
+    logs_dir = current_dir / "logs"
+    stdout = logs_dir / "stdout.txt"
+    stderr = logs_dir / "stderr.txt"
+    stdout.parent.mkdir(exist_ok=True)
+    if stdout.exists():
+        stdout.unlink()
+    if stderr.exists():
+        stderr.unlink()
+    return stdout.open("a"), stderr.open("a")
+
+
+STDOUT_DUMP_FILE, STDERR_DUMP_FILE = get_output_files()
+STDOUT_DUMP_FILE.write("STARTING WRITE")
+
+PATHS = get_paths()
 
 
 def _get_recipe_commands(recipe: str) -> Iterator[str]:
@@ -48,9 +63,11 @@ def run_tests(commands: List[str]) -> None:
             info = f"[.] Running command: `{cmd}`"
             print(info)
             try:
-                with OUTPUT_FILE.open("a") as f:
-                    f.write(info + "\n")
-                    p = subprocess.run(shlex.split(cmd), stdout=f)
+                STDOUT_DUMP_FILE.write(">>> " + info + "\n")
+                STDERR_DUMP_FILE.write(">>> " + info + "\n")
+                p = subprocess.run(
+                    shlex.split(cmd), stdout=STDOUT_DUMP_FILE, stderr=STDERR_DUMP_FILE
+                )
                 total_run.append(cmd)
                 assert p.returncode == 0, f"non-zero exit code: {p.returncode}"
                 print(f"[+] Success.")
