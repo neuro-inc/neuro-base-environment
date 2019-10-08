@@ -1,11 +1,13 @@
-import os
 import shlex
 import subprocess
 from typing import Iterator, List
-
+from pathlib import Path
 from generate_recipes import get_paths
 
 PATHS = get_paths()
+
+CURRENT_DIR = Path(__file__).parent
+OUTPUT_FILE = CURRENT_DIR / "logs" / "output.txt"
 
 DEFAULT_DELIMITER = "\n"
 COMMAND_FACTORIES = {
@@ -45,9 +47,9 @@ def run_tests(commands: List[str]) -> None:
         for cmd in commands:
             print(f"[.] Running command: `{cmd}`")
             try:
-                with open(os.devnull, "wb") as devnull:
-                    p = subprocess.run(shlex.split(cmd), stdout=devnull)
-                    total_run.append(cmd)
+                with OUTPUT_FILE.open("w") as f:
+                    p = subprocess.run(shlex.split(cmd), stdout=f)
+                total_run.append(cmd)
                 assert p.returncode == 0, f"non-zero exit code: {p.returncode}"
                 print(f"[+] Success.")
                 succeeded.append(cmd)

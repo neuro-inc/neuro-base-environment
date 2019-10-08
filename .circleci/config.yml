@@ -27,6 +27,9 @@ jobs:
             name: Run tests
             command: make test DOCKER_MOUNT_OPTION="--volumes-from=configs"
             no_output_timeout: 30m
+      - store_artifacts:
+          path: logs/output.txt
+          destination: output.txt
       - deploy:
           name: Publish Docker Image to Docker Hub
           command: |
