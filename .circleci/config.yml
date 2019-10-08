@@ -1,9 +1,13 @@
 version: 2
+
+defaults: &defaults
+  docker:
+    - image: docker:17.05.0-ce-git
+  working_directory: /template-base-image
+
 jobs:
   build:
-    working_directory: /template-base-image
-    docker:
-      - image: docker:19.03-rc-git
+    <<: *defaults
     steps:
       - checkout
       - setup_remote_docker:
@@ -25,18 +29,24 @@ jobs:
               docker cp testing/ configs:/
       - run:
             name: Run tests
-            command: make test DOCKER_MOUNT_OPTION="--volumes-from=configs"
-            no_output_timeout: 30m
-      - store_artifacts:
-          path: logs/output.txt
-          destination: output.txt
-      - deploy:
+            command: make test
+
+  deploy:
+    <<: *defaults
+    steps:
+      - checkout
+      - run:
           name: Publish Docker Image to Docker Hub
           command: |
             docker login -u "$DOCKERHUB_NAME" -p "$DOCKERHUB_PASSWORD"
             docker push neuromation/base:latest
+
 workflows:
   version: 2
   main:
     jobs:
       - build
+      - deploy:
+          filters:
+            branches:
+              only: master
