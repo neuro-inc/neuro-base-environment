@@ -23,11 +23,12 @@ jobs:
   deploy:
     <<: *defaults
     steps:
-      do_deploy:
-        name: Publish Docker Image to Docker Hub
-        command: |
-          docker login -u "$DOCKERHUB_NAME" -p "$DOCKERHUB_PASSWORD"
-          docker push neuromation/base:latest
+      - checkout
+      - run:
+          name: Publish Docker Image to Docker Hub
+          command: |
+            docker login -u "$DOCKERHUB_NAME" -p "$DOCKERHUB_PASSWORD"
+            docker push neuromation/base:latest
 
 workflows:
   version: 2
