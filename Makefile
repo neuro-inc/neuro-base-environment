@@ -25,7 +25,8 @@ setup-docker-locally:
 
 .PHONY: test
 test:
-	docker run -e PLATFORMAPI_SERVICE_HOST=test --volume=`pwd`/testing:/testing -w /testing -t $(IMAGE_NAME) ls
-	docker run -e PLATFORMAPI_SERVICE_HOST=test --volume=`pwd`/testing:/testing -w /testing -t $(IMAGE_NAME) ls /testing
-# 	docker run -e PLATFORMAPI_SERVICE_HOST=test --volume=`pwd`/testing:/testing -w /testing -t $(IMAGE_NAME) $(TEST_COMMAND)
+	docker run -e PLATFORMAPI_SERVICE_HOST=test --volume=testing:/testing -w /testing -t $(IMAGE_NAME) pwd
+	docker run -e PLATFORMAPI_SERVICE_HOST=test --volume=testing:/testing -w /testing -t $(IMAGE_NAME) ls -la
+	docker run -e PLATFORMAPI_SERVICE_HOST=test --volume=testing:/testing -w /testing -t $(IMAGE_NAME) ls -la /testing
+# 	docker run -e PLATFORMAPI_SERVICE_HOST=test --volume=testing:/testing -w /testing -t $(IMAGE_NAME) $(TEST_COMMAND)
 	@echo ok
