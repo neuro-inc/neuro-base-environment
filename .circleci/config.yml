@@ -26,7 +26,7 @@ jobs:
               docker cp testing/ configs:/testing/
       - run:
             name: Run tests
-            command: make test
+            command: make test DOCKER_RUN_EXTRA_OPTIONS="--volumes-from=configs"
       - deploy:
           name: Publish Docker Image to Docker Hub
           command: |
