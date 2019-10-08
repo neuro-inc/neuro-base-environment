@@ -14,13 +14,18 @@ generate-recipes:
 	python3 testing/generate_recipes.py $(DOCKERFILE)
 	git status
 
+.PHONY: setup-docker-locally
+setup-docker-locally:
+	sudo pkill docker
+	sudo iptables -t nat -F
+	sudo ifconfig docker0 down
+	sudo brctl delbr docker0
+	sudo docker -d
+
+
 .PHONY: test
 test:
-	ls
-	ls testing `pwd`/testing
-	docker run -e PLATFORMAPI_SERVICE_HOST=test --network=host -v `pwd`/testing:/testing:ro -w /testing -t $(IMAGE_NAME) pwd
-	docker run -e PLATFORMAPI_SERVICE_HOST=test --network=host -v `pwd`/testing:/testing:ro -w /testing -t $(IMAGE_NAME) ls
-	docker run -e PLATFORMAPI_SERVICE_HOST=test --network=host -v `pwd`/testing:/testing:ro -w /testing -t $(IMAGE_NAME) ls /testing
-	docker run -e PLATFORMAPI_SERVICE_HOST=test --network=host -v `pwd`/testing:/testing:ro -w /testing -t $(IMAGE_NAME) pip install neuromation
-	docker run -e PLATFORMAPI_SERVICE_HOST=test --network=host -v `pwd`/testing:/testing:ro -w /testing -t $(IMAGE_NAME) $(TEST_COMMAND)
+	docker run -e PLATFORMAPI_SERVICE_HOST=test --volume=`pwd`/testing:/testing -w /testing -t $(IMAGE_NAME) ls
+	docker run -e PLATFORMAPI_SERVICE_HOST=test --volume=`pwd`/testing:/testing -w /testing -t $(IMAGE_NAME) ls /testing
+# 	docker run -e PLATFORMAPI_SERVICE_HOST=test --volume=`pwd`/testing:/testing -w /testing -t $(IMAGE_NAME) $(TEST_COMMAND)
 	@echo ok

@@ -14,6 +14,17 @@ jobs:
           name: Build application Docker image
           command: make image
       - run:
+            name: Prepare testing environment
+            command: |
+              # Since we use remote docker, in order to mount `testing/` folder
+              # to the container, we need to copy it first.
+              # Source: https://circleci.com/docs/2.0/building-docker-images/#mounting-folders
+              # create a dummy container which will hold a volume with config
+              docker create -v testing/ --name configs alpine:3.4 /bin/true
+              # copy a config file into this volume
+              docker cp testing/ configs:/testing/
+      - deploy:
+      - run:
             name: Run tests
             command: make test
       - deploy:
