@@ -8,10 +8,10 @@ from generate_recipes import get_paths
 PATHS = get_paths()
 
 DEFAULT_DELIMITER = "\n"
-COMMAND_TEPMLATES = {
-    "imports": "python -c 'import {arg}'",
-    "requires": "pip install {arg}",
-    "commands": "{arg}",  # shell command
+COMMAND_FACTORIES = {
+    "imports": lambda arg: f"python -c 'import {arg}'",
+    "requires": lambda arg: f"pip install -U {arg.replace(' ', '')}",
+    "commands": lambda arg: f"bash -c '{arg}'",  # shell command
 }
 
 
@@ -22,7 +22,8 @@ def _get_recipe_commands(recipe: str) -> Iterator[str]:
         if path.exists():
             lines = path.read_text().splitlines()
             for line in lines:
-                yield COMMAND_TEPMLATES[key].format(arg=line)
+                command_factory = COMMAND_FACTORIES[key]
+                yield command_factory(arg=line)
 
 
 def get_recipes() -> List[str]:
