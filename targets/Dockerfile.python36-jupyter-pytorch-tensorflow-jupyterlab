@@ -65,6 +65,9 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
     $PIP_INSTALL \
         setuptools \
         && \
+    DEBIAN_FRONTEND=noninteractive $APT_INSTALL \
+        python3-tk \
+        && \
     $PIP_INSTALL \
         numpy \
         scipy \
