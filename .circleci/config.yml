@@ -1,7 +1,6 @@
 version: 2
 jobs:
   build:
-    machine: true
     working_directory: /template-base-image
     docker:
       - image: circleci/python:3.7.3
