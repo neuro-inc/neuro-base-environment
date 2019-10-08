@@ -11,12 +11,12 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker
-      - run:
-          name: Install dependencies
-          command: apk add --no-cache make python3
-      - run:
-          name: Build application Docker image
-          command: make image
+      - run: &install_dependencies
+            name: Install dependencies
+            command: apk add --no-cache make python3
+      - run: &build_image
+            name: Build application Docker image
+            command: make image
       - run:
             name: Run tests
             command: make test
@@ -24,6 +24,9 @@ jobs:
     <<: *defaults
     steps:
       - checkout
+      - setup_remote_docker
+      - run: *install_dependencies
+      - run: *build_image
       - run:
           name: Publish Docker Image to Docker Hub
           command: |
@@ -38,4 +41,4 @@ workflows:
       - deploy:
           filters:
             branches:
-              only: master
+              only: /.*/
