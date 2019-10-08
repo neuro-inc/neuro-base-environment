@@ -1,7 +1,7 @@
 IMAGE_NAME?=neuromation/base
 DOCKERFILE?=targets/Dockerfile.python36-jupyter-pytorch-tensorflow-jupyterlab
 TEST_COMMAND?=python ./run_tests.py
-DOCKER_RUN_EXTRA_OPTIONS=
+DOCKER_MOUNT_OPTION?=--volume=`pwd`/testing:/testing
 
 .PHONY: image
 image:
@@ -17,8 +17,8 @@ generate-recipes:
 
 .PHONY: test
 test:
-	docker run -e PLATFORMAPI_SERVICE_HOST=test $(DOCKER_RUN_EXTRA_OPTIONS) --volume=`pwd`/testing:/testing -w /testing -t $(IMAGE_NAME) pwd
-	docker run -e PLATFORMAPI_SERVICE_HOST=test $(DOCKER_RUN_EXTRA_OPTIONS) --volume=`pwd`/testing:/testing -w /testing -t $(IMAGE_NAME) ls -la
-	docker run -e PLATFORMAPI_SERVICE_HOST=test $(DOCKER_RUN_EXTRA_OPTIONS) --volume=`pwd`/testing:/testing -w /testing -t $(IMAGE_NAME) ls -la /testing
-# 	docker run -e PLATFORMAPI_SERVICE_HOST=test $(DOCKER_RUN_EXTRA_OPTIONS) --volume=`pwd`/testing:/testing -w /testing -t $(IMAGE_NAME) $(TEST_COMMAND)
+	docker run --tty --env PLATFORMAPI_SERVICE_HOST=test $(DOCKER_MOUNT_OPTION) --workdir /testing $(IMAGE_NAME) pwd
+	docker run --tty --env PLATFORMAPI_SERVICE_HOST=test $(DOCKER_MOUNT_OPTION) --workdir /testing $(IMAGE_NAME) ls -la
+	docker run --tty --env PLATFORMAPI_SERVICE_HOST=test $(DOCKER_MOUNT_OPTION) --workdir /testing $(IMAGE_NAME) ls -la /testing
+# 	docker run --tty --env PLATFORMAPI_SERVICE_HOST=test $(DOCKER_MOUNT_OPTION) --workdir /testing $(IMAGE_NAME) $(TEST_COMMAND)
 	@echo ok
