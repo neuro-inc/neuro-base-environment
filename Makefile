@@ -16,5 +16,11 @@ generate-recipes:
 
 .PHONY: test
 test:
+	ls
+	ls testing `pwd`/testing
+	docker run -e PLATFORMAPI_SERVICE_HOST=test --network=host -v `pwd`/testing:/testing:ro -w /testing -t $(IMAGE_NAME) pwd
+	docker run -e PLATFORMAPI_SERVICE_HOST=test --network=host -v `pwd`/testing:/testing:ro -w /testing -t $(IMAGE_NAME) ls
+	docker run -e PLATFORMAPI_SERVICE_HOST=test --network=host -v `pwd`/testing:/testing:ro -w /testing -t $(IMAGE_NAME) ls /testing
+	docker run -e PLATFORMAPI_SERVICE_HOST=test --network=host -v `pwd`/testing:/testing:ro -w /testing -t $(IMAGE_NAME) pip install neuromation
 	docker run -e PLATFORMAPI_SERVICE_HOST=test --network=host -v `pwd`/testing:/testing:ro -w /testing -t $(IMAGE_NAME) $(TEST_COMMAND)
 	@echo ok
