@@ -6,7 +6,8 @@ jobs:
       - image: circleci/python:3.7.3
     steps:
       - checkout
-      - setup_remote_docker
+      - setup_remote_docker:
+          docker_layer_caching: true
       - run:
           name: Install dependencies
           command: apk add --no-cache make python3
@@ -23,7 +24,6 @@ jobs:
               docker create -v testing/ --name configs alpine:3.4 /bin/true
               # copy a config file into this volume
               docker cp testing/ configs:/testing/
-      - deploy:
       - run:
             name: Run tests
             command: make test
