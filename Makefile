@@ -15,15 +15,6 @@ generate-recipes:
 	python3 testing/generate_recipes.py $(DOCKERFILE)
 	git status
 
-.PHONY: setup-docker-locally
-setup-docker-locally:
-	sudo pkill docker
-	sudo iptables -t nat -F
-	sudo ifconfig docker0 down
-	sudo brctl delbr docker0
-	sudo docker -d
-
-
 .PHONY: test
 test:
 	docker run -e PLATFORMAPI_SERVICE_HOST=test $(DOCKER_RUN_EXTRA_OPTIONS) --volume=`pwd`/testing:/testing -w /testing -t $(IMAGE_NAME) pwd
