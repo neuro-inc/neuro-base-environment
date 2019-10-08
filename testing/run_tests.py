@@ -47,13 +47,13 @@ def run_tests(commands: List[str]) -> None:
                 with open(os.devnull, "wb") as devnull:
                     p = subprocess.run(shlex.split(cmd), stdout=devnull)
                     total_run.append(cmd)
-                assert p.returncode == 0
+                assert p.returncode == 0, f"non-zero exit code: {p.returncode}"
                 print(f"[+] Success.")
                 succeeded.append(cmd)
             except KeyboardInterrupt:
                 raise
             except Exception as e:
-                print(f"[-] Error {type(e)}")
+                print(f"[-] Error {type(e)}: {e}")
                 failed.append(cmd)
     finally:
         print("-" * 50)
