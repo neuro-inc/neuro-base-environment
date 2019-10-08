@@ -13,7 +13,7 @@ DEFAULT_DELIMITER = "\n"
 COMMAND_FACTORIES = {
     "imports": lambda arg: f"python -c 'import {arg}'",
     "requires": lambda arg: f"pip install -U {arg.replace(' ', '')}",
-    "commands": lambda arg: f"bash -c '{arg}'",  # shell command
+    "commands": lambda arg: 'bash -c "' + arg.replace('"', '\\"') + '"',
 }
 
 
@@ -45,9 +45,11 @@ def run_tests(commands: List[str]) -> None:
     total_run, succeeded, failed = [], [], []
     try:
         for cmd in commands:
-            print(f"[.] Running command: `{cmd}`")
+            info = f"[.] Running command: `{cmd}`"
+            print(info)
             try:
-                with OUTPUT_FILE.open("w") as f:
+                with OUTPUT_FILE.open("a") as f:
+                    f.write(info + "\n")
                     p = subprocess.run(shlex.split(cmd), stdout=f)
                 total_run.append(cmd)
                 assert p.returncode == 0, f"non-zero exit code: {p.returncode}"
