@@ -61,7 +61,7 @@ def get_commands() -> List[str]:
 
 def _timestamp() -> str:
     delta = datetime.now() - TIME_START
-    return f"{delta.total_seconds():.3f}"
+    return f"{delta.total_seconds():.3f}s"
 
 
 def run_tests(commands: List[str]) -> None:
