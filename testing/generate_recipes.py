@@ -6,6 +6,9 @@ from typing import Any, Dict, List
 
 import yaml
 
+TESTING_PLATFORM = "[unix]"  # available: [unix], [win]
+TESTING_PLATFORM_REGEX = re.compile(r"\[\w+\]")
+
 PIP_MODULE_REGEX = re.compile(r"\s([a-z][^\s=]*)", re.IGNORECASE)
 PIP_INSTALL_COMMANDS = {"$PIP_INSTALL"}
 PIP_COMMAND_SEPARATORS = {"&&"}
@@ -19,9 +22,9 @@ RECIPES_IGNORE_DIR_PATH = CURRENT_DIR / "recipes-ignore"
 
 def _get_paths(recipes_path: Path) -> Dict[str, Path]:
     paths = dict()
-    for key in ["imports", "requires", "commands"]:
-        path = recipes_path / key
-        paths[key] = path
+    for op in ["imports", "requires", "commands"]:
+        path = recipes_path / op
+        paths[op] = path
     return paths
 
 
@@ -71,23 +74,31 @@ def _get_tests_subdict(pip: str, meta_dict: Dict[str, Any]) -> Dict[str, Any]:
     return normalized["test"]
 
 
+
 def _get_tests_dict(pip: str, meta_dict: Dict[str, Any]) -> Dict[str, Any]:
     tests = _get_tests_subdict(pip, meta_dict)
     result = dict()
-    for key in ["imports", "requires", "commands"]:
-        value = tests.get(key)
-        if value:
-            result[key] = value
+    for op in ["imports", "requires", "commands"]:
+        cmd = tests.get(op)
+        if cmd and not _ignore_command(cmd):
+            result[op] = cmd
     return result
 
+def _ignore_command(cmd: str) -> bool:
+    if "#" in cmd:
+        _, comment = cmd.rsplit("#", 1)
+        platform = TESTING_PLATFORM_REGEX.search(comment)
+        if platform is not None and platform.group() != TESTING_PLATFORM:
+            return True
+    return False
 
 def _dump_tests(pip: str, tests_dict: Dict[str, Any]) -> None:
-    for key in ["imports", "requires", "commands"]:
-        tests = tests_dict.get(key)
+    for op in ["imports", "requires", "commands"]:
+        tests = tests_dict.get(op)
         if not tests:
             continue
         assert isinstance(tests, list), type(tests)
-        path = RECIPES_PATHS[key] / pip
+        path = RECIPES_PATHS[op] / pip
         path.write_text("\n".join(tests))
 
 

@@ -33,20 +33,20 @@ STDOUT_DUMP_FILE, STDERR_DUMP_FILE = get_output_files()
 
 def _get_recipe_commands(recipe: str, recipes_paths: Dict[str, Path]) -> Iterator[str]:
     # order matters: only "commands" depend on "requires"
-    for key in ["imports", "requires", "commands"]:
-        path = recipes_paths[key] / recipe
+    for op in ["imports", "requires", "commands"]:
+        path = recipes_paths[op] / recipe
         if path.exists():
             lines = path.read_text().splitlines()
             for line in lines:
-                command_factory = COMMAND_FACTORIES[key]
+                command_factory = COMMAND_FACTORIES[op]
                 yield command_factory(arg=line)
 
 
 def _get_recipes(recipes_paths: Dict[str, Path]) -> List[str]:
     recipes = {
         recipe.stem
-        for key in ["imports", "commands"]
-        for recipe in recipes_paths[key].iterdir()
+        for op in ["imports", "commands"]
+        for recipe in recipes_paths[op].iterdir()
     }
     return sorted(list(recipes))
 

@@ -19,7 +19,6 @@ image:
 .PHONY: generate-recipes
 generate-recipes:
 	python3 testing/generate_recipes.py $(DOCKERFILE)
-	git status
 	@echo ok
 
 
