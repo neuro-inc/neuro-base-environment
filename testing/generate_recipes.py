@@ -10,6 +10,7 @@ PIP_MODULE_REGEX = re.compile(r"\s([a-z][^\s=]*)", re.IGNORECASE)
 PIP_INSTALL_COMMANDS = {"$PIP_INSTALL"}
 PIP_COMMAND_SEPARATORS = {"&&"}
 META_YML_URL_PATTERN = "https://raw.githubusercontent.com/conda-forge/{pip}-feedstock/master/recipe/meta.yaml"
+PIP_TO_RECIPE_MAP = {"torch": "pytorch-cpu", "tensorflow-gpu": "tensorflow"}
 
 CURRENT_DIR = Path(__file__).parent
 RECIPES_DIR_PATH = CURRENT_DIR / "recipes"
@@ -95,14 +96,16 @@ def generate_recipes(dockerfile_path: str) -> None:
     pips = _get_pip_packages(dockerfile_text)
 
     for pip in pips:
+        recipe = PIP_TO_RECIPE_MAP.get(pip, pip)
         try:
-            meta_text = _download_meta_yml(pip)
+            meta_text = _download_meta_yml(recipe)
             meta_dict = _parse_yaml_jinja_text(meta_text)
-            test_dict = _get_tests_dict(pip, meta_dict)
-            _dump_tests(pip, test_dict)
-            print(f"dumped: {pip}")
+            test_dict = _get_tests_dict(recipe, meta_dict)
+            _dump_tests(recipe, test_dict)
+            dump_name = f"{recipe} (as {pip})" if pip != recipe else recipe
+            print(f"dumped: {dump_name}")
         except Exception as e:
-            print(f"ERROR: Could not load meta for {pip}: {e}")
+            print(f"ERROR: Could not load meta for {recipe}: {repr(e)} {e}")
             continue
 
 
