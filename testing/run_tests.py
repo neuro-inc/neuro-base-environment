@@ -1,9 +1,10 @@
 import shlex
 import subprocess
-from typing import Iterator, List
+from datetime import datetime
 from pathlib import Path
-from generate_recipes import get_paths
+from typing import Iterator, List
 
+from generate_recipes import get_paths
 
 DEFAULT_DELIMITER = "\n"
 COMMAND_FACTORIES = {
@@ -11,6 +12,8 @@ COMMAND_FACTORIES = {
     "requires": lambda arg: f"pip install -U {arg.replace(' ', '')}",
     "commands": lambda arg: 'bash -c "' + arg.replace('"', '\\"') + '"',
 }
+
+TIME_START = datetime.now()
 
 
 def get_output_files():
@@ -56,13 +59,16 @@ def get_commands() -> List[str]:
     return [cmd for recipe in get_recipes() for cmd in _get_recipe_commands(recipe)]
 
 
-def run_tests(commands: List[str]) -> None:
-    def timestamp() -> str:
+def _timestamp() -> str:
+    delta = datetime.now() - TIME_START
+    return f"{delta.total_seconds():.3f}"
 
+
+def run_tests(commands: List[str]) -> None:
     total_run, succeeded, failed = [], [], []
     try:
         for cmd in commands:
-            info = f"[.] Running command: `{cmd}`"
+            info = f"[.] {_timestamp()} Running command: `{cmd}`"
             print(info)
             try:
                 with STDOUT_DUMP_FILE.open("a") as f_stdout, STDERR_DUMP_FILE.open(
@@ -75,12 +81,12 @@ def run_tests(commands: List[str]) -> None:
                     )
                 total_run.append(cmd)
                 assert p.returncode == 0, f"non-zero exit code: {p.returncode}"
-                print(f"[+] Success.")
+                print(f"[+] {_timestamp()} Success.")
                 succeeded.append(cmd)
             except KeyboardInterrupt:
                 raise
             except Exception as e:
-                print(f"[-] Error {type(e)}: {e}")
+                print(f"[-] {_timestamp()} Error {type(e)}: {e}")
                 failed.append(cmd)
     finally:
         print("-" * 50)
