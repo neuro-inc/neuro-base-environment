@@ -12,19 +12,20 @@ PIP_COMMAND_SEPARATORS = {"&&"}
 META_YML_URL_PATTERN = "https://raw.githubusercontent.com/conda-forge/{pip}-feedstock/master/recipe/meta.yaml"
 
 CURRENT_DIR = Path(__file__).parent
-RECIPES_PATH = CURRENT_DIR / "recipes"
-DUMP_META_FILE_PATH = RECIPES_PATH / "all"
+RECIPES_DIR_PATH = CURRENT_DIR / "recipes"
+RECIPES_IGNORE_DIR_PATH = CURRENT_DIR / "recipes-ignore"
 
 
-def get_paths() -> Dict[str, Path]:
+def _get_paths(recipes_path: Path) -> Dict[str, Path]:
     paths = dict()
     for key in ["imports", "requires", "commands"]:
-        path = RECIPES_PATH / key
+        path = recipes_path / key
         paths[key] = path
     return paths
 
 
-PATHS = get_paths()
+RECIPES_PATHS = _get_paths(RECIPES_DIR_PATH)
+IGNORE_RECIPES_PATHS = _get_paths(RECIPES_IGNORE_DIR_PATH)
 
 
 def _get_pip_packages(dockerfile_text: str) -> List[str]:
@@ -85,7 +86,7 @@ def _dump_tests(pip: str, tests_dict: Dict[str, Any]) -> None:
         if not tests:
             continue
         assert isinstance(tests, list), type(tests)
-        path = PATHS[key] / pip
+        path = RECIPES_PATHS[key] / pip
         path.write_text("\n".join(tests))
 
 

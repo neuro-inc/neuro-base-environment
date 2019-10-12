@@ -1,0 +1,2 @@
+# Somehow the `/usr/bin/freeze_graph` does not get installed, but so far we don't need it. Instead, we test that `tensorflow.python.tools.freeze_graph` is importable.
+freeze_graph --help

@@ -90,12 +90,15 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 # pytorch
 # ------------------------------------------------------------------
 
+    $APT_INSTALL \
+        python3-yaml \
+        && \
+
     $PIP_INSTALL \
         future \
         numpy \
         protobuf \
         enum34 \
-        pyyaml \
         typing \
         && \
     $PIP_INSTALL \
@@ -109,7 +112,7 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 # ------------------------------------------------------------------
 
     $PIP_INSTALL \
-        tensorflow==2.0.0-rc1 \
+        tensorflow-gpu==2.0.0 \
         && \
 
 # ==================================================================
@@ -122,6 +125,22 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 
     $PIP_INSTALL \
         jupyterlab \
+        && \
+
+# ==================================================================
+# tensorboard
+# ------------------------------------------------------------------
+
+    $PIP_INSTALL \
+        tensorboard \
+        && \
+
+# ==================================================================
+# tensorboardX
+# ------------------------------------------------------------------
+
+    $PIP_INSTALL \
+        tensorboardX \
         && \
 
 # ==================================================================

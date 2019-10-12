@@ -2,17 +2,15 @@ import shlex
 import subprocess
 from datetime import datetime
 from pathlib import Path
-from typing import Iterator, List
+from typing import Dict, Iterator, List, Set
 
-from generate_recipes import get_paths
+from generate_recipes import IGNORE_RECIPES_PATHS, RECIPES_PATHS
 
-DEFAULT_DELIMITER = "\n"
 COMMAND_FACTORIES = {
     "imports": lambda arg: f"python -c 'import {arg}'",
     "requires": lambda arg: f"pip install -U {arg.replace(' ', '')}",
     "commands": lambda arg: 'bash -c "' + arg.replace('"', '\\"') + '"',
 }
-
 TIME_START = datetime.now()
 
 
@@ -32,13 +30,11 @@ def get_output_files():
 
 STDOUT_DUMP_FILE, STDERR_DUMP_FILE = get_output_files()
 
-PATHS = get_paths()
 
-
-def _get_recipe_commands(recipe: str) -> Iterator[str]:
+def _get_recipe_commands(recipe: str, recipes_paths: Dict[str, Path]) -> Iterator[str]:
     # order matters: only "commands" depend on "requires"
     for key in ["imports", "requires", "commands"]:
-        path = PATHS[key] / recipe
+        path = recipes_paths[key] / recipe
         if path.exists():
             lines = path.read_text().splitlines()
             for line in lines:
@@ -46,17 +42,22 @@ def _get_recipe_commands(recipe: str) -> Iterator[str]:
                 yield command_factory(arg=line)
 
 
-def get_recipes() -> List[str]:
+def _get_recipes(recipes_paths: Dict[str, Path]) -> List[str]:
     recipes = {
         recipe.stem
         for key in ["imports", "commands"]
-        for recipe in PATHS[key].iterdir()
+        for recipe in recipes_paths[key].iterdir()
     }
     return sorted(list(recipes))
 
 
-def get_commands() -> List[str]:
-    return [cmd for recipe in get_recipes() for cmd in _get_recipe_commands(recipe)]
+def get_commands(recipes_paths: Dict[str, Path]) -> List[str]:
+    return [
+        cmd.strip()
+        for recipe in _get_recipes(recipes_paths)
+        for cmd in _get_recipe_commands(recipe, recipes_paths)
+        if cmd.strip()
+    ]
 
 
 def _timestamp() -> str:
@@ -64,10 +65,15 @@ def _timestamp() -> str:
     return f"{delta.total_seconds():.3f}s"
 
 
-def run_tests(commands: List[str]) -> None:
-    total_run, succeeded, failed = [], [], []
+def run_tests(commands: List[str], ignore_commands: Set[str]) -> None:
+    total_run, succeeded, failed, ignored = [], [], [], []
     try:
         for cmd in commands:
+            if cmd in ignore_commands:
+                ignored.append(cmd)
+                print(f"[!] {_timestamp()} Ignore command: `{cmd}`")
+                continue
+
             info = f"[.] {_timestamp()} Running command: `{cmd}`"
             print(info)
             try:
@@ -91,10 +97,11 @@ def run_tests(commands: List[str]) -> None:
     finally:
         print("-" * 50)
         print("Summary:")
-        print(f"Total commands: {len(commands)}")
+        print(f"Total: {len(commands)}")
         print(f"Total run: {len(total_run)}")
         print(f"Total succeeded: {len(succeeded)}")
         print(f"Total failed: {len(failed)}")
+        print(f"Total ignored: {len(ignored)}")
         if failed:
             print(f"Failed tests:")
             for fail in failed:
@@ -103,6 +110,8 @@ def run_tests(commands: List[str]) -> None:
 
 
 if __name__ == "__main__":
-    commands = get_commands()
+    commands = get_commands(RECIPES_PATHS)
     print(f"All commands: {commands}\n")
-    run_tests(commands)
+    ignore_commands = get_commands(IGNORE_RECIPES_PATHS)
+    print(f"All commands to be ignored: {ignore_commands}\n")
+    run_tests(commands, set(ignore_commands))
