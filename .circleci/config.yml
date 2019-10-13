@@ -17,7 +17,7 @@ jobs:
           command: apk add --no-cache --no-progress make python3==3.7.4-r0
       - run: &build_image
           name: Build application Docker image
-          command: echo ok #make image
+          command: make image
       - run:
             name: Prepare testing environment
             command: |
@@ -36,15 +36,8 @@ jobs:
       - run:
             name: Download logs dir from the remote docker
             command: docker cp test-image-container:/testing/logs testing/
-      # Somehow uploading the whole directory `testing/logs/` does not work: `No artifact files found at /template-base-image/testing/logs/*.txt`
       - store_artifacts:
           path: testing/logs
-#      - store_artifacts:
-#          path: testing/logs/stdout.txt
-#          destination: stdout.txt
-#      - store_artifacts:
-#          path: testing/logs/stderr.txt
-#          destination: stderr.txt
 
   deploy:
     <<: *defaults
