@@ -17,14 +17,13 @@ TIME_START = datetime.now()
 def get_output_files():
     current_dir = Path(__file__).parent
     logs_dir = current_dir / "logs"
+    logs_dir.mkdir(exist_ok=True)
     stdout = logs_dir / "stdout.txt"
     stderr = logs_dir / "stderr.txt"
-    stdout.parent.mkdir(exist_ok=True)
     if stdout.exists():
         stdout.unlink()
     if stderr.exists():
         stderr.unlink()
-    # return stdout.open("a"), stderr.open("a")
     return stdout, stderr
 
 
@@ -77,14 +76,13 @@ def run_tests(commands: List[str], ignore_commands: Set[str]) -> None:
             info = f"[.] {_timestamp()} Running command: `{cmd}`"
             print(info)
             try:
-                with STDOUT_DUMP_FILE.open("a") as f_stdout, STDERR_DUMP_FILE.open(
-                    "a"
-                ) as f_stderr:
-                    f_stdout.write(">>> " + info + "\n")
-                    f_stderr.write(">>> " + info + "\n")
-                    p = subprocess.run(
-                        shlex.split(cmd), stdout=f_stdout, stderr=f_stderr
-                    )
+                with STDOUT_DUMP_FILE.open("a") as f_stdout:
+                    with STDERR_DUMP_FILE.open("a") as f_stderr:
+                        f_stdout.write(">>> " + info + "\n")
+                        f_stderr.write(">>> " + info + "\n")
+                        p = subprocess.run(
+                            shlex.split(cmd), stdout=f_stdout, stderr=f_stderr
+                        )
                 total_run.append(cmd)
                 assert p.returncode == 0, f"non-zero exit code: {p.returncode}"
                 print(f"[+] {_timestamp()} Success.")
