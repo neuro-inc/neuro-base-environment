@@ -37,8 +37,11 @@ jobs:
             name: Download logs dir from the remote docker
             command: docker cp test-image-container:/testing/logs testing/
       - store_artifacts:
-          path: testing/logs/*
-          destination: kek/
+          path: testing/logs/stdout.txt
+          destination: stdout.txt
+      - store_artifacts:
+          path: testing/logs/stderr.txt
+          destination: stderr.txt
 
   deploy:
     <<: *defaults
