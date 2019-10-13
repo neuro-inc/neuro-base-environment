@@ -35,7 +35,7 @@ jobs:
       - run:
             name: Download logs dir from the remote docker
             command: |
-              docker cp test-image-container:/testing/logs testing/logs/
+              docker cp test-image-container:/testing/logs .
               ls
               ls testing
               ls testing/logs
