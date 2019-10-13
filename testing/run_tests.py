@@ -108,7 +108,7 @@ def run_tests(commands: List[str], ignore_commands: Set[str]) -> None:
 
 
 if __name__ == "__main__":
-    commands = get_commands(RECIPES_PATHS)
+    commands = ["easy_install --help"]#get_commands(RECIPES_PATHS)
     print(f"All commands: {commands}\n")
     ignore_commands = get_commands(IGNORE_RECIPES_PATHS)
     print(f"All commands to be ignored: {ignore_commands}\n")

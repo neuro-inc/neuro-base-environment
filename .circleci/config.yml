@@ -33,14 +33,9 @@ jobs:
             no_output_timeout: 30m
       - run:
             name: Download logs dir from the remote docker
-            command: |
-              docker cp configs:/testing/logs testing/
+            command: docker cp configs:/testing/logs testing/
       - store_artifacts:
           path: testing/logs/*.txt
-      - run:
-            name: sleep
-            command: sleep 2h
-            no_output_timeout: 2h
 
   deploy:
     <<: *defaults
