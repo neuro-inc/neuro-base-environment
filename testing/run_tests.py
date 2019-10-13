@@ -61,7 +61,10 @@ def get_commands(recipes_paths: Dict[str, Path]) -> List[str]:
 
 def _timestamp() -> str:
     delta = datetime.now() - TIME_START
-    return f"{delta.total_seconds():.3f}s"
+    total_sec = delta.total_seconds()
+    m = int(total_sec // 60)
+    s = total_sec % 60
+    return f"{m}min {s:.3f}sec"
 
 
 def run_tests(commands: List[str], ignore_commands: Set[str]) -> None:
