@@ -1,6 +1,6 @@
 IMAGE_NAME?=neuromation/base
 DOCKERFILE?=targets/Dockerfile.python36-jupyter-pytorch-tensorflow-jupyterlab
-DOCKER_RUN?=docker run --env PLATFORMAPI_SERVICE_HOST=test --tty
+DOCKER_RUN?=docker run --env PLATFORMAPI_SERVICE_HOST=test --tty --rm
 ASSERT_COMMAND_FAILS=&& { echo "failure!"; exit 1; } || { echo "success!"; }
 
 # Testing settings:
