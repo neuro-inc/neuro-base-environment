@@ -31,13 +31,12 @@ jobs:
             name: Run tests
             command: make test  DOCKER_MOUNT_OPTION="--volumes-from=configs"
             no_output_timeout: 30m
-      # somehow uploading all artifacts at once `testing/logs/*.txt` does not work
+      - run:
+            name: Download logs dir from the remote docker
+            command: |
+              docker cp configs:/testing/logs testing/
       - store_artifacts:
-          path: testing/logs/stdout.txt
-          destination: stdout.txt
-      - store_artifacts:
-          path: testing/logs/stderr.txt
-          destination: stderr.txt
+          path: testing/logs/*.txt
       - run:
             name: sleep
             command: sleep 2h
