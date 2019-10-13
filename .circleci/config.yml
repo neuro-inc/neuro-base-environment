@@ -29,13 +29,23 @@ jobs:
               docker cp testing/ aux:/
       - run:
             name: Run tests
-            command: make test  DOCKER_MOUNT_OPTION="--volumes-from=aux"
+            command: |
+              make test  DOCKER_MOUNT_OPTION="--volumes-from=aux"
+              ls
+              ls testing
+              ls testing/logs
+              cat testing/logs/*.txt
             no_output_timeout: 30m
       - run:
             name: Download logs dir from the remote docker
-            command: docker cp aux:/testing/logs .
+            command: |
+              docker cp aux:/testing/logs testing/logs/
+              ls
+              ls testing
+              ls testing/logs
+              cat testing/logs/*.txt
       - store_artifacts:
-          path: ./logs/*.txt
+          path: testing/logs/*.txt
 
   deploy:
     <<: *defaults
