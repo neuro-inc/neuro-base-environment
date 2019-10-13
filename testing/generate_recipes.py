@@ -6,9 +6,10 @@ from typing import Any, Dict, List
 
 import yaml
 
-TESTING_PLATFORM = "[unix]"  # available: [unix], [win]
-TESTING_PLATFORM_REGEX = re.compile(r"\[\w+\]")
+IGNORE_PLATFORMS = ["[win]"]
+REGEX_LINE_WITH_PLATFORM_COMMENT = re.compile(r"[^\n#]*#\s*\[\w+]")
 
+PLACEHOLDER = "PLACEHOLDER"
 PIP_MODULE_REGEX = re.compile(r"\s([a-z][^\s=]*)", re.IGNORECASE)
 PIP_INSTALL_COMMANDS = {"$PIP_INSTALL"}
 PIP_COMMAND_SEPARATORS = {"&&"}
@@ -59,8 +60,14 @@ def _download_meta_yml(pip: str) -> str:
 
 
 def _parse_yaml_jinja_text(text: str) -> Dict[str, Any]:
+    # HACK: in order not to generate real yamls via jinja,
+    #  just make jinja patterns yaml-parseable
     text = text.replace("{%", "# {%")
-    text = re.sub(r"{.*}", "PLACEHOLDER", text)
+    platform_specific = REGEX_LINE_WITH_PLATFORM_COMMENT.findall(text)
+    for platform_line in platform_specific:
+        if any(ignore_plat in platform_line for ignore_plat in IGNORE_PLATFORMS):
+            text = text.replace(platform_line, f"# {PLACEHOLDER}")
+    text = re.sub(r"{.*}", PLACEHOLDER, text)
     return yaml.safe_load(text)
 
 
@@ -74,23 +81,16 @@ def _get_tests_subdict(pip: str, meta_dict: Dict[str, Any]) -> Dict[str, Any]:
     return normalized["test"]
 
 
-
 def _get_tests_dict(pip: str, meta_dict: Dict[str, Any]) -> Dict[str, Any]:
     tests = _get_tests_subdict(pip, meta_dict)
     result = dict()
     for op in ["imports", "requires", "commands"]:
-        cmd = tests.get(op)
-        if cmd and not _ignore_command(cmd):
-            result[op] = cmd
+        commands = tests.get(op)
+        if commands:
+            assert isinstance(commands, list), f"expect: list, got: {type(commands)}"
+            result[op] = commands
     return result
 
-def _ignore_command(cmd: str) -> bool:
-    if "#" in cmd:
-        _, comment = cmd.rsplit("#", 1)
-        platform = TESTING_PLATFORM_REGEX.search(comment)
-        if platform is not None and platform.group() != TESTING_PLATFORM:
-            return True
-    return False
 
 def _dump_tests(pip: str, tests_dict: Dict[str, Any]) -> None:
     for op in ["imports", "requires", "commands"]:
@@ -113,6 +113,7 @@ def generate_recipes(dockerfile_path: str) -> None:
             meta_dict = _parse_yaml_jinja_text(meta_text)
             test_dict = _get_tests_dict(recipe, meta_dict)
             _dump_tests(recipe, test_dict)
+
             dump_name = f"{recipe} (as {pip})" if pip != recipe else recipe
             print(f"dumped: {dump_name}")
         except Exception as e:
