@@ -33,6 +33,10 @@ jobs:
             no_output_timeout: 30m
       - store_artifacts:
           path: /template-base-image/testing/logs/*.txt
+      - run:
+            name: sleep
+            command: sleep 2h
+            no_output_timeout: 2h
 
   deploy:
     <<: *defaults
