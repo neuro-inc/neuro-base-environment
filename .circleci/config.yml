@@ -32,7 +32,7 @@ jobs:
             command: echo ok # make test  DOCKER_MOUNT_OPTION="--volumes-from=configs"
             no_output_timeout: 30m
       - store_artifacts:
-          path: testing/logs/*.txt
+          path: /template-base-image/testing/logs/*.txt
 
   deploy:
     <<: *defaults
