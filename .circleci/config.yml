@@ -38,6 +38,7 @@ jobs:
             command: docker cp test-image-container:/testing/logs testing/
       - store_artifacts:
           path: testing/logs/*
+          destination: kek/
 
   deploy:
     <<: *defaults
