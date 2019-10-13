@@ -17,7 +17,7 @@ jobs:
           command: apk add --no-cache --no-progress make python3==3.7.4-r0
       - run: &build_image
           name: Build application Docker image
-          command: mkdir testing/logs && echo 123 > testing/logs/stderr.txt && echo 44445 > testing/logs/stdout.txt #make image
+          command: make image
       - run:
             name: Prepare testing environment
             command: |
@@ -29,8 +29,9 @@ jobs:
               docker cp testing/ configs:/
       - run:
             name: Run tests
-            command: echo ok # make test  DOCKER_MOUNT_OPTION="--volumes-from=configs"
+            command: make test  DOCKER_MOUNT_OPTION="--volumes-from=configs"
             no_output_timeout: 30m
+      # somehow uploading all artifacts at once `testing/logs/*.txt` does not work
       - store_artifacts:
           path: testing/logs/stdout.txt
           destination: stdout.txt
