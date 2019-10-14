@@ -41,8 +41,10 @@ jobs:
               docker cp aux:/testing/logs testing/ #docker cp test-image-container:/testing/logs testing/
               ls testing/ || echo not exist
               ls testing/logs || echo not exist
+            when: always
       - store_artifacts:
           path: testing/logs
+          when: always
 
   deploy:
     <<: *defaults
