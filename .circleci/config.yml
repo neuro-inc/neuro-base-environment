@@ -35,7 +35,7 @@ jobs:
             no_output_timeout: 30m
       - run:
             name: Download logs dir from the remote docker
-            command: docker cp test-image-container:/testing/logs testing/
+            command: docker cp aux:/testing/logs testing/ #docker cp test-image-container:/testing/logs testing/
       - store_artifacts:
           path: testing/logs
 
