@@ -29,18 +29,11 @@ jobs:
               docker cp testing/ aux:/
       - run:
             name: Run tests
-            command: |
-              make test_image  TEST_IMAGE_DOCKER_MOUNT_OPTION="--volumes-from=aux"  TEST_IMAGE_DOCKER_NAME_OPTION="--name=test-image-container"
-              #make test_timeout
+            command: make test_image  TEST_IMAGE_DOCKER_MOUNT_OPTION="--volumes-from=aux"  TEST_IMAGE_DOCKER_NAME_OPTION="--name=test-image-container"
             no_output_timeout: 30m
       - run:
             name: Download logs dir from the remote docker
-            command: |
-              ls testing/ || echo not exist
-              ls testing/logs || echo not exist
-              docker cp aux:/testing/logs testing/ #docker cp test-image-container:/testing/logs testing/
-              ls testing/ || echo not exist
-              ls testing/logs || echo not exist
+            command: docker cp aux:/testing/logs testing/
             when: always
       - store_artifacts:
           path: testing/logs
