@@ -30,9 +30,9 @@ jobs:
       - run:
             name: Run tests
             command: |
-#              make test_image  TEST_IMAGE_DOCKER_MOUNT_OPTION="--volumes-from=aux"  TEST_IMAGE_DOCKER_NAME_OPTION="--name=test-image-container"
-#              make test_timeout
               echo 123 > testing/logs/stdout.logs
+              #make test_image  TEST_IMAGE_DOCKER_MOUNT_OPTION="--volumes-from=aux"  TEST_IMAGE_DOCKER_NAME_OPTION="--name=test-image-container"
+              #make test_timeout
             no_output_timeout: 30m
       - run:
             name: Download logs dir from the remote docker
