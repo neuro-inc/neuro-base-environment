@@ -29,7 +29,7 @@ jobs:
               docker cp testing/ aux:/
       - run:
             name: Run tests
-            command: make test_image  TEST_IMAGE_DOCKER_MOUNT_OPTION="--volumes-from=aux"  TEST_IMAGE_DOCKER_NAME_OPTION="--name=test-image-container"
+            command: make test_image  TEST_IMAGE_DOCKER_MOUNT_OPTION="--volumes-from=aux"
             no_output_timeout: 30m
       - run:
             name: Download logs dir from the remote docker
