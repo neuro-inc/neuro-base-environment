@@ -4,7 +4,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, Iterator, List, Set
 
-from generate_recipes import IGNORE_RECIPES_PATHS, RECIPES_PATHS
+from common import IGNORE_RECIPES_PATHS, RECIPES_PATHS
 
 COMMAND_FACTORIES = {
     "imports": lambda arg: f"python -c 'import {arg}'",
@@ -79,10 +79,16 @@ def run_tests(commands: List[str], ignore_commands: Set[str]) -> None:
             info = f"[.] {_timestamp()} Running command: `{cmd}`"
             print(info)
             try:
-                with STDOUT_DUMP_FILE.open("a") as f_stdout:
-                    with STDERR_DUMP_FILE.open("a") as f_stderr:
-                        f_stdout.write(">>> " + info + "\n")
-                        f_stderr.write(">>> " + info + "\n")
+                import sys
+
+                f_stdout = sys.stdout
+                f_stderr = sys.stderr
+                if True:
+                    if True:
+                        # with STDOUT_DUMP_FILE.open("a") as f_stdout:
+                        #     with STDERR_DUMP_FILE.open("a") as f_stderr:
+                        f_stdout.write("\n" + info + "\n")
+                        f_stderr.write("\n" + info + "\n")
                         p = subprocess.run(
                             shlex.split(cmd), stdout=f_stdout, stderr=f_stderr
                         )
@@ -98,11 +104,9 @@ def run_tests(commands: List[str], ignore_commands: Set[str]) -> None:
     finally:
         print("-" * 50)
         print("Summary:")
-        print(f"Total: {len(commands)}")
-        print(f"Total run: {len(total_run)}")
+        print(f"Total: {len(commands)} ({len(ignored)} ignored)")
         print(f"Total succeeded: {len(succeeded)}")
         print(f"Total failed: {len(failed)}")
-        print(f"Total ignored: {len(ignored)}")
         if failed:
             print(f"Failed tests:")
             for fail in failed:
@@ -114,5 +118,5 @@ if __name__ == "__main__":
     commands = get_commands(RECIPES_PATHS)
     print(f"All commands: {commands}\n")
     ignore_commands = get_commands(IGNORE_RECIPES_PATHS)
-    print(f"All commands to be ignored: {ignore_commands}\n")
+    print(f"Ignore commands: {ignore_commands}\n")
     run_tests(commands, set(ignore_commands))

@@ -17,8 +17,8 @@ image:
 	@echo ok
 
 
-.PHONY: generate-recipes
-generate-recipes:
+.PHONY: generate_recipes
+generate_recipes:
 	python3 testing/generate_recipes.py $(DOCKERFILE)
 	@echo ok
 
