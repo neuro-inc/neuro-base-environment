@@ -1,6 +1,3 @@
-# This export is unnecessary, IMO
-export OPENBLAS_NUM_THREADS=1
-# Since `import sklearn` works, we can skip for now the full pytest test suite that fails
-#pytest --verbose --pyargs sklearn
-# Same test suite but for platforms [aarch64 or ppc64le]:
+# There are 2 tests failing out of the full test suite: "experimental/tests/test_enable_hist_gradient_boosting.py" and "experimental/tests/test_enable_iterative_imputer.py::test_imports_strategies" (`import re` fails with "AttributeError: module 'enum' has no attribute 'IntFlag'")
+pytest --verbose --pyargs sklearn
 pytest --verbose --pyargs sklearn -k 'not test_estimate_bandwidth_1sample'
