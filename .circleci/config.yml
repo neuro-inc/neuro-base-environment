@@ -25,7 +25,8 @@ jobs:
           name: Assert freshness of the recipes
           command: |
             source venv/bin/activate
-            make generate_recipes && git diff --exit-code || echo -e "\n Need to update recipes!"; exit 1
+            git diff --exit-code
+            { make generate_recipes && git diff --exit-code } || { echo -e "Need to update recipes!"; exit 3 }
 
       - run: &build_image
           name: Build application Docker image
