@@ -79,14 +79,8 @@ def run_tests(commands: List[str], ignore_commands: Set[str]) -> None:
             info = f"[.] {_timestamp()} Running command: `{cmd}`"
             print(info)
             try:
-                import sys
-
-                f_stdout = sys.stdout
-                f_stderr = sys.stderr
-                if True:
-                    if True:
-                        # with STDOUT_DUMP_FILE.open("a") as f_stdout:
-                        #     with STDERR_DUMP_FILE.open("a") as f_stderr:
+                with STDOUT_DUMP_FILE.open("a") as f_stdout:
+                    with STDERR_DUMP_FILE.open("a") as f_stderr:
                         f_stdout.write("\n" + info + "\n")
                         f_stderr.write("\n" + info + "\n")
                         p = subprocess.run(
