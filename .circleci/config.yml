@@ -16,7 +16,7 @@ jobs:
           name: Install dependencies
           command: |
             apk add --no-cache --no-progress make python3==3.7.5-r1 py-pip
-            pip install --user -r testing/requirements.txt
+            pip install -r testing/requirements.txt
       - run:
           name: Assert freshness of the recipes
           command: make generate_recipes && git diff --exit-code || echo -e "\n Need to update recipes!"; exit 1
