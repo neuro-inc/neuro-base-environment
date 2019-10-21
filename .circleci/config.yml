@@ -26,7 +26,7 @@ jobs:
           command: |
             source venv/bin/activate
             git diff --exit-code
-            { make generate_recipes && git diff --exit-code } || { echo -e "Need to update recipes!"; exit 3 }
+            { make generate_recipes && git diff --exit-code; } || { echo -e "Need to update recipes!"; exit 3; }
 
       - run: &build_image
           name: Build application Docker image
