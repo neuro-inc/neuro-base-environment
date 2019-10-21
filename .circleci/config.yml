@@ -16,7 +16,7 @@ jobs:
       - run: &install_dependencies
           name: Install dependencies
           command: |
-            apk add --no-cache --no-progress make python3==3.7.5-r1 py-pip
+            apk add --no-cache --no-progress make python3==3.7.5-r1 py-pip git
             python3 -m venv venv
             source venv/bin/activate
             pip3 install -r testing/requirements.txt
