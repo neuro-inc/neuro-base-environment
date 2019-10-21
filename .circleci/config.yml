@@ -12,17 +12,26 @@ jobs:
       - checkout
       - setup_remote_docker:
           docker_layer_caching: true
+
       - run: &install_dependencies
           name: Install dependencies
           command: |
             apk add --no-cache --no-progress make python3==3.7.5-r1 py-pip
-            pip install -r testing/requirements.txt
+            python3 -m venv venv
+            source venv/bin/activate
+            pip3 install -r testing/requirements.txt
+
       - run:
           name: Assert freshness of the recipes
-          command: make generate_recipes && git diff --exit-code || echo -e "\n Need to update recipes!"; exit 1
+          command: |
+            source venv/bin/activate
+            make generate_recipes && git diff --exit-code || echo -e "\n Need to update recipes!"; exit 1
+
       - run: &build_image
           name: Build application Docker image
-          command: make image
+          command: |
+            make image
+
       - run:
             name: Prepare testing environment
             command: |
@@ -32,13 +41,18 @@ jobs:
               docker create -v /testing --name=aux alpine /bin/true
               # copy testing folder into this volume:
               docker cp testing/ aux:/
+
       - run:
             name: Run tests
-            command: make test_image  TEST_IMAGE_DOCKER_MOUNT_OPTION="--volumes-from=aux"
+            command: |
+              make test_image  TEST_IMAGE_DOCKER_MOUNT_OPTION="--volumes-from=aux"
             no_output_timeout: 30m
+
       - run:
             name: Download logs dir from the remote docker
-            command: docker cp aux:/testing/logs testing/
+            command: |
+              docker cp aux:/testing/logs testing/
+
       - store_artifacts:
           path: testing/logs
           when: always
