@@ -12,7 +12,7 @@ jobs:
       - checkout
       - run:
           name: Assert freshness of the recipes
-          command: make generate_recipes && git diff --exit-code || echo -e "\n Need to update recipes!"; exit 1
+          command: ls; make generate_recipes && git diff --exit-code || echo -e "\n Need to update recipes!"; exit 1
       - setup_remote_docker:
           docker_layer_caching: true
       - run: &install_dependencies
