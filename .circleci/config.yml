@@ -14,7 +14,9 @@ jobs:
           docker_layer_caching: true
       - run: &install_dependencies
           name: Install dependencies
-          command: apk add --no-cache --no-progress make python3==3.7.5-r1
+          command: |
+            apk add --no-cache --no-progress make python3==3.7.5-r1
+            pip install --user -r testing/requirements.txt
       - run:
           name: Assert freshness of the recipes
           command: make generate_recipes && git diff --exit-code || echo -e "\n Need to update recipes!"; exit 1
