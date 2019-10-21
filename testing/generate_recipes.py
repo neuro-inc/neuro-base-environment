@@ -2,17 +2,17 @@ import re
 import sys
 import urllib.request
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 import yaml
 from sympy.logic.boolalg import BooleanFalse, BooleanTrue
 from sympy.parsing.sympy_parser import parse_expr
 
-from common import RECIPES_PATHS
+from _common import RECIPES_PATHS
 
 # TODO: we should generate jinja manually instead
 #  (maybe we could generate jinja partially, a new template for a specific platform?)
-IGNORE_PLATFORMS = ["win"]
+IGNORE_PLATFORMS: Tuple[str] = ("win",)
 REGEX_LINE_WITH_PLATFORM_COMMENT = re.compile(r"[^\n#]*#\s*\[([^\]]+)\]")
 TARGET_PYTHON_VERSION = "37"
 TARGET_PYTHON_REGEX = re.compile(r"(py *(>|>=|<|<=|==) *(\d+))")
@@ -25,7 +25,21 @@ META_YML_URL_PATTERN = "https://raw.githubusercontent.com/conda-forge/{pip}-feed
 PIP_TO_RECIPE_MAP = {"torch": "pytorch-cpu", "tensorflow-gpu": "tensorflow"}
 
 
-def _get_pip_packages(dockerfile_text: str) -> List[str]:
+def _get_deepo_pip_packages(dockerfile_text: str) -> List[str]:
+    """ This method accepts target Dockerfile contents as a string and finds there
+    all pip packages defined in standard syntax used in `deepo` Dockerfiles:
+    ```
+    $PIP_INSTALL \
+       future \
+       numpy \
+       protobuf \
+       enum34 \
+       typing \
+       && \
+    ```
+    :param dockerfile_text: Dockerfile contents as a string
+    :return: List of pip packages (without versions)
+    """
     lines = dockerfile_text.split("\n")
     pips: List[str] = []
     in_pip_section = False
@@ -45,76 +59,118 @@ def _get_pip_packages(dockerfile_text: str) -> List[str]:
 
 
 def _download_meta_yml(pip: str) -> str:
+    """ This method downloads `meta.yaml` used by conda-forge project to store
+    meta-information on pip- and system-packages (such as dependencies, testing
+    commands, etc).
+    :param pip: name of pip package
+    :return: contents of `meta.yml` file
+    """
     url = META_YML_URL_PATTERN.format(pip=pip)
     with urllib.request.urlopen(url) as resp:
-        assert resp.status == 200, f"error {url}, status: {resp.status}"
+        assert resp.status == 200, f"error downloading {url}, status: {resp.status}"
         return resp.read().decode()
 
 
 def _parse_yaml_jinja_text(text: str) -> Dict[str, Any]:
+    """ Since all `meta.yml` files are in fact jinja2 templates, we are unable to parse
+    them directly via a yaml parser. However, most of the information specified by the
+    template parameters (such as compiler version, python version) is unnecessary for us
+    since it's used only in `build`, `source`, and other fields (so far, we use only
+    `test` field). To solve this problem, we remove all jinja directives and parse
+    platform-specifying comments (such as `# [win]`) removing those lines of yaml-file
+    that are defined for undesired platforms (for example, windows is undesired).
+    :param text: contents of the `meta.yml` file
+    :return: parsed yaml
+    """
     # HACK: in order not to generate real yamls via jinja,
     #  just make jinja patterns yaml-parseable
-    text = _jinja_remove_directives(text)
-    text = _jinja_remove_platform_comments(text, IGNORE_PLATFORMS, PLACEHOLDER)
-
-    text = re.sub(r"{.*}", PLACEHOLDER, text)
+    text = __remove_jinja_directives(text)
+    text = __conda_forge_analyze_platform(text)
+    text = re.sub(r"{{.*}}", PLACEHOLDER, text)
     return yaml.safe_load(text)
 
 
-def _jinja_remove_directives(text: str) -> str:
+def __remove_jinja_directives(text: str) -> str:
+    """
+    Replace all jinja directives with a placeholder.
+    :param text: contents of the `meta.yml` file
+    :return: contents of the `meta.yml` file without jinja directives
+    """
     return text.replace("{%", "# {%")
 
 
-def _jinja_remove_platform_comments(
+def __conda_forge_analyze_platform(
     text: str,
-    ignore_platforms: List[str],
-    placeholder: str = PLACEHOLDER,
+    ignore_platforms: Sequence[str] = IGNORE_PLATFORMS,
     target_python_version: str = TARGET_PYTHON_VERSION,
+    placeholder: str = PLACEHOLDER,
 ) -> str:
     """
-    >>> _jinja_remove_platform_comments("test  # [not win]", ["win"], "replaced")
+    This method analyzes platform-specifying comments and replace those lines defined
+    for undesired platforms with a placeholder (python/bash comment). This step is
+    needed since many tests are duplicated for different platforms, for example:
+      https://github.com/conda-forge/numpy-feedstock/blob/master/recipe/meta.yaml#L54-L56
+      ```
+      - pytest --timeout=300 -v --pyargs numpy -k "not (test_loss_of_precision or test_einsum_sums_cfloat64)"  # [ppc64le]
+      - pytest --timeout=300 -v --pyargs numpy -k "not (test_loss_of_precision or test_may_share_memory_easy_fuzz or test_xerbla_override or test_may_share_memory_harder_fuzz or test_large_zip or test_sdot_bug_8577 or test_unary_ufunc_call_fuzz)"  # [aarch64]
+      - pytest --timeout=300 -v --pyargs numpy  # [not (aarch64 or ppc64le)]
+      ```
+    :param text: contents of the `meta.yml` file
+    :param ignore_platforms: list of platform IDs to ignore (without brackets, ex.: "win")
+    :param placeholder: text to replace lines with
+    :param target_python_version: two-digit line of desired python version (ex.: "37")
+    :return: contents of the `meta.yml` file without lines for undesired platforms
+
+    >>> __conda_forge_analyze_platform("test  # [not win]", ["win"], "37", "replaced")
     'test  # [not win]'
-    >>> _jinja_remove_platform_comments("test  # [win]", ["win"], "replaced")
+    >>> __conda_forge_analyze_platform("test  # [win]", ["win"], "37", "replaced")
     '# replaced'
-    >>> _jinja_remove_platform_comments("test  # [linux]", ["win"], "replaced")
+    >>> __conda_forge_analyze_platform("test  # [linux]", ["win"], "37", "replaced")
     'test  # [linux]'
-    >>> _jinja_remove_platform_comments("test  # [linux and py<=35]", ["win"], "replaced", "37")
+    >>> __conda_forge_analyze_platform("test  # [linux and py<=35]", ["win"], "37", "replaced")
+    '# replaced'
+    >>> __conda_forge_analyze_platform("test  # [linux and py <= 35]", ["win"], "37", "replaced")
     '# replaced'
     """
+    # TODO: py27
     platform_line_iter = REGEX_LINE_WITH_PLATFORM_COMMENT.finditer(text)
     for match in platform_line_iter:
         platform_expr = match.group(1)
-        platform_expr = _substitute_target_python(platform_expr, target_python_version)
-        if not _match_target_platform(platform_expr, ignore_platforms):
+        platform_expr = __substitute_target_python(platform_expr, target_python_version)
+        # TODO: protobuf: `# [win and vc<14]`
+        matched = __match_target_platform(platform_expr, ignore_platforms)
+        if not matched:
             platform_line = match.group(0)
             text = text.replace(platform_line, f"# {placeholder}")
     return text
 
 
-def _match_target_platform(platform_expr: str, ignore_platforms: List[str]) -> bool:
-    """ Simplified parser of `target_platform` directives.
+def __match_target_platform(
+    platform_expr: str, ignore_platforms: Sequence[str]
+) -> bool:
+    """ Helper: simplified parser of `target_platform` directives of `meta.yml` files.
 
-    >>> _match_target_platform("win", ["win", "osx"])
+    >>> __match_target_platform("win", ["win", "osx"])
     False
-    >>> _match_target_platform("not win", ["win", "osx"])
+    >>> __match_target_platform("not win", ["win", "osx"])
     True
-    >>> _match_target_platform("linux", ["win", "osx"])
+    >>> __match_target_platform("linux", ["win", "osx"])
     True
     >>> # The following example is a known non-working corner case:
     >>> #  the test should produce `True` because we assume
     >>> #  that except `linux` there are other valid platforms
-    >>> _match_target_platform("not linux", ["win", "osx"])
+    >>> __match_target_platform("not linux", ["win", "osx"])
     False
-    >>> _match_target_platform("win or osx", ["win", "osx"])
+    >>> __match_target_platform("win or osx", ["win", "osx"])
     False
-    >>> _match_target_platform("win or linux or osx", ["win", "osx"])
+    >>> __match_target_platform("win or linux or osx", ["win", "osx"])
     True
-    >>> _match_target_platform("not (win or osx)", ["win", "osx"])
+    >>> __match_target_platform("not (win or osx)", ["win", "osx"])
     True
-    >>> _match_target_platform("not (win or linux)", ["win", "osx"])
+    >>> __match_target_platform("not (win or linux)", ["win", "osx"])
     False
     >>> # Python version expressions are evaluated to bools: True or False:
-    >>> _match_target_platform("linux and True", ["win", "osx"])
+    >>> __match_target_platform("linux and True", ["win", "osx"])
     True
     """
     expr = platform_expr
@@ -130,25 +186,29 @@ def _match_target_platform(platform_expr: str, ignore_platforms: List[str]) -> b
 
     try:
         matched = parse_expr(expr, local_dict=local_dict)
-        assert isinstance(matched, bool), f"Wrong type: {type(matched)}"
+        assert isinstance(matched, bool), f"should be bool: {type(matched)} | {expr}"
         return matched
     except Exception as e:
         print(f"Could not parse target platform expression `{platform_expr}`: {e}")
         return False
 
 
-def _substitute_target_python(platform_expr: str, target_python_version: str) -> str:
-    """
-    >>> _substitute_target_python("py>=37", "37")
+def __substitute_target_python(platform_expr: str, target_python_version: str) -> str:
+    """ Helper: evaluates python-version conditions in order to make the whole line
+    a valid string to be parsed by sympy.
+
+    >>> __substitute_target_python("py>=37", "37")
     'True'
-    >>> _substitute_target_python("win and py>=37", "37")
+    >>> __substitute_target_python("win and py>=37", "37")
     'win and True'
-    >>> _substitute_target_python("win and py>=37", "35")
+    >>> __substitute_target_python("win and py>=37", "35")
     'win and False'
-    >>> _substitute_target_python("win and py == 37 or linux", "37")
+    >>> __substitute_target_python("win and py == 37 or linux", "37")
     'win and True or linux'
-    >>> _substitute_target_python("win and py< 37 or linux", "34")
+    >>> __substitute_target_python("win and py< 37 or linux", "34")
     'win and True or linux'
+    >>> __substitute_target_python("win and py > 37 or linux", "34")
+    'win and False or linux'
     """
     result = platform_expr
     for full, op, ver in set(TARGET_PYTHON_REGEX.findall(platform_expr)):
@@ -161,8 +221,14 @@ def _substitute_target_python(platform_expr: str, target_python_version: str) ->
     return result
 
 
-def _get_tests_subdict(pip: str, meta_dict: Dict[str, Any]) -> Dict[str, Any]:
+def _get_tests_subdict(
+    meta_dict: Dict[str, Any], pip: Optional[str] = None
+) -> Dict[str, Any]:
+    """ Returns `test` section of the parsed `meta.yml` contents.
+    """
     normalized = meta_dict.copy()
+
+    # HACK(artem) tensorflow's meta.yml has multiple sections inside `test`
     if pip == "tensorflow":
         outputs = [x for x in meta_dict["outputs"] if x["name"] == "tensorflow-base"]
         assert len(outputs) == 1, f"wrong dict: {meta_dict}"
@@ -171,18 +237,31 @@ def _get_tests_subdict(pip: str, meta_dict: Dict[str, Any]) -> Dict[str, Any]:
     return normalized["test"]
 
 
-def _get_tests_dict(pip: str, meta_dict: Dict[str, Any]) -> Dict[str, Any]:
-    tests = _get_tests_subdict(pip, meta_dict)
+def _get_tests_dict(
+    meta_dict: Dict[str, Any], pip: Optional[str] = None
+) -> Dict[str, Any]:
+    """ Returns necessary test sections: "imports", "requires", "commands"
+    """
+    tests = _get_tests_subdict(meta_dict, pip)
     result = dict()
     for op in ["imports", "requires", "commands"]:
         commands = tests.get(op)
-        if commands:
-            assert isinstance(commands, list), f"expect: list, got: {type(commands)}"
-            result[op] = commands
+        if not commands:
+            continue
+        assert isinstance(commands, list), f"expect: list, got: {type(commands)}"
+        result[op] = [
+            __conda_forge_analyze_platform(cmd, IGNORE_PLATFORMS, PLACEHOLDER)
+            for cmd in commands
+        ]
     return result
 
 
 def _dump_tests(pip: str, tests_dict: Dict[str, Any]) -> None:
+    """
+    Dumps parsed contents of test operations into separate files.
+    :param pip: name of pip package (no version)
+    :param tests_dict: parsed contents of test operations
+    """
     for op in ["imports", "requires", "commands"]:
         tests = tests_dict.get(op)
         if not tests:
@@ -193,21 +272,27 @@ def _dump_tests(pip: str, tests_dict: Dict[str, Any]) -> None:
 
 
 def generate_recipes(dockerfile_path: str) -> None:
+    """
+    Entry point of the whole script.
+    Parses Dockerfile to collect all pip packages installed, downloads and analyzes
+    `meta.yml` files of each pip package, dumps collected information to the files.
+    """
     dockerfile_text = Path(dockerfile_path).read_text()
-    pips = _get_pip_packages(dockerfile_text)
+    pips = _get_deepo_pip_packages(dockerfile_text)
 
     for pip in pips:
         recipe = PIP_TO_RECIPE_MAP.get(pip, pip)
         try:
             meta_text = _download_meta_yml(recipe)
             meta_dict = _parse_yaml_jinja_text(meta_text)
-            test_dict = _get_tests_dict(recipe, meta_dict)
+            test_dict = _get_tests_dict(meta_dict, recipe)
             _dump_tests(recipe, test_dict)
 
             dump_name = f"{recipe} (as {pip})" if pip != recipe else recipe
             print(f"dumped: {dump_name}")
         except Exception as e:
-            print(f"ERROR: Could not load meta for {recipe}: {repr(e)} {e}")
+            url = META_YML_URL_PATTERN.format(pip=pip)
+            print(f"ERROR {recipe}: {type(e)} {e}. See file: {url}")
             continue
 
 

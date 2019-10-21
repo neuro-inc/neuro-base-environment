@@ -4,7 +4,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, Iterator, List, Set
 
-from common import IGNORE_RECIPES_PATHS, RECIPES_PATHS
+from _common import IGNORE_RECIPES_PATHS, RECIPES_PATHS
 
 COMMAND_FACTORIES = {
     "imports": lambda arg: f"python -c 'import {arg}'",
@@ -31,7 +31,8 @@ STDOUT_DUMP_FILE, STDERR_DUMP_FILE = get_output_files()
 
 
 def _get_recipe_commands(recipe: str, recipes_paths: Dict[str, Path]) -> Iterator[str]:
-    # order matters: only "commands" depend on "requires"
+    """ Finds and parses recipe files. """
+    # order matters: only "commands" should depend on "requires"
     for op in ["imports", "requires", "commands"]:
         path = recipes_paths[op] / recipe
         if path.exists():
@@ -42,6 +43,8 @@ def _get_recipe_commands(recipe: str, recipes_paths: Dict[str, Path]) -> Iterato
 
 
 def _get_recipes(recipes_paths: Dict[str, Path]) -> List[str]:
+    """ Returns paths of all recipe paths (only testing operations, without `requires`).
+    """
     recipes = {
         recipe.stem
         for op in ["imports", "commands"]
@@ -51,6 +54,7 @@ def _get_recipes(recipes_paths: Dict[str, Path]) -> List[str]:
 
 
 def get_commands(recipes_paths: Dict[str, Path]) -> List[str]:
+    """ Parses commands from recipe files. """
     return [
         cmd.strip()
         for recipe in _get_recipes(recipes_paths)
@@ -68,6 +72,7 @@ def _timestamp() -> str:
 
 
 def run_tests(commands: List[str], ignore_commands: Set[str]) -> None:
+    """ Entry point for tests. """
     total_run, succeeded, failed, ignored = [], [], [], []
     try:
         for cmd in commands:
