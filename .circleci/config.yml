@@ -6,7 +6,7 @@ defaults: &defaults
   working_directory: /template-base-image
 
 jobs:
-  build:
+  test:
     <<: *defaults
     steps:
       - checkout
@@ -75,8 +75,10 @@ workflows:
   version: 2
   main:
     jobs:
-      - build
+      - test
       - deploy:
+          requires:
+            - test
           filters:
             branches:
               only: master
