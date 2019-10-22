@@ -1,0 +1,2 @@
+python -c 'import torch; print(torch.randn(2,2).cuda())'
+python -c 'import torch; assert torch.cuda.is_available()'

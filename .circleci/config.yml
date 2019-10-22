@@ -2,7 +2,7 @@ version: 2
 
 defaults: &defaults
   docker:
-    - image: docker:17.05.0-ce-git
+    - image: docker:19.03.3
   working_directory: /template-base-image
 
 jobs:
@@ -10,16 +10,54 @@ jobs:
     <<: *defaults
     steps:
       - checkout
-      - setup_remote_docker
+      - setup_remote_docker:
+          docker_layer_caching: true
+
       - run: &install_dependencies
           name: Install dependencies
-          command: apk add --no-cache make python3
+          command: |
+            apk add --no-cache --no-progress make python3==3.7.5-r1 py-pip git
+            python3 -m venv venv
+            source venv/bin/activate
+            pip3 install -r testing/requirements.txt
+
+      - run:
+          name: Assert freshness of the recipes
+          command: |
+            source venv/bin/activate
+            git diff --exit-code
+            { make generate_recipes && git diff --exit-code; } || { echo -e "Need to update recipes!"; exit 3; }
+
       - run: &build_image
           name: Build application Docker image
-          command: make image
+          command: |
+            make image
+
+      - run:
+            name: Prepare testing environment
+            command: |
+              # Since we use remote docker, in order to mount `testing/` folder to the container, we need to copy it first.
+              # Source: https://circleci.com/docs/2.0/building-docker-images/#mounting-folders
+              # create a dummy container which will hold a volume with config:
+              docker create -v /testing --name=aux alpine /bin/true
+              # copy testing folder into this volume:
+              docker cp testing/ aux:/
+
       - run:
             name: Run tests
-            command: make test
+            command: |
+              make test_image  TEST_IMAGE_DOCKER_MOUNT_OPTION="--volumes-from=aux"
+            no_output_timeout: 30m
+
+      - run:
+            name: Download logs dir from the remote docker
+            command: |
+              docker cp aux:/testing/logs testing/
+
+      - store_artifacts:
+          path: testing/logs
+          when: always
+
   deploy:
     <<: *defaults
     steps:

@@ -1,0 +1,2 @@
+python -c 'import tensorflow.python.tools.freeze_graph'
+python -c 'import tensorflow as tf; assert tf.test.is_gpu_available()
