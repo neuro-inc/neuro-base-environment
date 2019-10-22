@@ -2,7 +2,7 @@ import re
 import sys
 import urllib.request
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Dict, List, Optional, Pattern, Sequence, Tuple
 
 import yaml
 from sympy.logic.boolalg import BooleanFalse, BooleanTrue
@@ -15,7 +15,14 @@ from _common import RECIPES_PATHS
 IGNORE_PLATFORMS: Tuple[str] = ("win",)
 REGEX_LINE_WITH_PLATFORM_COMMENT = re.compile(r"[^\n#]*#\s*\[([^\]]+)\]")
 TARGET_PYTHON_VERSION = "37"
-TARGET_PYTHON_REGEX = re.compile(r"(py *(>|>=|<|<=|==) *(\d+))")
+
+
+def _get_version_assertion_regex(name: str) -> Pattern:
+    return re.compile(fr"(({name}) *(>|>=|<|<=|==)* *(\d+))")
+
+
+TARGET_PYTHON_REGEX = _get_version_assertion_regex("py")
+TARGET_ANY_REGEX = _get_version_assertion_regex("[^><= ]+")
 
 PLACEHOLDER = "PLACEHOLDER"
 PIP_MODULE_REGEX = re.compile(r"\s([a-z][^\s=]*)", re.IGNORECASE)
@@ -131,13 +138,20 @@ def __conda_forge_analyze_platform(
     '# replaced'
     >>> __conda_forge_analyze_platform("test  # [linux and py <= 35]", ["win"], "37", "replaced")
     '# replaced'
+    >>> __conda_forge_analyze_platform("test  # [linux and py == 37]", ["win"], "37", "replaced")
+    'test  # [linux and py == 37]'
+    >>> __conda_forge_analyze_platform("test  # [linux and py ==37]", ["win"], "37", "replaced")
+    'test  # [linux and py ==37]'
+    >>> __conda_forge_analyze_platform("test  # [linux and py37]", ["win"], "37", "replaced")
+    'test  # [linux and py37]'
+    >>> __conda_forge_analyze_platform("test  # [linux and py38]", ["win"], "37", "replaced")
+    '# replaced'
     """
-    # TODO: py27
     platform_line_iter = REGEX_LINE_WITH_PLATFORM_COMMENT.finditer(text)
     for match in platform_line_iter:
         platform_expr = match.group(1)
         platform_expr = __substitute_target_python(platform_expr, target_python_version)
-        # TODO: protobuf: `# [win and vc<14]`
+        platform_expr = __normalize_expressions(platform_expr)
         matched = __match_target_platform(platform_expr, ignore_platforms)
         if not matched:
             platform_line = match.group(0)
@@ -209,15 +223,52 @@ def __substitute_target_python(platform_expr: str, target_python_version: str) -
     'win and True or linux'
     >>> __substitute_target_python("win and py > 37 or linux", "34")
     'win and False or linux'
+    >>> __substitute_target_python("win and py37 or linux", "37")
+    'win and True or linux'
     """
     result = platform_expr
-    for full, op, ver in set(TARGET_PYTHON_REGEX.findall(platform_expr)):
+    for full, py, op, ver in set(TARGET_PYTHON_REGEX.findall(platform_expr)):
+        if not op:
+            op = "=="
         repl = parse_expr(f"{target_python_version} {op} {ver}")
         if isinstance(repl, (BooleanTrue, BooleanFalse)):
             repl = bool(repl)
         assert isinstance(repl, bool), f"Wrong type of {repl}: {type(repl)}"
         result = result.replace(full, str(repl))
+    return result
 
+
+def __normalize_expressions(platform_expr: str) -> str:
+    """ Helper: Replaces expressions containing equality and non-equality signs
+    with a "safe" string so that sympy evaluates them as a single token.
+
+    >>> __normalize_expressions("vc<3")
+    'vc_lt_3'
+    >>> __normalize_expressions("vc >=3")
+    'vc_gteq_3'
+    >>> __normalize_expressions("vc  == 3")
+    'vc_eq_3'
+    >>> __normalize_expressions("vc3")
+    'vc3'
+    """
+    result = platform_expr
+    for full, nom, op, ver in set(TARGET_ANY_REGEX.findall(platform_expr)):
+        if not op:
+            continue
+        if op == "==":
+            op = "eq"
+        elif op == ">":
+            op = "gt"
+        elif op == ">=":
+            op = "gteq"
+        elif op == "<":
+            op = "lt"
+        elif op == "<=":
+            op = "lteq"
+        elif op:
+            op = "op"
+        repl = f"{nom}_{op}_{ver}"
+        result = result.replace(full, str(repl))
     return result
 
 
