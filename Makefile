@@ -2,7 +2,7 @@ IMAGE_NAME?=neuromation/base
 DOCKERFILE?=targets/Dockerfile.python36-jupyter-pytorch-tensorflow-jupyterlab
 
 # Shortcuts:
-DOCKER_RUN?=docker run --env PLATFORMAPI_SERVICE_HOST=test --tty --rm
+DOCKER_RUN?=docker run --tty --rm                -e PLATFORMAPI_SERVICE_HOST=test
 ASSERT_COMMAND_FAILS=&& { echo "failure!"; exit 1; } || { echo "success!"; }
 
 # Testing settings:
@@ -34,3 +34,8 @@ test_timeout:
 	$(DOCKER_RUN) -e JOB_TIMEOUT=3 -t $(IMAGE_NAME) sleep 1 && echo "success!"
 	# job exits within the timeout sec (exit code 124):
 	$(DOCKER_RUN) -e JOB_TIMEOUT=3 -t $(IMAGE_NAME) sleep 10 $(ASSERT_COMMAND_FAILS)
+
+.PHONY: test_ssh
+test_ssh:
+	# run with SSH
+	{ $(DOCKER_RUN) -e EXPOSE_SSH=yes --publish-all=true --name=ssh-works --detach $(IMAGE_NAME) sleep 1h ;} && { ssh -o "StrictHostKeyChecking=no" -o "BatchMode=yes" -q localhost -p `docker port ssh-works 22 | grep -oP ':\K.+'` echo OK ;} && { echo "success" ;}
