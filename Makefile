@@ -21,8 +21,8 @@ generate_recipes:
 	python3 testing/generate_recipes.py $(DOCKERFILE)
 
 
-.PHONY: test_image
-test_image:
+.PHONY: test_dependencies_pip
+test_dependencies_pip:
 	# Note: `--network=host` is used for the Internet access (to use `pip install ...`)
 	# however this prevents SSH to start (port 22 is already bind).
 	# see https://github.com/neuromation/template-base-image/issues/21
@@ -31,6 +31,6 @@ test_image:
 .PHONY: test_timeout
 test_timeout:
 	# job exits within the timeout 3 sec (ok):
-	$(DOCKER_RUN) -e JOB_TIMEOUT=3 -t $(IMAGE_NAME) sleep 1 && echo "success!"
+	{ $(DOCKER_RUN) -e JOB_TIMEOUT=3 $(IMAGE_NAME) sleep 1; } && echo "success"
 	# job exits within the timeout sec (exit code 124):
-	$(DOCKER_RUN) -e JOB_TIMEOUT=3 -t $(IMAGE_NAME) sleep 10 $(ASSERT_COMMAND_FAILS)
+	{ $(DOCKER_RUN) -e JOB_TIMEOUT=3 $(IMAGE_NAME) sleep 10; } $(ASSERT_COMMAND_FAILS)
