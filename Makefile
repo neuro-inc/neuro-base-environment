@@ -3,8 +3,8 @@ DOCKERFILE?=targets/Dockerfile.python36-jupyter-pytorch-tensorflow-jupyterlab
 
 # Shortcuts:
 DOCKER_RUN?=docker run --tty --rm
-ASSERT_COMMAND_FAILS=&& { echo 'Failure!'; exit 1; } || { echo 'Success!'; }
-ASSERT_COMMAND_SUCCEEDS=&& echo 'Success!'
+ASSERT_COMMAND_FAILS=&& { echo -e 'Failure!\n'; exit 1; } || { echo -e 'Success!\n'; }
+ASSERT_COMMAND_SUCCEEDS=&& echo -e 'Success!\n'
 
 # Testing settings:
 IMAGE_TEST_DOCKER_MOUNT_OPTION?=--volume=`pwd`/testing:/testing
