@@ -54,6 +54,7 @@ jobs:
               # Run tests on image timeout:
               make test_timeout
               # Run ssh tests:
+              sleep 1h
               make test_ssh  SSH_OPTION="-e EXPOSE_SSH=yes"   SSH_TEST_SUCCEEDS=yes
               make test_ssh  SSH_OPTION="-e EXPOSE_SSH=true"  SSH_TEST_SUCCEEDS=yes
               make test_ssh  SSH_OPTION="-e EXPOSE_SSH=no"    SSH_TEST_SUCCEEDS=no
