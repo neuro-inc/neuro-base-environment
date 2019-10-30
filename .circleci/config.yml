@@ -16,7 +16,10 @@ jobs:
       - run: &install_dependencies
           name: Install dependencies
           command: |
-            apk add --no-cache --no-progress make python3==3.7.5-r1 py-pip git
+            # dependencies for building the image
+            apk add --no-cache --no-progress make
+            # dependencies for testing pip dependencies (python must support typing)
+            apk add --no-cache --no-progress python3==3.7.5-r1 py-pip git
             python3 -m venv venv
             source venv/bin/activate
             pip3 install -r testing/requirements.txt
@@ -47,7 +50,7 @@ jobs:
             name: Run tests
             command: |
               make test_timeout
-              make test_dependencies_pip  TEST_IMAGE_DOCKER_MOUNT_OPTION="--volumes-from=aux"
+              make test_dependencies_pip  IMAGE_TEST_DOCKER_MOUNT_OPTION="--volumes-from=aux"
             no_output_timeout: 15m
 
       - run:

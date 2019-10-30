@@ -3,10 +3,11 @@ DOCKERFILE?=targets/Dockerfile.python36-jupyter-pytorch-tensorflow-jupyterlab
 
 # Shortcuts:
 DOCKER_RUN?=docker run --env PLATFORMAPI_SERVICE_HOST=test --tty --rm
-ASSERT_COMMAND_FAILS=&& { echo "failure!"; exit 1; } || { echo "success!"; }
+ASSERT_COMMAND_FAILS=&& { echo -e 'Failure!\n'; exit 1; } || { echo -e 'Success!\n'; }
+ASSERT_COMMAND_SUCCEEDS=&& echo -e 'Success!\n'
 
 # Testing settings:
-TEST_IMAGE_DOCKER_MOUNT_OPTION?=--volume=`pwd`/testing:/testing
+IMAGE_TEST_DOCKER_MOUNT_OPTION?=--volume=`pwd`/testing:/testing
 
 
 .PHONY: image
@@ -26,11 +27,11 @@ test_dependencies_pip:
 	# Note: `--network=host` is used for the Internet access (to use `pip install ...`)
 	# however this prevents SSH to start (port 22 is already bind).
 	# see https://github.com/neuromation/template-base-image/issues/21
-	$(DOCKER_RUN) $(TEST_IMAGE_DOCKER_MOUNT_OPTION) --network=host --workdir=/testing $(IMAGE_NAME) python ./run_tests.py
+	$(DOCKER_RUN) $(IMAGE_TEST_DOCKER_MOUNT_OPTION) --network=host --workdir=/testing $(IMAGE_NAME) python ./run_tests.py
 
 .PHONY: test_timeout
 test_timeout:
 	# job exits within the timeout 3 sec (ok):
-	$(DOCKER_RUN) -e JOB_TIMEOUT=3 $(IMAGE_NAME) sleep 1 && echo "success!"
+	$(DOCKER_RUN) -e JOB_TIMEOUT=3 $(IMAGE_NAME) sleep 1  $(ASSERT_COMMAND_SUCCEEDS)
 	# job exits within the timeout sec (exit code 124):
-	$(DOCKER_RUN) -e JOB_TIMEOUT=3 $(IMAGE_NAME) sleep 10 $(ASSERT_COMMAND_FAILS)
+	$(DOCKER_RUN) -e JOB_TIMEOUT=3 $(IMAGE_NAME) sleep 10  $(ASSERT_COMMAND_FAILS)
