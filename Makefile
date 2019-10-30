@@ -2,12 +2,24 @@ IMAGE_NAME?=neuromation/base
 DOCKERFILE?=targets/Dockerfile.python36-jupyter-pytorch-tensorflow-jupyterlab
 
 # Shortcuts:
-DOCKER_RUN?=docker run --env PLATFORMAPI_SERVICE_HOST=test --tty --rm
+DOCKER_RUN?=docker run --tty --rm
 ASSERT_COMMAND_FAILS=&& { echo -e 'Failure!\n'; exit 1; } || { echo -e 'Success!\n'; }
 ASSERT_COMMAND_SUCCEEDS=&& echo -e 'Success!\n'
 
 # Testing settings:
 IMAGE_TEST_DOCKER_MOUNT_OPTION?=--volume=`pwd`/testing:/testing
+
+# SSH test variables:
+SSH=ssh -o "StrictHostKeyChecking=no" -o "BatchMode=yes"
+SSH_CONTAINER=ssh-test
+SSH_OPTION?=-e EXPOSE_SSH=yes
+SSH_ENABLED?=yes
+SSH_TEST_ASSERTION:=
+ifeq ($(SSH_ENABLED),yes)
+	SSH_TEST_ASSERTION=$(ASSERT_COMMAND_SUCCEEDS)
+else
+	SSH_TEST_ASSERTION=$(ASSERT_COMMAND_FAILS)
+endif
 
 
 .PHONY: image
@@ -29,9 +41,22 @@ test_dependencies_pip:
 	# see https://github.com/neuromation/template-base-image/issues/21
 	$(DOCKER_RUN) $(IMAGE_TEST_DOCKER_MOUNT_OPTION) --network=host --workdir=/testing $(IMAGE_NAME) python ./run_tests.py
 
+
 .PHONY: test_timeout
 test_timeout:
 	# job exits within the timeout 3 sec (ok):
 	$(DOCKER_RUN) -e JOB_TIMEOUT=3 $(IMAGE_NAME) sleep 1  $(ASSERT_COMMAND_SUCCEEDS)
 	# job exits within the timeout sec (exit code 124):
 	$(DOCKER_RUN) -e JOB_TIMEOUT=3 $(IMAGE_NAME) sleep 10  $(ASSERT_COMMAND_FAILS)
+
+
+.PHONY: cleanup_test_ssh
+cleanup_test_ssh:
+	docker kill $(SSH_CONTAINER) | true
+
+.PHONY: test_ssh
+test_ssh: cleanup_test_ssh
+	{ $(DOCKER_RUN) --detach --publish-all --name=$(SSH_CONTAINER) $(SSH_OPTION) $(IMAGE_NAME) sleep 1h ;} && \
+	{ $(DOCKER_RUN) --network=container:$(SSH_CONTAINER) --name=$(SSH_CONTAINER)-client  kroniak/ssh-client \
+		$(SSH) root@localhost -p 22 whoami ;}  \
+	$(SSH_TEST_ASSERTION)

@@ -20,6 +20,8 @@ jobs:
             apk add --no-cache --no-progress make
             # dependencies for testing pip dependencies (python must support typing)
             apk add --no-cache --no-progress python3==3.7.5-r1 py-pip git
+            # dependencies for testing ssh (grep must have -P option)
+            apk add --no-cache --no-progress grep==3.3-r0 openssh-client==8.1_p1-r0
             python3 -m venv venv
             source venv/bin/activate
             pip3 install -r testing/requirements.txt
@@ -48,10 +50,21 @@ jobs:
 
       - run:
             name: Run tests
-            command: |
-              make test_timeout
-              make test_dependencies_pip  IMAGE_TEST_DOCKER_MOUNT_OPTION="--volumes-from=aux"
             no_output_timeout: 15m
+            command: |
+              # Run tests on image timeout:
+              make test_timeout
+
+              # Run ssh tests:
+              make test_ssh  SSH_OPTION="-e EXPOSE_SSH=yes"   SSH_ENABLED=yes
+              make test_ssh  SSH_OPTION="-e EXPOSE_SSH=value" SSH_ENABLED=yes
+              make test_ssh  SSH_OPTION="-e EXPOSE_SSH="      SSH_ENABLED=no
+              make test_ssh  SSH_OPTION='-e EXPOSE_SSH=""'    SSH_ENABLED=no
+              make test_ssh  SSH_OPTION=""                    SSH_ENABLED=no
+              make cleanup_test_ssh
+
+              # Run tests on pip dependencies:
+              make test_dependencies_pip  IMAGE_TEST_DOCKER_MOUNT_OPTION="--volumes-from=aux"
 
       - run:
             name: Download logs dir from the remote docker
