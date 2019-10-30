@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
 if [ "$EXPOSE_SSH" == "true" ] || [ "$EXPOSE_SSH" == "yes" ]; then
-  /usr/sbin/sshd -De &
+  echo "Starting SSH server"
+  /usr/sbin/sshd -e
 fi
 
 ldconfig

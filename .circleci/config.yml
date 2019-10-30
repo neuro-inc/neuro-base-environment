@@ -16,9 +16,12 @@ jobs:
       - run: &install_dependencies
           name: Install dependencies
           command: |
-            apk add --no-cache --no-progress make python3==3.7.5-r1 py-pip git grep==3.3-r0 openssh-client==8.1_p1-r0
-            echo "0.0.0.0:1234" | grep -oP ':\K.+'
-            ssh -V
+            # dependencies for building the image
+            apk add --no-cache --no-progress make
+            # dependencies for testing pip dependencies (python must support typing)
+            apk add --no-cache --no-progress python3==3.7.5-r1 py-pip git
+            # dependencies for testing ssh (grep must have -P option)
+            apk add --no-cache --no-progress grep==3.3-r0 openssh-client==8.1_p1-r0
             python3 -m venv venv
             source venv/bin/activate
             pip3 install -r testing/requirements.txt
@@ -33,7 +36,7 @@ jobs:
       - run: &build_image
           name: Build application Docker image
           command: |
-            make test_ssh
+            make image
 
       - run:
             name: Prepare testing environment
@@ -49,6 +52,11 @@ jobs:
             name: Run tests
             command: |
               make test_image  TEST_IMAGE_DOCKER_MOUNT_OPTION="--volumes-from=aux"
+              # Run ssh tests:
+              make test_ssh  SSH_OPTION="-e EXPOSE_SSH=yes"   SSH_TEST_SUCCEEDS=yes
+              make test_ssh  SSH_OPTION="-e EXPOSE_SSH=true"  SSH_TEST_SUCCEEDS=yes
+              make test_ssh  SSH_OPTION="-e EXPOSE_SSH=no"    SSH_TEST_SUCCEEDS=no
+              make test_ssh  SSH_OPTION="-e EXPOSE_SSH=false" SSH_TEST_SUCCEEDS=no
             no_output_timeout: 30m
 
       - run:
