@@ -2,7 +2,7 @@ IMAGE_NAME?=neuromation/base
 DOCKERFILE?=targets/Dockerfile.python36-jupyter-pytorch-tensorflow-jupyterlab
 
 # Shortcuts:
-DOCKER_RUN?=docker run --tty --rm --publish-all=true
+DOCKER_RUN?=docker run --tty --rm --publish-all
 ASSERT_COMMAND_FAILS=&& { echo 'Failure!'; exit 1; } || { echo 'Success!'; }
 ASSERT_COMMAND_SUCCEEDS=&& echo 'Success!'
 
@@ -33,8 +33,8 @@ generate_recipes:
 	python3 testing/generate_recipes.py $(DOCKERFILE)
 
 
-.PHONY: test_image
-test_image:
+.PHONY: test_dependencies_pip
+test_dependencies_pip:
 	# Note: `--network=host` is used for the Internet access (to use `pip install ...`)
 	# however this prevents SSH to start (port 22 is already bind).
 	# see https://github.com/neuromation/template-base-image/issues/21
@@ -44,9 +44,9 @@ test_image:
 .PHONY: test_timeout
 test_timeout:
 	# job exits within the timeout 3 sec (ok):
-	$(DOCKER_RUN) -e JOB_TIMEOUT=3 -t $(IMAGE_NAME) sleep 1  $(ASSERT_COMMAND_SUCCEEDS)
+	$(DOCKER_RUN) -e JOB_TIMEOUT=3 $(IMAGE_NAME) sleep 1  $(ASSERT_COMMAND_SUCCEEDS)
 	# job exits within the timeout sec (exit code 124):
-	$(DOCKER_RUN) -e JOB_TIMEOUT=3 -t $(IMAGE_NAME) sleep 10  $(ASSERT_COMMAND_FAILS)
+	$(DOCKER_RUN) -e JOB_TIMEOUT=3 $(IMAGE_NAME) sleep 10  $(ASSERT_COMMAND_FAILS)
 
 
 .PHONY: _cleanup_test_ssh
