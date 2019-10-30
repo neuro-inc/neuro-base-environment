@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-if [ "$EXPOSE_SSH" == "true" ] || [ "$EXPOSE_SSH" == "yes" ]; then
+if [ ! -z "$EXPOSE_SSH" ]; then
   echo "Starting SSH server"
   /usr/sbin/sshd -e
 fi

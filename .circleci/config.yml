@@ -56,10 +56,11 @@ jobs:
               make test_timeout
 
               # Run ssh tests:
-              make test_ssh  SSH_OPTION="-e EXPOSE_SSH=yes"   SSH_TEST_SUCCEEDS=yes
-              make test_ssh  SSH_OPTION="-e EXPOSE_SSH=true"  SSH_TEST_SUCCEEDS=yes
-              make test_ssh  SSH_OPTION="-e EXPOSE_SSH=no"    SSH_TEST_SUCCEEDS=no
-              make test_ssh  SSH_OPTION="-e EXPOSE_SSH=false" SSH_TEST_SUCCEEDS=no
+              make test_ssh  SSH_OPTION="-e EXPOSE_SSH=yes"   SSH_ENABLED=yes
+              make test_ssh  SSH_OPTION="-e EXPOSE_SSH=value" SSH_ENABLED=yes
+              make test_ssh  SSH_OPTION="-e EXPOSE_SSH="      SSH_ENABLED=no
+              make test_ssh  SSH_OPTION='-e EXPOSE_SSH=""'    SSH_ENABLED=no
+              make test_ssh  SSH_OPTION=""                    SSH_ENABLED=no
               make cleanup_test_ssh
 
               # Run tests on pip dependencies:

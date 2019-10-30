@@ -11,11 +11,11 @@ IMAGE_TEST_DOCKER_MOUNT_OPTION?=--volume=`pwd`/testing:/testing
 
 # SSH test variables:
 SSH=ssh -o "StrictHostKeyChecking=no" -o "BatchMode=yes"
-SSH_CONT_NAME=ssh-test
+SSH_CONTAINER=ssh-test
 SSH_OPTION?=-e EXPOSE_SSH=yes
-SSH_TEST_SUCCEEDS?=yes
+SSH_ENABLED?=yes
 SSH_TEST_ASSERTION:=
-ifeq ($(SSH_TEST_SUCCEEDS),yes)
+ifeq ($(SSH_ENABLED),yes)
 	SSH_TEST_ASSERTION=$(ASSERT_COMMAND_SUCCEEDS)
 else
 	SSH_TEST_ASSERTION=$(ASSERT_COMMAND_FAILS)
@@ -52,12 +52,11 @@ test_timeout:
 
 .PHONY: cleanup_test_ssh
 cleanup_test_ssh:
-	docker kill $(SSH_CONT_NAME) | true
+	docker kill $(SSH_CONTAINER) | true
 
 .PHONY: test_ssh
 test_ssh: cleanup_test_ssh
-	# run with ssh
-	{ $(DOCKER_RUN) --detach --publish-all --name=$(SSH_CONT_NAME) $(SSH_OPTION) $(IMAGE_NAME) sleep 1h ;} && \
-	{ $(DOCKER_RUN) --network=container:$(SSH_CONT_NAME) --name=$(SSH_CONT_NAME)-client  kroniak/ssh-client \
+	{ $(DOCKER_RUN) --detach --publish-all --name=$(SSH_CONTAINER) $(SSH_OPTION) $(IMAGE_NAME) sleep 1h ;} && \
+	{ $(DOCKER_RUN) --network=container:$(SSH_CONTAINER) --name=$(SSH_CONTAINER)-client  kroniak/ssh-client \
 		$(SSH) root@localhost -p 22 whoami ;}  \
 	$(SSH_TEST_ASSERTION)
