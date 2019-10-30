@@ -93,7 +93,7 @@ workflows:
   main:
     jobs:
       - test:
-        filters:
+          filters:
             branches:
               ignore: master
       - deploy:
