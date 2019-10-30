@@ -36,7 +36,6 @@ jobs:
       - run: &build_image
           name: Build application Docker image
           command: |
-#            make image
             echo OK
 
       - run:
