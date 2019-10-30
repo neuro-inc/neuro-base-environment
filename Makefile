@@ -50,12 +50,12 @@ test_timeout:
 	$(DOCKER_RUN) -e JOB_TIMEOUT=3 $(IMAGE_NAME) sleep 10  $(ASSERT_COMMAND_FAILS)
 
 
-.PHONY: _cleanup_test_ssh
-_cleanup_test_ssh:
+.PHONY: cleanup_test_ssh
+cleanup_test_ssh:
 	docker kill $(SSH_CONT_NAME) | true
 
 .PHONY: test_ssh
-test_ssh: _cleanup_test_ssh
+test_ssh: cleanup_test_ssh
 	# run with ssh
 	{ $(DOCKER_RUN) --detach --publish-all --name=$(SSH_CONT_NAME) $(SSH_OPTION) $(IMAGE_NAME) sleep 1h ;} && \
 	{ $(DOCKER_RUN) --network=container:$(SSH_CONT_NAME) --name=$(SSH_CONT_NAME)-client  kroniak/ssh-client \

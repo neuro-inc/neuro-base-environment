@@ -50,18 +50,20 @@ jobs:
 
       - run:
             name: Run tests
+            no_output_timeout: 15m
             command: |
               # Run tests on image timeout:
               make test_timeout
+
               # Run ssh tests:
               make test_ssh  SSH_OPTION="-e EXPOSE_SSH=yes"   SSH_TEST_SUCCEEDS=yes
               make test_ssh  SSH_OPTION="-e EXPOSE_SSH=true"  SSH_TEST_SUCCEEDS=yes
               make test_ssh  SSH_OPTION="-e EXPOSE_SSH=no"    SSH_TEST_SUCCEEDS=no
               make test_ssh  SSH_OPTION="-e EXPOSE_SSH=false" SSH_TEST_SUCCEEDS=no
-              make test_dependencies_pip  TEST_IMAGE_DOCKER_MOUNT_OPTION="--volumes-from=aux"
+              make cleanup_test_ssh
+
               # Run tests on pip dependencies:
-              make test_image  TEST_IMAGE_DOCKER_MOUNT_OPTION="--volumes-from=aux"
-            no_output_timeout: 15m
+              make test_dependencies_pip  TEST_IMAGE_DOCKER_MOUNT_OPTION="--volumes-from=aux"
 
       - run:
             name: Download logs dir from the remote docker
