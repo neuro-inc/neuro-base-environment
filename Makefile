@@ -2,7 +2,7 @@ IMAGE_NAME?=neuromation/base
 DOCKERFILE?=targets/Dockerfile.python36-jupyter-pytorch-tensorflow-jupyterlab
 
 # Shortcuts:
-DOCKER_RUN?=docker run --tty --rm --publish-all
+DOCKER_RUN?=docker run --tty --rm
 ASSERT_COMMAND_FAILS=&& { echo 'Failure!'; exit 1; } || { echo 'Success!'; }
 ASSERT_COMMAND_SUCCEEDS=&& echo 'Success!'
 
@@ -11,8 +11,9 @@ IMAGE_TEST_DOCKER_MOUNT_OPTION?=--volume=`pwd`/testing:/testing
 
 # SSH test variables:
 SSH=ssh -o "StrictHostKeyChecking=no" -o "BatchMode=yes"
-SSH_OPTION?="-e EXPOSE_SSH=yes"
-SSH_TEST_SUCCEEDS?="yes"
+SSH_CONT_NAME=ssh-test
+SSH_OPTION?=-e EXPOSE_SSH=yes
+SSH_TEST_SUCCEEDS?=yes
 SSH_TEST_ASSERTION:=
 ifeq ($(SSH_TEST_SUCCEEDS),yes)
 	SSH_TEST_ASSERTION=$(ASSERT_COMMAND_SUCCEEDS)
@@ -51,10 +52,12 @@ test_timeout:
 
 .PHONY: _cleanup_test_ssh
 _cleanup_test_ssh:
-	docker kill container_test_ssh | true
+	docker kill $(SSH_CONT_NAME) | true
 
 .PHONY: test_ssh
 test_ssh: _cleanup_test_ssh
 	# run with ssh
-	{ $(DOCKER_RUN) --detach --name=container_test_ssh $(SSH_OPTION) $(IMAGE_NAME) sleep 1h ;} && { $(SSH) root@localhost -p $$(docker port container_test_ssh 22 | grep -oP ':\K.+') echo 'SSH by $$(whoami)'  | grep "SSH by root" ;}  $(SSH_TEST_ASSERTION)
-
+	{ $(DOCKER_RUN) --detach --publish-all --name=$(SSH_CONT_NAME) $(SSH_OPTION) $(IMAGE_NAME) sleep 1h ;} && \
+	{ $(DOCKER_RUN) --network=container:$(SSH_CONT_NAME) --name=$(SSH_CONT_NAME)-client  kroniak/ssh-client \
+		$(SSH) root@localhost -p 22 whoami ;}  \
+	$(SSH_TEST_ASSERTION)
