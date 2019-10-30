@@ -49,12 +49,12 @@ test_timeout:
 	$(DOCKER_RUN) -e JOB_TIMEOUT=3 -t $(IMAGE_NAME) sleep 10  $(ASSERT_COMMAND_FAILS)
 
 
-.PHONY: cleanup_ssh_test
-cleanup_ssh_test:
+.PHONY: _cleanup_test_ssh
+_cleanup_test_ssh:
 	docker kill container_test_ssh | true
 
 .PHONY: test_ssh
-test_ssh: cleanup_ssh_test
+test_ssh: _cleanup_test_ssh
 	# run with ssh
 	{ $(DOCKER_RUN) --detach --name=container_test_ssh $(SSH_OPTION) $(IMAGE_NAME) sleep 1h ;} && { $(SSH) root@localhost -p $$(docker port container_test_ssh 22 | grep -oP ':\K.+') echo 'SSH by $$(whoami)'  | grep "SSH by root" ;}  $(SSH_TEST_ASSERTION)
 
