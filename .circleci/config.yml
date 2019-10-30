@@ -63,7 +63,7 @@ jobs:
               make cleanup_test_ssh
 
               # Run tests on pip dependencies:
-              make test_dependencies_pip  TEST_IMAGE_DOCKER_MOUNT_OPTION="--volumes-from=aux"
+              make test_dependencies_pip  IMAGE_TEST_DOCKER_MOUNT_OPTION="--volumes-from=aux"
 
       - run:
             name: Download logs dir from the remote docker
