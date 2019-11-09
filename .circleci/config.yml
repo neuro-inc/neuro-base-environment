@@ -36,7 +36,7 @@ jobs:
       - run: &build_image
           name: Build application Docker image
           command: |
-            make image
+            make image_build
 
       - run:
             name: Prepare testing environment
