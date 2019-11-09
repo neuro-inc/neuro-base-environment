@@ -20,6 +20,8 @@ def get_output_files():
     logs_dir.mkdir(exist_ok=True)
     stdout = logs_dir / "stdout.txt"
     stderr = logs_dir / "stderr.txt"
+    print(f"[.] Stdout dump file: {stdout.absolute()}")
+    print(f"[.] Stderr dump file: {stderr.absolute()}")
     if stdout.exists():
         stdout.unlink()
     if stderr.exists():
@@ -110,7 +112,7 @@ def run_tests(commands: List[str], ignore_commands: Set[str]) -> None:
             print(f"Failed tests:")
             for fail in failed:
                 print(f"  {fail}")
-            exit(1)
+            raise RuntimeError(f"{len(failed)} tests failed")
 
 
 if __name__ == "__main__":
