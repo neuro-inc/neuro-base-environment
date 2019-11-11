@@ -98,7 +98,6 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
         future \
         numpy \
         protobuf \
-        enum \
         typing \
         && \
     $PIP_INSTALL \
