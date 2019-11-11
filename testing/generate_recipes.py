@@ -2,7 +2,7 @@ import re
 import sys
 import urllib.request
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Pattern, Sequence, Tuple
+from typing import Any, Dict, List, Optional, Pattern, Sequence
 
 import yaml
 from sympy.logic.boolalg import BooleanFalse, BooleanTrue
@@ -12,7 +12,7 @@ from _common import RECIPES_PATHS
 
 # TODO: we should generate jinja manually instead
 #  (maybe we could generate jinja partially, a new template for a specific platform?)
-IGNORE_PLATFORMS: Tuple[str] = ("win",)
+TARGET_PLATFORMS: Sequence[str] = ("linux", "unix", "x86_64",)
 REGEX_LINE_WITH_PLATFORM_COMMENT = re.compile(r"[^\n#]*#\s*\[([^\]]+)\]")
 TARGET_PYTHON_VERSION = "37"
 
@@ -108,7 +108,7 @@ def __remove_jinja_directives(text: str) -> str:
 
 def __conda_forge_analyze_platform(
     text: str,
-    ignore_platforms: Sequence[str] = IGNORE_PLATFORMS,
+    target_platforms: Sequence[str] = TARGET_PLATFORMS,
     target_python_version: str = TARGET_PYTHON_VERSION,
     placeholder: str = PLACEHOLDER,
 ) -> str:
@@ -123,28 +123,28 @@ def __conda_forge_analyze_platform(
       - pytest --timeout=300 -v --pyargs numpy  # [not (aarch64 or ppc64le)]
       ```
     :param text: contents of the `meta.yml` file
-    :param ignore_platforms: list of platform IDs to ignore (without brackets, ex.: "win")
+    :param target_platforms: list of platform IDs to compile code to (without brackets, ex.: "linux")
     :param placeholder: text to replace lines with
     :param target_python_version: two-digit line of desired python version (ex.: "37")
     :return: contents of the `meta.yml` file without lines for undesired platforms
 
-    >>> __conda_forge_analyze_platform("test  # [not win]", ["win"], "37", "replaced")
+    >>> __conda_forge_analyze_platform("test  # [not win]", ["linux"], "37", "replaced")
     'test  # [not win]'
-    >>> __conda_forge_analyze_platform("test  # [win]", ["win"], "37", "replaced")
+    >>> __conda_forge_analyze_platform("test  # [win]", ["linux"], "37", "replaced")
     '# replaced'
-    >>> __conda_forge_analyze_platform("test  # [linux]", ["win"], "37", "replaced")
+    >>> __conda_forge_analyze_platform("test  # [linux]", ["linux"], "37", "replaced")
     'test  # [linux]'
-    >>> __conda_forge_analyze_platform("test  # [linux and py<=35]", ["win"], "37", "replaced")
+    >>> __conda_forge_analyze_platform("test  # [linux and py<=35]", ["linux"], "37", "replaced")
     '# replaced'
-    >>> __conda_forge_analyze_platform("test  # [linux and py <= 35]", ["win"], "37", "replaced")
+    >>> __conda_forge_analyze_platform("test  # [linux and py <= 35]", ["linux"], "37", "replaced")
     '# replaced'
-    >>> __conda_forge_analyze_platform("test  # [linux and py == 37]", ["win"], "37", "replaced")
+    >>> __conda_forge_analyze_platform("test  # [linux and py == 37]", ["linux"], "37", "replaced")
     'test  # [linux and py == 37]'
-    >>> __conda_forge_analyze_platform("test  # [linux and py ==37]", ["win"], "37", "replaced")
+    >>> __conda_forge_analyze_platform("test  # [linux and py ==37]", ["linux"], "37", "replaced")
     'test  # [linux and py ==37]'
-    >>> __conda_forge_analyze_platform("test  # [linux and py37]", ["win"], "37", "replaced")
+    >>> __conda_forge_analyze_platform("test  # [linux and py37]", ["linux"], "37", "replaced")
     'test  # [linux and py37]'
-    >>> __conda_forge_analyze_platform("test  # [linux and py38]", ["win"], "37", "replaced")
+    >>> __conda_forge_analyze_platform("test  # [linux and py38]", ["linux"], "37", "replaced")
     '# replaced'
     """
     platform_line_iter = REGEX_LINE_WITH_PLATFORM_COMMENT.finditer(text)
@@ -152,7 +152,7 @@ def __conda_forge_analyze_platform(
         platform_expr = match.group(1)
         platform_expr = __substitute_target_python(platform_expr, target_python_version)
         platform_expr = __normalize_expressions(platform_expr)
-        matched = __match_target_platform(platform_expr, ignore_platforms)
+        matched = __match_target_platform(platform_expr, target_platforms)
         if not matched:
             platform_line = match.group(0)
             text = text.replace(platform_line, f"# {placeholder}")
@@ -160,43 +160,44 @@ def __conda_forge_analyze_platform(
 
 
 def __match_target_platform(
-    platform_expr: str, ignore_platforms: Sequence[str]
+    platform_expr: str, target_platforms: Sequence[str]
 ) -> bool:
     """ Helper: simplified parser of `target_platform` directives of `meta.yml` files.
 
-    >>> __match_target_platform("win", ["win", "osx"])
+    >>> __match_target_platform("win", ["linux"])
     False
-    >>> __match_target_platform("not win", ["win", "osx"])
+    >>> __match_target_platform("not win", ["linux"])
     True
-    >>> __match_target_platform("linux", ["win", "osx"])
+    >>> __match_target_platform("linux", ["linux"])
     True
     >>> # The following example is a known non-working corner case:
     >>> #  the test should produce `True` because we assume
     >>> #  that except `linux` there are other valid platforms
-    >>> __match_target_platform("not linux", ["win", "osx"])
+    >>> __match_target_platform("not linux", ["linux"])
     False
-    >>> __match_target_platform("win or osx", ["win", "osx"])
+    >>> __match_target_platform("win or osx", ["linux"])
     False
-    >>> __match_target_platform("win or linux or osx", ["win", "osx"])
+    >>> __match_target_platform("win or linux or osx", ["linux"])
     True
-    >>> __match_target_platform("not (win or osx)", ["win", "osx"])
+    >>> __match_target_platform("not (win or osx)", ["linux"])
     True
-    >>> __match_target_platform("not (win or linux)", ["win", "osx"])
+    >>> __match_target_platform("not (win or linux)", ["linux"])
     False
     >>> # Python version expressions are evaluated to bools: True or False:
-    >>> __match_target_platform("linux and True", ["win", "osx"])
+    >>> __match_target_platform("linux and True", ["linux"])
     True
     """
     expr = platform_expr
     keywords = {"or", "and", "not"}
 
+    # Pre-process: replace all expected platforms with `true`, all other tokens with `false`
     local_dict = {
-        token: True
+        token: False
         for token in expr.replace("(", "").replace(")", "").split()
         if token not in keywords
     }
-    for ignore in ignore_platforms:
-        local_dict[ignore] = False
+    for expected in target_platforms:
+        local_dict[expected] = True
 
     try:
         matched = parse_expr(expr, local_dict=local_dict)
@@ -301,7 +302,7 @@ def _get_tests_dict(
             continue
         assert isinstance(commands, list), f"expect: list, got: {type(commands)}"
         result[op] = [
-            __conda_forge_analyze_platform(cmd, IGNORE_PLATFORMS, PLACEHOLDER)
+            __conda_forge_analyze_platform(cmd, TARGET_PLATFORMS, PLACEHOLDER)
             for cmd in commands
         ]
     return result
