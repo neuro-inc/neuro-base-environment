@@ -1,5 +1,6 @@
 import shlex
 import subprocess
+import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Iterator, List, Set
@@ -20,6 +21,8 @@ def get_output_files():
     logs_dir.mkdir(exist_ok=True)
     stdout = logs_dir / "stdout.txt"
     stderr = logs_dir / "stderr.txt"
+    print(f"[.] Stdout dump file: {stdout.absolute()}")
+    print(f"[.] Stderr dump file: {stderr.absolute()}")
     if stdout.exists():
         stdout.unlink()
     if stderr.exists():
@@ -110,7 +113,8 @@ def run_tests(commands: List[str], ignore_commands: Set[str]) -> None:
             print(f"Failed tests:")
             for fail in failed:
                 print(f"  {fail}")
-            exit(1)
+            print(f"{len(failed)} tests failed")
+            sys.exit(1)
 
 
 if __name__ == "__main__":

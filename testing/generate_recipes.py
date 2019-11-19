@@ -40,7 +40,6 @@ def _get_deepo_pip_packages(dockerfile_text: str) -> List[str]:
        future \
        numpy \
        protobuf \
-       enum34 \
        typing \
        && \
     ```
