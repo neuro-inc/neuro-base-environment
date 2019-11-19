@@ -1,5 +1,5 @@
 IMAGE_NAME?=neuromation/base
-DOCKERFILE?=targets/Dockerfile.python36-jupyter-pytorch-tensorflow-jupyterlab
+DOCKERFILE_NAME?=python36-jupyter-pytorch-tensorflow-jupyterlab
 
 # Shortcuts:
 DOCKER_RUN?=docker run --tty --rm
@@ -22,16 +22,22 @@ else
 endif
 
 
-.PHONY: image
-image:
+
+.PHONY: image_build
+image_build:
 	# git clone https://github.com/ufoym/deepo.git
-	# python3 deepo/generator/generate.py Dockerfile tensorflow pytorch jupyter jupyterlab python==3.6
-	docker build -t $(IMAGE_NAME) -f $(DOCKERFILE) .
+	# python3 deepo/generator/generate.py --cuda-ver=10.0 --cudnn-ver=cudnn7-devel --ubuntu-ver=ubuntu18.04 targets/$(DOCKERFILE_NAME)/Dockerfile-deepo tensorflow pytorch jupyter jupyterlab python==3.6
+	docker build -t $(IMAGE_NAME) -f targets/$(DOCKERFILE_NAME)/Dockerfile .
+
+
+.PHONY: image_diff
+image_diff:
+	diff --color=always --side-by-side  targets/$(DOCKERFILE_NAME)/Dockerfile.deepo targets/$(DOCKERFILE_NAME)/Dockerfile
 
 
 .PHONY: generate_recipes
 generate_recipes:
-	python3 testing/generate_recipes.py $(DOCKERFILE)
+	python3 testing/generate_recipes.py targets/$(DOCKERFILE_NAME)/Dockerfile
 
 
 .PHONY: test_dependencies_pip
