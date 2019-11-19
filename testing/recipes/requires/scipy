@@ -1,4 +1,3 @@
 pytest
 pytest-xdist
 mpmath
-blas * netlib

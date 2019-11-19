@@ -1,2 +1,2 @@
 export OPENBLAS_NUM_THREADS=1
-pytest --verbose --pyargs sklearn -k 'not test_estimate_bandwidth_1sample'
+pytest --verbose --pyargs sklearn
