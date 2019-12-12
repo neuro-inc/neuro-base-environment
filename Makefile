@@ -70,12 +70,12 @@ test_ssh: cleanup_test_ssh
 .PHONY: test_gcloud_auth
 test_gcloud_auth:
 	# no env var was set => no auth
-	$(DOCKER_RUN) $(IMAGE_NAME) echo ok | grep -v "Activated service account credentials for"
+	$(DOCKER_RUN) $(IMAGE_TEST_DOCKER_MOUNT_OPTION) $(IMAGE_NAME) echo ok | grep -v "Activated service account credentials for"
 	# wrong env var was set => file not found error
-	$(DOCKER_RUN) -e GCP_SERVICE_ACCOUNT_KEY_PATH=non-existing.json $(IMAGE_NAME) echo ok | grep -Pz "(?s)Unable to read file .*No such file or directory: .+ok"
+	$(DOCKER_RUN) $(IMAGE_TEST_DOCKER_MOUNT_OPTION) -e GCP_SERVICE_ACCOUNT_KEY_PATH=non-existing.json $(IMAGE_NAME) echo ok | grep -Pz "(?s)Unable to read file .*No such file or directory: .+ok"
 	# correct env var was set => auth successful
 	python3 testing/gcloud/decrypter.py testing/gcloud/gcp-key.json.enc testing/gcloud/gcp-key.json
-	$(DOCKER_RUN) -v $${PWD}/testing/gcloud/:/mnt/ -e GCP_SERVICE_ACCOUNT_KEY_PATH=/mnt/gcp-key.json $(IMAGE_NAME) echo ok | grep -Pz "(?s)Activated service account credentials for: .+ok"
+	$(DOCKER_RUN) $(IMAGE_TEST_DOCKER_MOUNT_OPTION) -v $${PWD}/testing/gcloud/:/mnt/ -e GCP_SERVICE_ACCOUNT_KEY_PATH=/mnt/gcp-key.json $(IMAGE_NAME) echo ok | grep -Pz "(?s)Activated service account credentials for: .+ok"
 	make --quiet cleanup_test_gcloud_auth
 
 .PHONY: cleanup_test_gcloud_auth
