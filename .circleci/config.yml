@@ -24,6 +24,7 @@ jobs:
             apk add --no-cache --no-progress grep==3.3-r0 openssh-client==8.1_p1-r0
             python3 -m venv venv
             source venv/bin/activate
+            pip3 install -U pip
             pip3 install -r testing/requirements.txt
 
       - run:
