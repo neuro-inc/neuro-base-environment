@@ -1,2 +1,4 @@
 pyyaml==5.1.2
 sympy==1.4
+fernet==1.0.1
+cryptography  # on CI, pip succeeds to install 'fernet', but then fails to 'from cryptography.fernet import Fernet'

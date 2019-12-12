@@ -66,3 +66,18 @@ test_ssh: cleanup_test_ssh
 	{ $(DOCKER_RUN) --network=container:$(SSH_CONTAINER) --name=$(SSH_CONTAINER)-client  kroniak/ssh-client \
 		$(SSH) root@localhost -p 22 whoami ;}  \
 	$(SSH_TEST_ASSERTION)
+
+.PHONY: test_gcloud_auth
+test_gcloud_auth:
+	# no env var was set => no auth
+	$(DOCKER_RUN) $(IMAGE_NAME) echo ok | grep "Activated service account credentials for"  $(ASSERT_COMMAND_FAILS)
+	# wrong env var was set => file not found error
+	$(DOCKER_RUN) -e GCP_SERVICE_ACCOUNT_KEY_PATH=non-existing.json $(IMAGE_NAME) echo ok | grep "No such file or directory: 'non-existing.json'"  $(ASSERT_COMMAND_FAILS)
+	# correct env var was set => auth successful
+	python testing/gcloud/decrypter.py testing/gcloud/gcp-key.json.enc testing/gcloud/gcp-key.json
+	$(DOCKER_RUN) -v $${PWD}/testing/gcloud/:/mnt/ -e GCP_SERVICE_ACCOUNT_KEY_PATH=/mnt/gcp-key.json $(IMAGE_NAME) echo ok | grep "Activated service account credentials for"  $(ASSERT_COMMAND_SUCCEEDS)
+	make --quiet cleanup_test_gcloud_auth
+
+.PHONY: cleanup_test_gcloud_auth
+cleanup_test_gcloud_auth:
+	rm testing/gcloud/gcp-key.json
