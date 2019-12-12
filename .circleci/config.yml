@@ -22,6 +22,8 @@ jobs:
             apk add --no-cache --no-progress python3==3.7.5-r1 py-pip git
             # dependencies for testing ssh (grep must have -P option)
             apk add --no-cache --no-progress grep==3.3-r0 openssh-client==8.1_p1-r0
+            # dependencies for testing gcloud: pip-package 'fernet' needs it
+            apk add --no-cache --no-progress py-cryptography
             python3 -m venv venv
             source venv/bin/activate
             pip3 install -U pip
@@ -64,11 +66,15 @@ jobs:
               make test_ssh  SSH_OPTION=""                    SSH_ENABLED=no
               make cleanup_test_ssh
 
+              # Run tests on 'gcloud auth':
+              make _test_gcloud_false  # should be no gsutil auth
+              make _generate_gcloud_key
+              docker create -v /testing --name=test-gsutil alpine /bin/true
+              docker cp testing/ test-gsutil:/
+              make _test_gcloud_true  IMAGE_TEST_DOCKER_MOUNT_OPTION="--volumes-from=test-gsutil"   # should succeed to auth gsutil
+
               # Run tests on pip dependencies:
               make test_dependencies_pip  IMAGE_TEST_DOCKER_MOUNT_OPTION="--volumes-from=aux"
-
-              # Run tests on 'gcloud auth':
-              make test_gcloud_auth
 
       - run:
             name: Download logs dir from the remote docker
@@ -78,7 +84,7 @@ jobs:
       - run:
             name: Cleanup test dirs
             command: |
-              make cleanup_test_gcloud_auth
+              make _delete_gcloud_key || true
             when: always
 
       - store_artifacts:

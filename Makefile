@@ -67,17 +67,30 @@ test_ssh: cleanup_test_ssh
 		$(SSH) root@localhost -p 22 whoami ;}  \
 	$(SSH_TEST_ASSERTION)
 
-.PHONY: test_gcloud_auth
-test_gcloud_auth:
+
+.PHONY: test_gcloud
+test_gcloud:
+	make _test_gcloud_false
+	make _generate_gcloud_key
+	make _test_gcloud_true
+
+.PHONY: _test_gcloud_false
+_test_gcloud_false:
 	# no env var was set => no auth
 	$(DOCKER_RUN) $(IMAGE_NAME) echo ok | grep -v "Activated service account credentials for"
 	# wrong env var was set => file not found error
 	$(DOCKER_RUN) -e GCP_SERVICE_ACCOUNT_KEY_PATH=non-existing.json $(IMAGE_NAME) echo ok | grep -Pz "(?s)Unable to read file .*No such file or directory: .+ok"
-	# correct env var was set => auth successful
-	python testing/gcloud/decrypter.py testing/gcloud/gcp-key.json.enc testing/gcloud/gcp-key.json
-	$(DOCKER_RUN) -v $${PWD}/testing/gcloud/:/mnt/ -e GCP_SERVICE_ACCOUNT_KEY_PATH=/mnt/gcp-key.json $(IMAGE_NAME) echo ok | grep -Pz "(?s)Activated service account credentials for: .+ok"
-	make --quiet cleanup_test_gcloud_auth
 
-.PHONY: cleanup_test_gcloud_auth
-cleanup_test_gcloud_auth:
-	rm testing/gcloud/gcp-key.json | true
+.PHONY: _generate_gcloud_key
+_generate_gcloud_key:
+	python3 testing/gcloud/decrypter.py testing/gcloud/gcp-key.json.enc testing/gcloud/gcp-key.json
+
+.PHONY: _test_gcloud_true
+_test_gcloud_true:
+	# correct env var was set => auth successful
+	$(DOCKER_RUN) $(IMAGE_TEST_DOCKER_MOUNT_OPTION) -e GCP_SERVICE_ACCOUNT_KEY_PATH=/testing/gcloud/gcp-key.json $(IMAGE_NAME) echo ok | grep -Pz "(?s)Activated service account credentials for: .+ok"
+	make --quiet _delete_gcloud_key
+
+.PHONY: _delete_gcloud_key
+_delete_gcloud_key:
+	rm testing/gcloud/gcp-key.json
