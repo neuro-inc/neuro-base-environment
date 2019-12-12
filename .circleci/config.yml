@@ -55,8 +55,9 @@ jobs:
             name: Run tests
             no_output_timeout: 15m
             command: |
-              make test_gcloud_auth  IMAGE_TEST_DOCKER_MOUNT_OPTION="--volumes-from=aux" || true
-              sleep 1h
+              docker create -v /testing --name=test-gsutil alpine /bin/true
+              docker cp testing/ test-gsutil:/
+              make test_gcloud_auth  IMAGE_TEST_DOCKER_MOUNT_OPTION="--volumes-from=test-gsutil"
 #              # Run tests on image timeout:
 #              make test_timeout
 #
@@ -72,7 +73,9 @@ jobs:
 #              make test_dependencies_pip  IMAGE_TEST_DOCKER_MOUNT_OPTION="--volumes-from=aux"
 #
 #              # Run tests on 'gcloud auth':
-#              make test_gcloud_auth
+#              docker create -v /testing --name=test-gsutil alpine /bin/true
+#              docker cp testing/ test-gsutil:/
+#              make test_gcloud_auth  IMAGE_TEST_DOCKER_MOUNT_OPTION="--volumes-from=test-gsutil"
 
       - run:
             name: Download logs dir from the remote docker
