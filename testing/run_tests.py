@@ -9,7 +9,7 @@ from _common import IGNORE_RECIPES_PATHS, RECIPES_PATHS
 
 COMMAND_FACTORIES = {
     "imports": lambda arg: f"python -c 'import {arg}'",
-    "requires": lambda arg: f"pip install -U {arg.replace(' ', '')}",
+    "requires": lambda arg: f"bash -c 'pip install -U {arg.replace(' ', '')} || true'",
     "commands": lambda arg: 'bash -c "' + arg.replace('"', '\\"') + '"',
 }
 TIME_START = datetime.now()
