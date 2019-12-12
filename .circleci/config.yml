@@ -53,6 +53,7 @@ jobs:
             name: Run tests
             no_output_timeout: 15m
             command: |
+              make test_gcloud_auth
 #              # Run tests on image timeout:
 #              make test_timeout
 #
@@ -66,9 +67,9 @@ jobs:
 #
 #              # Run tests on pip dependencies:
 #              make test_dependencies_pip  IMAGE_TEST_DOCKER_MOUNT_OPTION="--volumes-from=aux"
-
-              # Run tests on 'gcloud auth':
-              make test_gcloud_auth
+#
+#              # Run tests on 'gcloud auth':
+#              make test_gcloud_auth
 
       - run:
             name: Download logs dir from the remote docker
