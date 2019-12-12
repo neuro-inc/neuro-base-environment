@@ -74,7 +74,7 @@ test_gcloud_auth:
 	# wrong env var was set => file not found error
 	$(DOCKER_RUN) -e GCP_SERVICE_ACCOUNT_KEY_PATH=non-existing.json $(IMAGE_NAME) echo ok | grep -Pz "(?s)Unable to read file .*No such file or directory: .+ok"
 	# correct env var was set => auth successful
-	python testing/gcloud/decrypter.py testing/gcloud/gcp-key.json.enc testing/gcloud/gcp-key.json
+	python3 testing/gcloud/decrypter.py testing/gcloud/gcp-key.json.enc testing/gcloud/gcp-key.json
 	$(DOCKER_RUN) -v $${PWD}/testing/gcloud/:/mnt/ -e GCP_SERVICE_ACCOUNT_KEY_PATH=/mnt/gcp-key.json $(IMAGE_NAME) echo ok | grep -Pz "(?s)Activated service account credentials for: .+ok"
 	make --quiet cleanup_test_gcloud_auth
 
