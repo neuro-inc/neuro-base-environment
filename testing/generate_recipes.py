@@ -92,7 +92,7 @@ def _parse_yaml_jinja_text(text: str) -> Dict[str, Any]:
     #  just make jinja patterns yaml-parseable
     text = __remove_jinja_directives(text)
     text = __conda_forge_analyze_platform(text)
-    text = re.sub(r"{{.*}}", PLACEHOLDER, text)
+    text = re.sub(r"{{[^}]*}}", PLACEHOLDER, text)
     return yaml.safe_load(text)
 
 

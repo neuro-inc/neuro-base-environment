@@ -1,2 +1,4 @@
 # Duplicates test: "pytest --verbose --pyargs sklearn"
 pytest --verbose --pyargs sklearn -k 'not test_estimate_bandwidth_1sample'
+# not rendered test (covered in 'scikit-learn__custom'), see https://raw.githubusercontent.com/conda-forge/scikit-learn-feedstock/master/recipe/meta.yaml
+pytest --timeout 300 -n PLACEHOLDER --verbose --pyargs sklearn -k "not (PLACEHOLDER)"
