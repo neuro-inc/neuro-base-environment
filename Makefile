@@ -80,4 +80,4 @@ test_gcloud_auth:
 
 .PHONY: cleanup_test_gcloud_auth
 cleanup_test_gcloud_auth:
-	rm testing/gcloud/gcp-key.json
+	rm testing/gcloud/gcp-key.json | true
