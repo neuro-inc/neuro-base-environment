@@ -167,6 +167,9 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 
   $APT_INSTALL google-cloud-sdk && \
 
+  # Python API:
+  $PIP_INSTALL google-cloud-storage && \
+
 # ==================================================================
 # SSH
 # ------------------------------------------------------------------
