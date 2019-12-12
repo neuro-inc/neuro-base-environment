@@ -55,9 +55,13 @@ jobs:
             name: Run tests
             no_output_timeout: 15m
             command: |
+              make test_gcloud_auth_false
+
+              make pre_test_gcloud_auth_true
               docker create -v /testing --name=test-gsutil alpine /bin/true
               docker cp testing/ test-gsutil:/
-              make test_gcloud_auth  IMAGE_TEST_DOCKER_MOUNT_OPTION="--volumes-from=test-gsutil"
+              make test_gcloud_auth_true  IMAGE_TEST_DOCKER_MOUNT_OPTION="--volumes-from=test-gsutil"
+              make post_test_gcloud_auth_true
 #              # Run tests on image timeout:
 #              make test_timeout
 #
@@ -85,7 +89,7 @@ jobs:
       - run:
             name: Cleanup test dirs
             command: |
-              make cleanup_test_gcloud_auth
+              make post_test_gcloud_auth_true || true
             when: always
 
       - store_artifacts:
