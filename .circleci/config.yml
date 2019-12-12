@@ -55,7 +55,8 @@ jobs:
             name: Run tests
             no_output_timeout: 15m
             command: |
-              make test_gcloud_auth  IMAGE_TEST_DOCKER_MOUNT_OPTION="--volumes-from=aux"
+              make test_gcloud_auth  IMAGE_TEST_DOCKER_MOUNT_OPTION="--volumes-from=aux" || true
+              sleep 1h
 #              # Run tests on image timeout:
 #              make test_timeout
 #
