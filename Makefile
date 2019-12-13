@@ -68,6 +68,8 @@ test_ssh: cleanup_test_ssh
 	$(SSH_TEST_ASSERTION)
 
 
+GCP_SUCCESS_PATTERN=Activated service account credentials for
+
 .PHONY: test_gcloud
 test_gcloud:
 	make _test_gcloud_false
@@ -76,10 +78,11 @@ test_gcloud:
 
 .PHONY: _test_gcloud_false
 _test_gcloud_false:
-	# no env var was set => no auth
-	$(DOCKER_RUN) $(IMAGE_NAME) echo ok | grep -v "Activated service account credentials for"
+	# no env var was set => no auth (note: 'grep -v' reverses the pattern)
+	$(DOCKER_RUN) $(IMAGE_NAME) echo OK | grep -v "${GCP_SUCCESS_PATTERN}"
+	$(DOCKER_RUN) $(IMAGE_NAME) -e GCP_SERVICE_ACCOUNT_KEY_PATH= echo OK | grep -v "${GCP_SUCCESS_PATTERN}"
 	# wrong env var was set => file not found error
-	$(DOCKER_RUN) -e GCP_SERVICE_ACCOUNT_KEY_PATH=non-existing.json $(IMAGE_NAME) echo ok | grep -Pz "(?s)Unable to read file .*No such file or directory: .+ok"
+	$(DOCKER_RUN) -e GCP_SERVICE_ACCOUNT_KEY_PATH=non-existing.json $(IMAGE_NAME) echo OK | grep -Pz "(?s)Unable to read file .*No such file or directory: .+OK"
 
 .PHONY: _generate_gcloud_key
 _generate_gcloud_key:
@@ -88,9 +91,24 @@ _generate_gcloud_key:
 .PHONY: _test_gcloud_true
 _test_gcloud_true:
 	# correct env var was set => auth successful
-	$(DOCKER_RUN) $(IMAGE_TEST_DOCKER_MOUNT_OPTION) -e GCP_SERVICE_ACCOUNT_KEY_PATH=/testing/gcloud/gcp-key.json $(IMAGE_NAME) echo ok | grep -Pz "(?s)Activated service account credentials for: .+ok"
+	$(DOCKER_RUN) $(IMAGE_TEST_DOCKER_MOUNT_OPTION) -e GCP_SERVICE_ACCOUNT_KEY_PATH=/testing/gcloud/gcp-key.json $(IMAGE_NAME) echo OK | grep -Pz "(?s)${GCP_SUCCESS_PATTERN} .+OK"
 	make --quiet _delete_gcloud_key
 
 .PHONY: _delete_gcloud_key
 _delete_gcloud_key:
 	rm testing/gcloud/gcp-key.json
+
+
+WANDB_SUCCESS_PATTERN=Successfully logged in to Weights & Biases
+
+.PHONY: test_wandb
+test_wandb:
+	# no env var was set => no auth (note: 'grep -v' reverses the pattern)
+	$(DOCKER_RUN) $(IMAGE_NAME) echo OK | grep -v "${WANDB_SUCCESS_PATTERN}"
+	$(DOCKER_RUN) $(IMAGE_NAME) -e WANDB_TOKEN_KEY_PATH= echo OK | grep -v "${WANDB_SUCCESS_PATTERN}"
+	# wrong env var was set => no action
+	$(DOCKER_RUN) $(IMAGE_TEST_DOCKER_MOUNT_OPTION) -e WANDB_TOKEN_KEY_PATH=non-existing.txt $(IMAGE_NAME) echo OK
+	# wrong token length in file => ValueError
+	$(DOCKER_RUN) $(IMAGE_TEST_DOCKER_MOUNT_OPTION) -e WANDB_TOKEN_KEY_PATH=testing/wandb/wrong-length-token.txt $(IMAGE_NAME) echo OK | grep "ValueError: API key must be 40 characters long, yours was 10"
+	# correct env var was set => auth successful
+	$(DOCKER_RUN) $(IMAGE_TEST_DOCKER_MOUNT_OPTION) -e WANDB_TOKEN_KEY_PATH=/testing/wandb/fake-token.txt $(IMAGE_NAME) echo OK | grep -Pz "(?s)${WANDB_SUCCESS_PATTERN}.+OK"
