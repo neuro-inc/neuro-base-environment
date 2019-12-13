@@ -11,8 +11,8 @@ if [ "$GCP_SERVICE_ACCOUNT_KEY_PATH" ]; then
   gcloud auth activate-service-account --key-file "$GCP_SERVICE_ACCOUNT_KEY_PATH"
 fi
 
-if [ -f "$WANDB_TOKEN_KEY_PATH" ]; then
-  wandb login $(cat "$WANDB_TOKEN_KEY_PATH")
+if [ -f "$NM_WANDB_TOKEN_PATH" ]; then
+  wandb login $(cat "$NM_WANDB_TOKEN_PATH")
 fi
 
 exec timeout $JOB_TIMEOUT "$@" || [ $? -eq 124 ] && echo "Job timeout exceeded: JOB_TIMEOUT=$JOB_TIMEOUT"
