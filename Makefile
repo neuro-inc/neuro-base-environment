@@ -109,6 +109,6 @@ test_wandb:
 	# wrong env var was set => no action
 	$(DOCKER_RUN) $(IMAGE_TEST_DOCKER_MOUNT_OPTION) -e WANDB_TOKEN_KEY_PATH=non-existing.txt $(IMAGE_NAME) echo OK ${ASSERT_COMMAND_SUCCEEDS}
 	# wrong token length in file => ValueError
-	$(DOCKER_RUN) $(IMAGE_TEST_DOCKER_MOUNT_OPTION) -e WANDB_TOKEN_KEY_PATH=testing/wandb/wrong-length-token.txt $(IMAGE_NAME) echo OK | grep "ValueError: API key must be 40 characters long, yours was 10" ${ASSERT_COMMAND_SUCCEEDS}
+	$(DOCKER_RUN) $(IMAGE_TEST_DOCKER_MOUNT_OPTION) -e WANDB_TOKEN_KEY_PATH=testing/wandb-keys/wrong-length-token.txt $(IMAGE_NAME) echo OK | grep "ValueError: API key must be 40 characters long, yours was 10" ${ASSERT_COMMAND_SUCCEEDS}
 	# correct env var was set => auth successful
-	$(DOCKER_RUN) $(IMAGE_TEST_DOCKER_MOUNT_OPTION) -e WANDB_TOKEN_KEY_PATH=/testing/wandb/fake-token.txt $(IMAGE_NAME) echo OK | grep -Pz "(?s)${WANDB_SUCCESS_PATTERN}.+OK" ${ASSERT_COMMAND_SUCCEEDS}
+	$(DOCKER_RUN) $(IMAGE_TEST_DOCKER_MOUNT_OPTION) -e WANDB_TOKEN_KEY_PATH=/testing/wandb-keys/fake-token.txt $(IMAGE_NAME) echo OK | grep -Pz "(?s)${WANDB_SUCCESS_PATTERN}.+OK" ${ASSERT_COMMAND_SUCCEEDS}
