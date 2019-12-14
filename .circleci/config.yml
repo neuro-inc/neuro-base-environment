@@ -73,6 +73,9 @@ jobs:
               docker cp testing/ test-gsutil:/
               make _test_gcloud_true  IMAGE_TEST_DOCKER_MOUNT_OPTION="--volumes-from=test-gsutil"   # should succeed to auth gsutil
 
+              # Run tests on 'wandb login':
+              make test_wandb  IMAGE_TEST_DOCKER_MOUNT_OPTION="--volumes-from=aux"
+
               # Run tests on pip dependencies:
               make test_dependencies_pip  IMAGE_TEST_DOCKER_MOUNT_OPTION="--volumes-from=aux"
 
