@@ -53,7 +53,7 @@ jobs:
 
       - run:
             name: Run tests
-            no_output_timeout: 15m
+            no_output_timeout: 30m
             command: |
               # Run tests on image timeout:
               make test_timeout
