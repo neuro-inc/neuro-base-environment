@@ -6,7 +6,7 @@ Base docker image used in [Neuro Platform Template](https://github.com/neuromati
 Notes
 -----
 1. Please don't use this image outside [Neuro Platform](https://neu.ro/platform) as it might be insecure!
-2. If the env variable `EXPOSE_SSH` is set, then **the unpassworded SSH server with root access** will start. Please don't use this image outside [Neuro Platform](https://neu.ro/platform).
+2. Setting environment variable `EXPOSE_SSH` enables SSH server with root account without password. This is safe to do within [Neuro Platform](https://neu.ro/platform), but very dangerous otherwise.
 3. By default, a container created from this image will run with a timeout 1 day. To tweak this behaviour, please set a non-zero value to env variable `JOB_TIMEOUT` (for example, `neuro run ... -e JOB_TIMEOUT=1h` for 1 hour timeout). To completely disable the timeout, please set `JOB_TIMEOUT=0`.
 
 License
