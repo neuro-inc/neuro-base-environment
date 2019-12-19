@@ -1,1 +1,1 @@
-aws help > /tmp/aws-help
+aws --version
