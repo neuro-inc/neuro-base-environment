@@ -11,7 +11,7 @@ Notes
 
 License
 -------
-This project is licensed under the terms of the [MIT License](/LICENSE)
+This project is licensed under the terms of the [Apache License](/LICENSE)
 
 Additional info
 ---------------
