@@ -15,4 +15,4 @@ if [ -f "$NM_WANDB_TOKEN_PATH" ]; then
   wandb login $(cat "$NM_WANDB_TOKEN_PATH")
 fi
 
-exec timeout $JOB_TIMEOUT "$@" || [ $? -eq 124 ] && echo "Job timeout exceeded: JOB_TIMEOUT=$JOB_TIMEOUT"
+exec 2>&1 timeout $JOB_TIMEOUT "$@" | tee /tmp/output

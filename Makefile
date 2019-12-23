@@ -112,3 +112,15 @@ test_wandb:
 	$(DOCKER_RUN) $(IMAGE_TEST_DOCKER_MOUNT_OPTION) -e NM_WANDB_TOKEN_PATH=testing/wandb-keys/wrong-length-token.txt $(IMAGE_NAME) echo OK | grep "ValueError: API key must be 40 characters long, yours was 10" ${ASSERT_COMMAND_SUCCEEDS}
 	# correct env var was set => auth successful
 	$(DOCKER_RUN) $(IMAGE_TEST_DOCKER_MOUNT_OPTION) -e NM_WANDB_TOKEN_PATH=/testing/wandb-keys/fake-token.txt $(IMAGE_NAME) echo OK | grep -Pz "(?s)${WANDB_SUCCESS_PATTERN}.+OK" ${ASSERT_COMMAND_SUCCEEDS}
+
+
+.PHONY: test_output
+test_output:
+	# test redirects
+	$(DOCKER_RUN) ${IMAGE_NAME} bash -c 'echo OK && cat /tmp/output'     | grep -Pz "OK\r\nOK" ${ASSERT_COMMAND_SUCCEEDS}
+	$(DOCKER_RUN) ${IMAGE_NAME} bash -c 'echo OK >&2 && cat /tmp/output' | grep -Pz "OK\r\nOK" ${ASSERT_COMMAND_SUCCEEDS}
+	# test tqdm
+	docker kill test-output | true
+	$(DOCKER_RUN) --detach --name test-output ${IMAGE_NAME} python -u -c 'import time, tqdm; [(time.sleep(0.1), print(i)) for i in tqdm.tqdm(range(1000))]' \
+		&& docker exec -it test-output bash -c 'tail -f /tmp/output | sed -n "/5%.*50/ {;p;q;}"' ${ASSERT_COMMAND_SUCCEEDS}
+	docker kill test-output
