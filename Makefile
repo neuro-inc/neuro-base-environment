@@ -119,11 +119,9 @@ test_wandb:
 .PHONY: test_output
 test_output:
 	# test that stdout is redirected to /tmp/output
-	$(DOCKER_RUN) $(IMAGE_TEST_DOCKER_MOUNT_OPTION) $(IMAGE_NAME) bash -c 'echo "test stdout"'
-	$(DOCKER_RUN) $(IMAGE_TEST_DOCKER_MOUNT_OPTION) $(IMAGE_NAME) grep -q "test stdout" /tmp/output ${ASSERT_COMMAND_SUCCEEDS}
+	$(DOCKER_RUN) $(IMAGE_NAME) bash -c 'echo "stdout" && grep -q "stdout" /tmp/output' ${ASSERT_COMMAND_SUCCEEDS}
 	# test that stderr is redirected to /tmp/output
-	$(DOCKER_RUN) $(IMAGE_TEST_DOCKER_MOUNT_OPTION) $(IMAGE_NAME) bash -c 'echo "test stderr" >&2'
-	$(DOCKER_RUN) $(IMAGE_TEST_DOCKER_MOUNT_OPTION) $(IMAGE_NAME) grep -q "test stderr" /tmp/output ${ASSERT_COMMAND_SUCCEEDS}
+	$(DOCKER_RUN) $(IMAGE_TEST_DOCKER_MOUNT_OPTION) $(IMAGE_NAME) bash -c 'echo "stderr" >&2 && grep -q "stderr" /tmp/output' ${ASSERT_COMMAND_SUCCEEDS}
 	# test tqdm
 	docker kill test-output | true
 	$(DOCKER_RUN) --detach --name test-output ${IMAGE_NAME} python -u -c 'import time, tqdm; [(time.sleep(0.1), print(i)) for i in tqdm.tqdm(range(1000))]' \

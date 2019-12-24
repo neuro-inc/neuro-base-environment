@@ -15,5 +15,5 @@ if [ -f "$NM_WANDB_TOKEN_PATH" ]; then
   wandb login $(cat "$NM_WANDB_TOKEN_PATH")
 fi
 
-exec 2>&1 timeout $JOB_TIMEOUT "$@" | tee /tmp/output
+exec timeout $JOB_TIMEOUT "$@" 2>&1 | tee /tmp/output
 exit "${PIPESTATUS[0]}"

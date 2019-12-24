@@ -47,7 +47,7 @@ jobs:
               # Since we use remote docker, in order to mount `testing/` folder to the container, we need to copy it first.
               # Source: https://circleci.com/docs/2.0/building-docker-images/#mounting-folders
               # create a dummy container which will hold a volume with config:
-              docker create -v /testing -v /tmp --name=aux alpine /bin/true
+              docker create -v /testing --name=aux alpine /bin/true
               # copy testing folder into this volume:
               docker cp testing/ aux:/
 
@@ -77,10 +77,10 @@ jobs:
               make test_wandb  IMAGE_TEST_DOCKER_MOUNT_OPTION="--volumes-from=aux"
 
               # Run tests on stdou+stderr redirect to /tmp/output:
-              make test_output  IMAGE_TEST_DOCKER_MOUNT_OPTION="--volumes-from=aux"
+              make test_output
 
-#              # Run tests on pip dependencies:
-#              make test_dependencies_pip  IMAGE_TEST_DOCKER_MOUNT_OPTION="--volumes-from=aux"
+              # Run tests on pip dependencies:
+              make test_dependencies_pip  IMAGE_TEST_DOCKER_MOUNT_OPTION="--volumes-from=aux"
 
       - run:
             name: Download logs dir from the remote docker
