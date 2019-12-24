@@ -7,9 +7,7 @@ ASSERT_COMMAND_FAILS=&& { echo -e 'Failure!\n'; exit 1; } || { echo -e 'Success!
 ASSERT_COMMAND_SUCCEEDS=&& echo -e 'Success!\n'
 
 # Testing settings:
-IMAGE_TEST_DOCKER_MOUNT_OPTION?=--volume=`pwd`/testing:/testing --volume=/tmp/neuro-base-environment:/tmp
-# Create required temp directory:
-$(shell mkdir -p /tmp/neuro-base-environment)
+IMAGE_TEST_DOCKER_MOUNT_OPTION?=--volume=`pwd`/testing:/testing
 
 # SSH test variables:
 SSH=ssh -o "StrictHostKeyChecking=no" -o "BatchMode=yes"
@@ -53,9 +51,9 @@ test_dependencies_pip:
 .PHONY: test_timeout
 test_timeout:
 	# job exits within the timeout 3 sec (ok):
-	$(DOCKER_RUN) -e JOB_TIMEOUT=1 $(IMAGE_NAME) sleep 0.1  $(ASSERT_COMMAND_SUCCEEDS)
+	$(DOCKER_RUN) -e JOB_TIMEOUT=3 $(IMAGE_NAME) sleep 1  $(ASSERT_COMMAND_SUCCEEDS)
 	# job exits within the timeout sec (exit code 124):
-	$(DOCKER_RUN) -e JOB_TIMEOUT=1 $(IMAGE_NAME) sleep 10  $(ASSERT_COMMAND_FAILS)
+	$(DOCKER_RUN) -e JOB_TIMEOUT=3 $(IMAGE_NAME) sleep 10  $(ASSERT_COMMAND_FAILS)
 
 
 .PHONY: cleanup_test_ssh
