@@ -76,6 +76,9 @@ jobs:
               # Run tests on 'wandb login':
               make test_wandb  IMAGE_TEST_DOCKER_MOUNT_OPTION="--volumes-from=aux"
 
+              # Run tests on stdou+stderr redirect to /tmp/output:
+              make test_output  IMAGE_TEST_DOCKER_MOUNT_OPTION="--volumes-from=aux"
+
 #              # Run tests on pip dependencies:
 #              make test_dependencies_pip  IMAGE_TEST_DOCKER_MOUNT_OPTION="--volumes-from=aux"
 
@@ -83,7 +86,6 @@ jobs:
             name: Download logs dir from the remote docker
             command: |
               docker cp aux:/testing/logs testing/
-              docker cp aux:/tmp/output testing/logs/
 
       - run:
             name: Cleanup test dirs
