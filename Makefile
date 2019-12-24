@@ -7,7 +7,9 @@ ASSERT_COMMAND_FAILS=&& { echo -e 'Failure!\n'; exit 1; } || { echo -e 'Success!
 ASSERT_COMMAND_SUCCEEDS=&& echo -e 'Success!\n'
 
 # Testing settings:
-IMAGE_TEST_DOCKER_MOUNT_OPTION?=--volume=`pwd`/testing:/testing
+IMAGE_TEST_DOCKER_MOUNT_OPTION?=--volume=`pwd`/testing:/testing --volume=/tmp/neuro-base-environment:/tmp
+# Create required temp directory:
+$(shell mkdir -p /tmp/neuro-base-environment)
 
 # SSH test variables:
 SSH=ssh -o "StrictHostKeyChecking=no" -o "BatchMode=yes"
@@ -51,9 +53,9 @@ test_dependencies_pip:
 .PHONY: test_timeout
 test_timeout:
 	# job exits within the timeout 3 sec (ok):
-	$(DOCKER_RUN) -e JOB_TIMEOUT=3 $(IMAGE_NAME) sleep 1  $(ASSERT_COMMAND_SUCCEEDS)
+	$(DOCKER_RUN) -e JOB_TIMEOUT=1 $(IMAGE_NAME) sleep 0.1  $(ASSERT_COMMAND_SUCCEEDS)
 	# job exits within the timeout sec (exit code 124):
-	$(DOCKER_RUN) -e JOB_TIMEOUT=3 $(IMAGE_NAME) sleep 10  $(ASSERT_COMMAND_FAILS)
+	$(DOCKER_RUN) -e JOB_TIMEOUT=1 $(IMAGE_NAME) sleep 10  $(ASSERT_COMMAND_FAILS)
 
 
 .PHONY: cleanup_test_ssh
@@ -116,9 +118,12 @@ test_wandb:
 
 .PHONY: test_output
 test_output:
-	# test redirects
-	$(DOCKER_RUN) ${IMAGE_NAME} bash -c 'echo OK && cat /tmp/output'     | grep -Pz "OK\r\nOK" ${ASSERT_COMMAND_SUCCEEDS}
-	$(DOCKER_RUN) ${IMAGE_NAME} bash -c 'echo OK >&2 && cat /tmp/output' | grep -Pz "OK\r\nOK" ${ASSERT_COMMAND_SUCCEEDS}
+	# test that stdout is redirected to /tmp/output
+	$(DOCKER_RUN) $(IMAGE_TEST_DOCKER_MOUNT_OPTION) $(IMAGE_NAME) bash -c 'echo "test stdout"'
+	$(DOCKER_RUN) $(IMAGE_TEST_DOCKER_MOUNT_OPTION) $(IMAGE_NAME) grep -q "test stdout" /tmp/output ${ASSERT_COMMAND_SUCCEEDS}
+	# test that stderr is redirected to /tmp/output
+	$(DOCKER_RUN) $(IMAGE_TEST_DOCKER_MOUNT_OPTION) $(IMAGE_NAME) bash -c 'echo "test stderr" >&2'
+	$(DOCKER_RUN) $(IMAGE_TEST_DOCKER_MOUNT_OPTION) $(IMAGE_NAME) grep -q "test stderr" /tmp/output ${ASSERT_COMMAND_SUCCEEDS}
 	# test tqdm
 	docker kill test-output | true
 	$(DOCKER_RUN) --detach --name test-output ${IMAGE_NAME} python -u -c 'import time, tqdm; [(time.sleep(0.1), print(i)) for i in tqdm.tqdm(range(1000))]' \

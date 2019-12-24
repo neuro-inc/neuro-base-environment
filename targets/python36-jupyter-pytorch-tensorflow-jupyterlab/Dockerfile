@@ -226,7 +226,7 @@ EXPOSE 8888 6006
 ENV JOB_TIMEOUT 1d
 
 ## Setup entrypoint
-COPY entrypoint.sh /tmp/entrypoint.sh
+COPY entrypoint.sh /entrypoint.sh
 
-RUN chmod +x /tmp/entrypoint.sh
-ENTRYPOINT ["bash", "/tmp/entrypoint.sh"]
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["bash", "/entrypoint.sh"]
