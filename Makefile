@@ -116,9 +116,9 @@ test_wandb:
 
 .PHONY: test_output
 test_output:
-	# test that stdout is redirected to /tmp/output
+	# test that stdout is redirected to named pipe /tmp/output
 	$(DOCKER_RUN) $(IMAGE_NAME) bash -c 'echo "stdout" && grep -q "stdout" /tmp/output' ${ASSERT_COMMAND_SUCCEEDS}
-	# test that stderr is redirected to /tmp/output
+	# test that stderr is redirected to named pipe /tmp/output
 	$(DOCKER_RUN) $(IMAGE_TEST_DOCKER_MOUNT_OPTION) $(IMAGE_NAME) bash -c 'echo "stderr" >&2 && grep -q "stderr" /tmp/output' ${ASSERT_COMMAND_SUCCEEDS}
 	# test tqdm
 	docker kill test-output | true

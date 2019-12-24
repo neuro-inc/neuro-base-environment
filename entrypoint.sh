@@ -15,5 +15,8 @@ if [ -f "$NM_WANDB_TOKEN_PATH" ]; then
   wandb login $(cat "$NM_WANDB_TOKEN_PATH")
 fi
 
+# Create named pipe for stdout+stderr
+mkfifo /tmp/output
+
 exec timeout $JOB_TIMEOUT "$@" 2>&1 | tee /tmp/output
 exit "${PIPESTATUS[0]}"
