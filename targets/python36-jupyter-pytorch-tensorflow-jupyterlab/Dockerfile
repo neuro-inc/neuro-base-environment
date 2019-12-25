@@ -177,6 +177,12 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
     $PIP_INSTALL awscli && \
 
 # ==================================================================
+# Dependencies of OpenCV (needed for hyper-parameter search via W&B)
+# ------------------------------------------------------------------
+
+    $APT_INSTALL libsm6 libxext6 libxrender-dev && \
+
+# ==================================================================
 # SSH
 # ------------------------------------------------------------------
 
