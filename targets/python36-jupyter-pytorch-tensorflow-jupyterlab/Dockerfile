@@ -177,7 +177,7 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
     $PIP_INSTALL awscli && \
 
 # ==================================================================
-# Dependencies of OpenCV (needed for hyper-parameter search via W&B)
+# Dependencies of OpenCV (which is a dependency of Catalyst)
 # ------------------------------------------------------------------
 
     $APT_INSTALL libsm6 libxext6 libxrender-dev && \
