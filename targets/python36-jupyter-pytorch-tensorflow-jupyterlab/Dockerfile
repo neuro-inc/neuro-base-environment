@@ -233,7 +233,6 @@ ENV JOB_TIMEOUT 1d
 
 # Create named pipe for stdout+stderr
 ENV OUTPUT_PIPE "/output"
-RUN mkfifo "$OUTPUT_PIPE"
 
 ## Setup entrypoint
 COPY entrypoint.sh /entrypoint.sh
