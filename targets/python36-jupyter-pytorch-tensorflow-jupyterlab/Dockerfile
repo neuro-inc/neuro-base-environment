@@ -177,10 +177,12 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
     $PIP_INSTALL awscli && \
 
 # ==================================================================
-# Dependencies of OpenCV (which is a dependency of Catalyst)
+# Catalyst
 # ------------------------------------------------------------------
 
-    $APT_INSTALL libsm6 libxext6 libxrender-dev && \
+    $PIP_INSTALL catalyst && \
+    # Dependencies: (maybe would also need 'libxrender-dev')
+    $APT_INSTALL libsm6 libxext6 && \
 
 # ==================================================================
 # SSH
