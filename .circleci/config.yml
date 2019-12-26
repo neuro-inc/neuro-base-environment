@@ -126,8 +126,5 @@ workflows:
 #          requires:
 #            - test
           filters:
-            branches:
-#              only: release
-              only: ay/fix-deploy
             tags:
               only: /v.*/
