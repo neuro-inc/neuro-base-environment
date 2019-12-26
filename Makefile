@@ -3,6 +3,7 @@ DOCKERFILE_NAME?=python36-jupyter-pytorch-tensorflow-jupyterlab
 
 # Git helpers:
 GIT_TAG=$(shell git tag -l --points-at HEAD)
+GIT_TAG_NUM=$(shell echo "${GIT_TAG}" | wc -w)
 
 # Shortcuts:
 DOCKER_RUN?=docker run --tty --rm
@@ -43,10 +44,9 @@ image_diff:
 
 .PHONY: image_deploy
 image_deploy:
-	git diff-index --quiet HEAD -- || { echo "Found uncommited changes"; false; }
-	@export num=$(shell echo "${GIT_TAG}" | wc -w) && \
-	[ "$${num}" -eq 1 ] || { echo "Must be only 1 tag, found: $${num}; GIT_TAG='${GIT_TAG}'"; false; } && \
-	docker push neuromation/base:${GIT_TAG}
+	@[ "${GIT_TAG_NUM}" -eq 1 ] || { echo "Must be only 1 tag, found: ${GIT_TAG_NUM}; GIT_TAG='${GIT_TAG}'"; false; }
+	docker tag ${IMAGE_NAME} ${IMAGE_NAME}:${GIT_TAG}
+	docker push ${IMAGE_NAME}:${GIT_TAG}
 
 
 .PHONY: generate_recipes

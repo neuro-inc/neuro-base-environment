@@ -101,6 +101,8 @@ jobs:
     <<: *defaults
     steps:
       - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
       - run: *install_dependencies
       - run:
           name: Build application Docker image (if need to deploy)
@@ -121,5 +123,5 @@ workflows:
           requires:
             - test
           filters:
-            branches:
-              only: release
+            tags:
+              only: /v.*/
