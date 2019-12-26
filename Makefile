@@ -140,3 +140,16 @@ test_wandb:
 	$(DOCKER_RUN) $(IMAGE_TEST_DOCKER_MOUNT_OPTION) -e NM_WANDB_TOKEN_PATH=testing/wandb-keys/wrong-length-token.txt $(IMAGE_NAME) echo OK | grep "ValueError: API key must be 40 characters long, yours was 10" ${ASSERT_COMMAND_SUCCEEDS}
 	# correct env var was set => auth successful
 	$(DOCKER_RUN) $(IMAGE_TEST_DOCKER_MOUNT_OPTION) -e NM_WANDB_TOKEN_PATH=/testing/wandb-keys/fake-token.txt $(IMAGE_NAME) echo OK | grep -Pz "(?s)${WANDB_SUCCESS_PATTERN}.+OK" ${ASSERT_COMMAND_SUCCEEDS}
+
+
+.PHONY: test_output
+test_output:
+	# test that stdout is redirected to named pipe $$OUTPUT_PIPE
+	$(DOCKER_RUN) $(IMAGE_NAME) bash -c 'echo "stdout" && grep -q "stdout" $${OUTPUT_PIPE}' ${ASSERT_COMMAND_SUCCEEDS}
+	# test that stderr is redirected to named pipe $$OUTPUT_PIPE
+	$(DOCKER_RUN) $(IMAGE_TEST_DOCKER_MOUNT_OPTION) $(IMAGE_NAME) bash -c 'echo "stderr" >&2 && grep -q "stderr" $${OUTPUT_PIPE}' ${ASSERT_COMMAND_SUCCEEDS}
+	# test tqdm
+	docker kill test-output | true
+	$(DOCKER_RUN) --detach --name test-output ${IMAGE_NAME} python -u -c 'import time, tqdm; [(time.sleep(0.1), print(i)) for i in tqdm.tqdm(range(1000))]' \
+		&& docker exec -it test-output bash -c 'tail -f $${OUTPUT_PIPE} | sed -n "/5%.*50/ {;p;q;}"' ${ASSERT_COMMAND_SUCCEEDS}
+	docker kill test-output

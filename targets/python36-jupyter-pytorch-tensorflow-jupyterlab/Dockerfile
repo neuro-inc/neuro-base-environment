@@ -149,12 +149,21 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
     $PIP_INSTALL \
         neuromation \
         && \
+
 # ==================================================================
-# neuromation
+# wandb
 # ------------------------------------------------------------------
 
     $PIP_INSTALL \
         wandb \
+        && \
+
+# ==================================================================
+# tqdm
+# ------------------------------------------------------------------
+
+    $PIP_INSTALL \
+        tqdm \
         && \
 
 # ==================================================================
@@ -222,10 +231,15 @@ EXPOSE 8888 6006
 # Default job lifetime timeout (use zero `0` to disable)
 ENV JOB_TIMEOUT 1d
 
+# Create named pipe for stdout+stderr
+ENV OUTPUT_PIPE "/output"
+
+# Force the stdout and stderr streams to be unbuffered. 
+# Needed for correct work of tqdm via 'neuro exec'
 ENV PYTHONUNBUFFERED 1
 
 ## Setup entrypoint
-COPY entrypoint.sh /tmp/entrypoint.sh
+COPY entrypoint.sh /entrypoint.sh
 
-RUN chmod +x /tmp/entrypoint.sh
-ENTRYPOINT ["bash", "/tmp/entrypoint.sh"]
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["bash", "/entrypoint.sh"]
