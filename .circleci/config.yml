@@ -36,7 +36,7 @@ jobs:
             git diff --exit-code
             { make generate_recipes && git diff --exit-code; } || { echo -e "Need to update recipes!"; exit 3; }
 
-      - run: &build_image
+      - run:
           name: Build application Docker image
           command: |
             make image_build
@@ -101,9 +101,11 @@ jobs:
     <<: *defaults
     steps:
       - checkout
-      - setup_remote_docker
       - run: *install_dependencies
-      - run: *build_image
+      - run:
+          name: Build application Docker image (if need to deploy)
+          command: |
+            make image_build_for_deploy
       - run:
           name: Publish Docker Image to Docker Hub (if have a version tag)
           command: |

@@ -234,6 +234,10 @@ ENV JOB_TIMEOUT 1d
 # Create named pipe for stdout+stderr
 ENV OUTPUT_PIPE "/output"
 
+# Force the stdout and stderr streams to be unbuffered. 
+# Needed for correct work of tqdm via 'neuro exec'
+ENV PYTHONUNBUFFERED 1
+
 ## Setup entrypoint
 COPY entrypoint.sh /entrypoint.sh
 
