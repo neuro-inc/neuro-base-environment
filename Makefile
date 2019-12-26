@@ -38,27 +38,15 @@ image_build:
 	# python3 deepo/generator/generate.py --cuda-ver=10.0 --cudnn-ver=cudnn7-devel --ubuntu-ver=ubuntu18.04 targets/$(DOCKERFILE_NAME)/Dockerfile-deepo tensorflow pytorch jupyter jupyterlab python==3.6
 	docker build -t $(IMAGE_NAME) -f targets/$(DOCKERFILE_NAME)/Dockerfile .
 
-.PHONY: image_build_for_deploy
-image_build_for_deploy:
-ifeq (${GIT_NUMBER_OF_TAGS}, 1)
-	make image_build
-else
-	@echo "No need to build image: Found ${GIT_NUMBER_OF_TAGS} version tags: '${GIT_TAG}'"
-endif
-
 .PHONY: image_diff
 image_diff:
 	diff --color=always --side-by-side  targets/$(DOCKERFILE_NAME)/Dockerfile.deepo targets/$(DOCKERFILE_NAME)/Dockerfile
 
 .PHONY: image_deploy
 image_deploy:
-ifeq (${GIT_NUMBER_OF_TAGS}, 1)
 	git diff-index --quiet HEAD -- || { echo "Found uncommited changes"; false; }
-	echo docker push neuromation/base:${GIT_TAG}
-else
-	@echo "Found ${GIT_NUMBER_OF_TAGS} version tags: '${GIT_TAG}'"
-	@echo "Skipping."
-endif
+	@[ "{GIT_TAG}" -eq 1 ] || { echo "Must be only 1 tag, found: ${GIT_TAG}"; false; }
+	docker push neuromation/base:${GIT_TAG}
 
 
 .PHONY: generate_recipes
