@@ -222,6 +222,8 @@ EXPOSE 8888 6006
 # Default job lifetime timeout (use zero `0` to disable)
 ENV JOB_TIMEOUT 1d
 
+ENV PYTHONUNBUFFERED 1
+
 ## Setup entrypoint
 COPY entrypoint.sh /tmp/entrypoint.sh
 
