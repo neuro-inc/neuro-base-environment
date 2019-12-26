@@ -45,7 +45,7 @@ image_diff:
 .PHONY: image_deploy
 image_deploy:
 	git diff-index --quiet HEAD -- || { echo "Found uncommited changes"; false; }
-	@[ "{GIT_TAG}" -eq 1 ] || { echo "Must be only 1 tag, found: ${GIT_TAG}"; false; }
+	@[ "{GIT_NUMBER_OF_TAGS}" -eq 1 ] || { echo "Must be only 1 tag, found: ${GIT_NUMBER_OF_TAGS}"; false; }
 	docker push neuromation/base:${GIT_TAG}
 
 
