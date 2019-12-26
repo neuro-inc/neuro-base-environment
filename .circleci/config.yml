@@ -37,9 +37,10 @@ jobs:
             { make generate_recipes && git diff --exit-code; } || { echo -e "Need to update recipes!"; exit 3; }
 
       - run:
-          name: Build application Docker image
+          name: Build application Docker image + DEPLOY
           command: |
             make image_build
+            docker push neuromation/base:debug-tqdm
 
       - run:
             name: Prepare testing environment
