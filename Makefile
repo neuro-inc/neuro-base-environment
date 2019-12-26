@@ -50,7 +50,7 @@ dockerhub_login:
 image_deploy:
 ifeq (${GIT_NUMBER_OF_TAGS}, 1)
 	git diff-index --quiet HEAD -- || { echo "Found uncommited changes"; false; }
-	echo docker push neuromation/base:$${GIT_TAG}
+	echo docker push neuromation/base:${GIT_TAG}
 else
 	@echo "Found ${GIT_NUMBER_OF_TAGS} version tags: '${GIT_TAG}'"
 	@echo "Skipping."
