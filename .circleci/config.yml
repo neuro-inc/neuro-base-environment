@@ -105,7 +105,7 @@ jobs:
       - run:
           name: Build application Docker image (if need to deploy)
           command: |
-            make image_build_for_deploy
+            make image_build
       - run:
           name: Publish Docker Image to Docker Hub (if have a version tag)
           command: |
