@@ -26,6 +26,11 @@ else
 endif
 
 
+.PHONY: dockerhub_login
+dockerhub_login:
+	[ "$${DOCKERHUB_NAME}" ]     || { echo "env var DOCKERHUB_NAME not set up.";     false; }
+	[ "$${DOCKERHUB_PASSWORD}" ] || { echo "env var DOCKERHUB_PASSWORD not set up."; false; }
+	docker login -u "$${DOCKERHUB_NAME}" -p "$${DOCKERHUB_PASSWORD}"
 
 .PHONY: image_build
 image_build:
@@ -33,18 +38,17 @@ image_build:
 	# python3 deepo/generator/generate.py --cuda-ver=10.0 --cudnn-ver=cudnn7-devel --ubuntu-ver=ubuntu18.04 targets/$(DOCKERFILE_NAME)/Dockerfile-deepo tensorflow pytorch jupyter jupyterlab python==3.6
 	docker build -t $(IMAGE_NAME) -f targets/$(DOCKERFILE_NAME)/Dockerfile .
 
+.PHONY: image_build_for_deploy
+image_build_for_deploy:
+ifeq (${GIT_NUMBER_OF_TAGS}, 1)
+	make image_build
+else
+	@echo "No need to build image: Found ${GIT_NUMBER_OF_TAGS} version tags: '${GIT_TAG}'"
+endif
 
 .PHONY: image_diff
 image_diff:
 	diff --color=always --side-by-side  targets/$(DOCKERFILE_NAME)/Dockerfile.deepo targets/$(DOCKERFILE_NAME)/Dockerfile
-
-
-.PHONY: dockerhub_login
-dockerhub_login:
-	[ "$${DOCKERHUB_NAME}" ]     || { echo "env var DOCKERHUB_NAME not set up.";     false; }
-	[ "$${DOCKERHUB_PASSWORD}" ] || { echo "env var DOCKERHUB_PASSWORD not set up."; false; }
-	docker login -u "$${DOCKERHUB_NAME}" -p "$${DOCKERHUB_PASSWORD}"
-
 
 .PHONY: image_deploy
 image_deploy:
