@@ -3,7 +3,6 @@ DOCKERFILE_NAME?=python36-jupyter-pytorch-tensorflow-jupyterlab
 
 # Git helpers:
 GIT_TAG=$(shell git tag -l --points-at HEAD)
-GIT_NUMBER_OF_TAGS=$(shell echo "${GIT_TAG}" | wc -w)
 
 # Shortcuts:
 DOCKER_RUN?=docker run --tty --rm
@@ -45,7 +44,8 @@ image_diff:
 .PHONY: image_deploy
 image_deploy:
 	git diff-index --quiet HEAD -- || { echo "Found uncommited changes"; false; }
-	@[ "{GIT_NUMBER_OF_TAGS}" -eq 1 ] || { echo "Must be only 1 tag, found: ${GIT_NUMBER_OF_TAGS}"; false; }
+	@export num=$(shell echo "${GIT_TAG}" | wc -w) && \
+	[ "$${num}" -eq 1 ] || { echo "Must be only 1 tag, found: $${num}; GIT_TAG='${GIT_TAG}'"; false; } && \
 	docker push neuromation/base:${GIT_TAG}
 
 
