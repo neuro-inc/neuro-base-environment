@@ -105,11 +105,11 @@ jobs:
           docker_layer_caching: true
       - run: *install_dependencies
       - run:
-          name: Build application Docker image (if need to deploy)
+          name: Build application Docker image
           command: |
             make image_build
       - run:
-          name: Publish Docker Image to Docker Hub (if have a version tag)
+          name: Publish Docker Image to Docker Hub
           command: |
             make dockerhub_login
             make image_deploy
