@@ -119,10 +119,13 @@ workflows:
   version: 2
   main:
     jobs:
-      - test
+#      - test
       - deploy:
-          requires:
-            - test
+#          requires:
+#            - test
           filters:
             branches:
-              only: release
+#              only: release
+              only: ay/fix-deploy
+            tags:
+              only: /v.*/
