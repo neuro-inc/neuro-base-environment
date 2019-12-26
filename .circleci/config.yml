@@ -30,6 +30,12 @@ jobs:
             pip3 install -r testing/requirements.txt
 
       - run:
+          name: TEST TEST TEST
+          command: |
+            make image_build_for_deploy
+            exit 1
+
+      - run:
           name: Assert freshness of the recipes
           command: |
             source venv/bin/activate
