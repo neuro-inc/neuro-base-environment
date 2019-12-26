@@ -45,7 +45,8 @@ image_diff:
 .PHONY: image_deploy
 image_deploy:
 	@[ "${GIT_TAG_NUM}" -eq 1 ] || { echo "Must be only 1 tag, found: ${GIT_TAG_NUM}; GIT_TAG='${GIT_TAG}'"; false; }
-	docker push neuromation/base:${GIT_TAG}
+	docker tag ${IMAGE_NAME} ${IMAGE_NAME}:${GIT_TAG}
+	docker push ${IMAGE_NAME}:${GIT_TAG}
 
 
 .PHONY: generate_recipes
