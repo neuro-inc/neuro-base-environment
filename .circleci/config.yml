@@ -30,15 +30,6 @@ jobs:
             pip3 install -r testing/requirements.txt
 
       - run:
-          name: TEST AUTO DEPLOY
-          command: |
-            make image_deploy
-            git tag v1.0.0
-            make image_deploy
-            git tag v2.0.0
-            make image_deploy
-
-      - run:
           name: Assert freshness of the recipes
           command: |
             source venv/bin/activate
@@ -111,7 +102,7 @@ jobs:
       - run: *install_dependencies
       - run: *build_image
       - run:
-          name: If have a git tag, Publish Docker Image to Docker Hub
+          name: Publish Docker Image to Docker Hub (if have a version tag)
           command: |
             make dockerhub_login
             make image_deploy
