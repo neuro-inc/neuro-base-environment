@@ -36,59 +36,59 @@ jobs:
             git diff --exit-code
             { make generate_recipes && git diff --exit-code; } || { echo -e "Need to update recipes!"; exit 3; }
 
-      - run: &build_image
-          name: Build application Docker image
-          command: |
-            make image_build
-
-      - run:
-            name: Prepare testing environment
-            command: |
-              # Since we use remote docker, in order to mount `testing/` folder to the container, we need to copy it first.
-              # Source: https://circleci.com/docs/2.0/building-docker-images/#mounting-folders
-              # create a dummy container which will hold a volume with config:
-              docker create -v /testing --name=aux alpine /bin/true
-              # copy testing folder into this volume:
-              docker cp testing/ aux:/
-
-      - run:
-            name: Run tests
-            no_output_timeout: 30m
-            command: |
-              # Run tests on image timeout:
-              make test_timeout
-
-              # Run ssh tests:
-              make test_ssh  SSH_OPTION="-e EXPOSE_SSH=yes"   SSH_ENABLED=yes
-              make test_ssh  SSH_OPTION="-e EXPOSE_SSH=value" SSH_ENABLED=yes
-              make test_ssh  SSH_OPTION="-e EXPOSE_SSH="      SSH_ENABLED=no
-              make test_ssh  SSH_OPTION='-e EXPOSE_SSH=""'    SSH_ENABLED=no
-              make test_ssh  SSH_OPTION=""                    SSH_ENABLED=no
-              make cleanup_test_ssh
-
-              # Run tests on 'gcloud auth':
-              make _test_gcloud_false  # should be no gsutil auth
-              make _generate_gcloud_key
-              docker create -v /testing --name=test-gsutil alpine /bin/true
-              docker cp testing/ test-gsutil:/
-              make _test_gcloud_true  IMAGE_TEST_DOCKER_MOUNT_OPTION="--volumes-from=test-gsutil"   # should succeed to auth gsutil
-
-              # Run tests on 'wandb login':
-              make test_wandb  IMAGE_TEST_DOCKER_MOUNT_OPTION="--volumes-from=aux"
-
-              # Run tests on pip dependencies:
-              make test_dependencies_pip  IMAGE_TEST_DOCKER_MOUNT_OPTION="--volumes-from=aux"
-
-      - run:
-            name: Download logs dir from the remote docker
-            command: |
-              docker cp aux:/testing/logs testing/
-
-      - run:
-            name: Cleanup test dirs
-            command: |
-              make _delete_gcloud_key || true
-            when: always
+#      - run: &build_image
+#          name: Build application Docker image
+#          command: |
+#            make image_build
+#
+#      - run:
+#            name: Prepare testing environment
+#            command: |
+#              # Since we use remote docker, in order to mount `testing/` folder to the container, we need to copy it first.
+#              # Source: https://circleci.com/docs/2.0/building-docker-images/#mounting-folders
+#              # create a dummy container which will hold a volume with config:
+#              docker create -v /testing --name=aux alpine /bin/true
+#              # copy testing folder into this volume:
+#              docker cp testing/ aux:/
+#
+#      - run:
+#            name: Run tests
+#            no_output_timeout: 30m
+#            command: |
+#              # Run tests on image timeout:
+#              make test_timeout
+#
+#              # Run ssh tests:
+#              make test_ssh  SSH_OPTION="-e EXPOSE_SSH=yes"   SSH_ENABLED=yes
+#              make test_ssh  SSH_OPTION="-e EXPOSE_SSH=value" SSH_ENABLED=yes
+#              make test_ssh  SSH_OPTION="-e EXPOSE_SSH="      SSH_ENABLED=no
+#              make test_ssh  SSH_OPTION='-e EXPOSE_SSH=""'    SSH_ENABLED=no
+#              make test_ssh  SSH_OPTION=""                    SSH_ENABLED=no
+#              make cleanup_test_ssh
+#
+#              # Run tests on 'gcloud auth':
+#              make _test_gcloud_false  # should be no gsutil auth
+#              make _generate_gcloud_key
+#              docker create -v /testing --name=test-gsutil alpine /bin/true
+#              docker cp testing/ test-gsutil:/
+#              make _test_gcloud_true  IMAGE_TEST_DOCKER_MOUNT_OPTION="--volumes-from=test-gsutil"   # should succeed to auth gsutil
+#
+#              # Run tests on 'wandb login':
+#              make test_wandb  IMAGE_TEST_DOCKER_MOUNT_OPTION="--volumes-from=aux"
+#
+#              # Run tests on pip dependencies:
+#              make test_dependencies_pip  IMAGE_TEST_DOCKER_MOUNT_OPTION="--volumes-from=aux"
+#
+#      - run:
+#            name: Download logs dir from the remote docker
+#            command: |
+#              docker cp aux:/testing/logs testing/
+#
+#      - run:
+#            name: Cleanup test dirs
+#            command: |
+#              make _delete_gcloud_key || true
+#            when: always
 
       - store_artifacts:
           path: testing/logs
