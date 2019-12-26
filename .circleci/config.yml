@@ -104,8 +104,8 @@ jobs:
       - run:
           name: Publish Docker Image to Docker Hub
           command: |
-            docker login -u "$DOCKERHUB_NAME" -p "$DOCKERHUB_PASSWORD"
-            docker push neuromation/base:latest
+            make dockerhub_login
+            make image_deploy
 
 workflows:
   version: 2

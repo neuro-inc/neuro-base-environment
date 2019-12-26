@@ -1,6 +1,10 @@
 IMAGE_NAME?=neuromation/base
 DOCKERFILE_NAME?=python36-jupyter-pytorch-tensorflow-jupyterlab
 
+# Git helpers:
+GIT_TAG=$(shell git tag -l --points-at HEAD)
+GIT_NUMBER_OF_TAGS=$(shell echo "${GIT_TAG}" | wc -w)
+
 # Shortcuts:
 DOCKER_RUN?=docker run --tty --rm
 ASSERT_COMMAND_FAILS=&& { echo -e 'Failure!\n'; exit 1; } || { echo -e 'Success!\n'; }
@@ -34,6 +38,21 @@ image_build:
 image_diff:
 	diff --color=always --side-by-side  targets/$(DOCKERFILE_NAME)/Dockerfile.deepo targets/$(DOCKERFILE_NAME)/Dockerfile
 
+.PHONY: dockerhub_login
+dockerhub_login:
+	[ "$${DOCKERHUB_NAME}" ]     || { echo "env var DOCKERHUB_NAME not set up.";     false; }
+	[ "$${DOCKERHUB_PASSWORD}" ] || { echo "env var DOCKERHUB_PASSWORD not set up."; false; }
+	docker login -u "$${DOCKERHUB_NAME}" -p "$${DOCKERHUB_PASSWORD}"
+
+.PHONY: image_deploy
+image_deploy:
+ifeq (${GIT_NUMBER_OF_TAGS}, 1)
+	git diff-index --quiet HEAD -- || { echo "Found uncommited changes"; false; }
+	docker push neuromation/base:$${GIT_TAG}
+else
+	@echo "Found ${GIT_NUMBER_OF_TAGS} version tags: '${GIT_TAG}'"
+	@echo "Skipping."
+endif
 
 .PHONY: generate_recipes
 generate_recipes:
