@@ -200,6 +200,16 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 # Install openssh
   $APT_INSTALL openssh-server
 
+# ==================================================================
+# Apex for PyTorch mixed precision training
+# ==================================================================
+
+RUN mkdir /apex && \
+    cd /apex && \
+    git clone https://github.com/NVIDIA/apex && \
+    cd apex && \
+    python -m pip install -v --no-cache-dir --global-option="--cpp_ext" --global-option="--cuda_ext" ./
+
 # Setup environment for ssh session
 RUN echo "export PATH=$PATH" >> /etc/profile && \
  echo "export LANG=$LANG" >> /etc/profile && \
