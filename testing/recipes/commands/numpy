@@ -1,2 +1,2 @@
 f2py -h
-pytest --timeout=300 -v --pyargs numpy
+pytest --verbose --pyargs numpy -k "not (PLACEHOLDER)"
