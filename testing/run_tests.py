@@ -86,23 +86,25 @@ def run_tests(commands: List[str], ignore_commands: Set[str]) -> None:
 
             info = f"[.] {_timestamp()} Running command: `{cmd}`"
             print(info)
+            p = None
             try:
-                with STDOUT_DUMP_FILE.open("a") as f_stdout:
-                    with STDERR_DUMP_FILE.open("a") as f_stderr:
-                        f_stdout.write("\n" + info + "\n")
-                        f_stderr.write("\n" + info + "\n")
-                        p = subprocess.run(
-                            shlex.split(cmd), stdout=f_stdout, stderr=f_stderr
-                        )
-                total_run.append(cmd)
-                assert p.returncode == 0, f"non-zero exit code: {p.returncode}"
+                p = subprocess.run(
+                    shlex.split(cmd), stdout=subprocess.PIPE, stderr=subprocess.PIPE
+                )
+                if p.returncode != 0:
+                    raise RuntimeError(f"Non-zero exit code: {p.returncode}")
                 print(f"[+] {_timestamp()} Success.")
                 succeeded.append(cmd)
             except KeyboardInterrupt:
                 raise
             except Exception as e:
                 print(f"[-] {_timestamp()} Error {type(e)}: {e}")
+                if p:
+                    print(f"stdout: `{p.stdout}`")
+                    print(f"stderr: `{p.stderr}`")
                 failed.append(cmd)
+            finally:
+                total_run.append(cmd)
     finally:
         print("-" * 50)
         print("Summary:")
