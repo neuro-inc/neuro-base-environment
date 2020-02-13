@@ -1,4 +1,3 @@
-# Ignoring all catalyst tests as they are unstable and catalyst is going to be dropped out, see issue #85
 catalyst
 catalyst.dl
 catalyst.dl.callbacks
