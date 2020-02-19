@@ -253,6 +253,9 @@ ENV OUTPUT_PIPE "/output"
 # Needed for correct work of tqdm via 'neuro exec'
 ENV PYTHONUNBUFFERED 1
 
+# Copy jupyter defaults
+COPY jupyter_notebook_config.py /root/.jupyter/jupyter_notebook_config.py
+
 ## Setup entrypoint
 COPY entrypoint.sh /entrypoint.sh
 
