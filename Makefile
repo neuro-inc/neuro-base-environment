@@ -50,7 +50,7 @@ image_deploy:
 
 .PHONY: image_pip_list
 image_pip_list:
-	(DOCKER_RUN) $(IMAGE_NAME) pip list
+	$(DOCKER_RUN) $(IMAGE_NAME) pip list
 
 
 .PHONY: generate_recipes
