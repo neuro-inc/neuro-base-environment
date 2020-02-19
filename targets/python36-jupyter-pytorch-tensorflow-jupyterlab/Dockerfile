@@ -76,6 +76,7 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
         scikit-learn \
         matplotlib \
         Cython \
+        Pillow \
         && \
 
 # ==================================================================
