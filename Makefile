@@ -48,6 +48,10 @@ image_deploy:
 	docker tag ${IMAGE_NAME} ${IMAGE_NAME}:${GIT_TAG}
 	docker push ${IMAGE_NAME}:${GIT_TAG}
 
+.PHONY: image_pip_list
+image_pip_list:
+	(DOCKER_RUN) $(IMAGE_NAME) pip list
+
 
 .PHONY: generate_recipes
 generate_recipes:
