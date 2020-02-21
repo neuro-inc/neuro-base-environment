@@ -42,6 +42,11 @@ jobs:
             make image_build
 
       - run:
+            name: List installed pip packages
+            command: |
+              make image_pip_list
+              
+      - run:
             name: Prepare testing environment
             command: |
               # Since we use remote docker, in order to mount `testing/` folder to the container, we need to copy it first.
