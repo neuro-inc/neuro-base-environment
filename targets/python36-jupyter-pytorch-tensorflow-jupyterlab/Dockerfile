@@ -76,6 +76,8 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
         scikit-learn \
         matplotlib \
         Cython \
+        # Pillow version fixed, see https://github.com/python-pillow/Pillow/issues/4130#issuecomment-570452778
+        Pillow==6.1 \
         && \
 
 # ==================================================================
@@ -184,14 +186,6 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 # ------------------------------------------------------------------
 
     $PIP_INSTALL awscli && \
-
-# ==================================================================
-# catalyst
-# ------------------------------------------------------------------
-
-  # OpenCV requirements:
-  $APT_INSTALL libsm6 libxext6 libxrender-dev && \
-  $PIP_INSTALL catalyst && \
 
 # ==================================================================
 # SSH
