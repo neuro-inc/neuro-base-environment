@@ -124,9 +124,12 @@ workflows:
   main:
     jobs:
       - test
-#      - deploy:
-#          requires:
-#            - test
-#          filters:
-#            tags:
-#              only: /v.*/
+      - deploy:
+          requires:
+            - test
+          filters:
+            tags:
+              only: /v.*/
+            branches:
+              only:
+                - master
