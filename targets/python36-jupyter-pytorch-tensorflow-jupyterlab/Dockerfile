@@ -106,13 +106,15 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 # ==================================================================
 # jupyterlab
 # ------------------------------------------------------------------
-
+    # To pass test `jupyter lab build` (jupyterlab extensions), it needs nodejs>=12
+    # See instructions https://github.com/nodesource/distributions/blob/master/README.md#installation-instructions
+    curl -sL https://deb.nodesource.com/setup_12.x | bash - && \
     $APT_INSTALL \
         nodejs \
         && \
 
     $PIP_INSTALL \
-        jupyterlab==2.0.0 \
+        jupyterlab \
         && \
 
 # ==================================================================
