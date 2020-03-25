@@ -15,4 +15,4 @@ This project is licensed under the terms of the [Apache License](/LICENSE)
 
 Additional info
 ---------------
-For more details, see [Neuro Platform documentation](https://neu.ro/docs).
+For more details, see [Neuro Platform documentation](https://docs.neu.ro).
