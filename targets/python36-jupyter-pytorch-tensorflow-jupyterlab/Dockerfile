@@ -68,6 +68,7 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
     DEBIAN_FRONTEND=noninteractive $APT_INSTALL \
         python3-tk \
         && \
+    # Note: Pillow version fixed, see https://github.com/python-pillow/Pillow/issues/4130#issuecomment-570452778
     $PIP_INSTALL \
         numpy \
         scipy \
@@ -76,7 +77,6 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
         scikit-learn \
         matplotlib \
         Cython \
-        # Pillow version fixed, see https://github.com/python-pillow/Pillow/issues/4130#issuecomment-570452778
         Pillow==6.1 \
         && \
 
@@ -112,7 +112,7 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
         && \
 
     $PIP_INSTALL \
-        jupyterlab \
+        jupyterlab==2.0.0 \
         && \
 
 # ==================================================================
@@ -136,7 +136,7 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 # ------------------------------------------------------------------
 
     $PIP_INSTALL \
-        neuromation \
+        neuromation==20.3.20 \
         && \
 
 # ==================================================================
