@@ -68,6 +68,7 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
     DEBIAN_FRONTEND=noninteractive $APT_INSTALL \
         python3-tk \
         && \
+    # Note: Pillow version fixed, see https://github.com/python-pillow/Pillow/issues/4130#issuecomment-570452778
     $PIP_INSTALL \
         numpy \
         scipy \
@@ -76,7 +77,6 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
         scikit-learn \
         matplotlib \
         Cython \
-        # Pillow version fixed, see https://github.com/python-pillow/Pillow/issues/4130#issuecomment-570452778
         Pillow==6.1 \
         && \
 
@@ -106,7 +106,9 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 # ==================================================================
 # jupyterlab
 # ------------------------------------------------------------------
-
+    # To pass test `jupyter lab build` (jupyterlab extensions), it needs nodejs>=12
+    # See instructions https://github.com/nodesource/distributions/blob/master/README.md#installation-instructions
+    curl -sL https://deb.nodesource.com/setup_12.x | bash - && \
     $APT_INSTALL \
         nodejs \
         && \
@@ -136,7 +138,7 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 # ------------------------------------------------------------------
 
     $PIP_INSTALL \
-        neuromation \
+        neuromation==20.3.23 \
         && \
 
 # ==================================================================
