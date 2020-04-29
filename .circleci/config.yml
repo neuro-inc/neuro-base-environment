@@ -123,10 +123,10 @@ workflows:
   version: 2
   main:
     jobs:
-      - test
+      # - test
       - deploy:
-          requires:
-            - test
+          # requires:
+          #   - test
           filters:
             tags:
               only: /^v.*/
