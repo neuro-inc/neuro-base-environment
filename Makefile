@@ -66,16 +66,6 @@ test_dependencies_pip:
 	$(DOCKER_RUN) $(IMAGE_TEST_DOCKER_MOUNT_OPTION) --network=host --workdir=/testing $(IMAGE_NAME) python ./run_tests.py
 
 
-.PHONY: test_timeout
-test_timeout:
-	# job succeeds within the timeout 1 sec:
-	$(DOCKER_RUN) -e JOB_TIMEOUT=1 $(IMAGE_NAME) sleep 0.1  $(ASSERT_COMMAND_SUCCEEDS)
-	# job fails within the timeout 1 sec and exit status remains
-	$(DOCKER_RUN) -e JOB_TIMEOUT=1 $(IMAGE_NAME) bash -c 'exit 123' ; [ $$? -eq 123 ] $(ASSERT_COMMAND_SUCCEEDS)
-	# job exits within the timeout 1 sec (exit code 124):
-	$(DOCKER_RUN) -e JOB_TIMEOUT=1 $(IMAGE_NAME) sleep 10  $(ASSERT_COMMAND_FAILS)
-
-
 .PHONY: cleanup_test_ssh
 cleanup_test_ssh:
 	docker kill $(SSH_CONTAINER) | true

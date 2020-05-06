@@ -18,7 +18,7 @@ if [ -f "$NM_WANDB_TOKEN_PATH" ]; then
 fi
 
 
-exec timeout $JOB_TIMEOUT "$@"
+exec "$@"
 
 } 2>&1 | tee $OUTPUT_PIPE
 exit "${PIPESTATUS[0]}"
