@@ -138,7 +138,7 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 # ------------------------------------------------------------------
 
     $PIP_INSTALL \
-        neuromation==20.3.23 \
+        neuromation \
         && \
 
 # ==================================================================
@@ -205,8 +205,12 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 # Apex for PyTorch mixed precision training
 # ==================================================================
 
-RUN git clone https://github.com/NVIDIA/apex /tmp/apex && \
-    python -m pip install -v --no-cache-dir --global-option="--cpp_ext" --global-option="--cuda_ext" /tmp/apex
+# Somehow Apex does not use releases, and current master fails to build
+# (commit 1f2aa9156547377a023932a1512752c392d9bbdf on Apr 23, 2020).
+# So we fix installation to the version Apr 21, 2020
+RUN python -m pip install \
+  -v --no-cache-dir --global-option="--cpp_ext" --global-option="--cuda_ext" \
+  git+https://github.com/NVIDIA/apex@2ec84ebdca59278eaf15e8ddf32476d9d6d8b904
 
 # Setup environment for ssh session
 RUN echo "export PATH=$PATH" >> /etc/profile && \
