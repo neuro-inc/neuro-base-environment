@@ -10,3 +10,4 @@ matplotlib.ttconv
 matplotlib.backends._tkagg
 mpl_toolkits
 pylab
+matplotlib

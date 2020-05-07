@@ -1,8 +1,11 @@
+import json
 import re
 import sys
 import urllib.request
+from collections import defaultdict
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Pattern, Sequence
+from urllib.error import HTTPError
 
 import yaml
 from sympy.logic.boolalg import BooleanFalse, BooleanTrue
@@ -279,13 +282,19 @@ def _get_tests_subdict(
     """
     normalized = meta_dict.copy()
 
-    # HACK(artem) tensorflow's meta.yml has multiple sections inside `test`
-    if pip == "tensorflow":
-        outputs = [x for x in meta_dict["outputs"] if x["name"] == "tensorflow-base"]
-        assert len(outputs) == 1, f"wrong dict: {meta_dict}"
-        normalized = outputs[0]
+    test = normalized.get("test")
+    if test is None:
+        test = defaultdict(list)
+        for output in meta_dict.get("outputs", {}):
+            if output["name"] not in (pip, f"{pip}-base"):
+                continue
+            output_test = output.get("test", {})
+            for op in ["imports", "requires", "commands"]:
+                test[op].extend(output_test.get(op, {}))
+    if not test:
+        raise ValueError(f"Could not find tests in `{json.dumps(meta_dict, indent=2)}`")
 
-    return normalized["test"]
+    return test
 
 
 def _get_tests_dict(
@@ -341,7 +350,7 @@ def generate_recipes(dockerfile_path: str) -> None:
 
             dump_name = f"{recipe} (as {pip})" if pip != recipe else recipe
             print(f"dumped: {dump_name}")
-        except Exception as e:
+        except HTTPError as e:
             url = META_YML_URL_PATTERN.format(pip=pip)
             print(f"ERROR {recipe}: {type(e)} {e}. See file: {url}")
             continue
