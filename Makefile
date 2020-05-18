@@ -47,7 +47,7 @@ image_deploy:
 	@[ "${GIT_TAG_NUM}" -eq 1 ] || { echo "Must be only 1 tag, found: ${GIT_TAG_NUM}; GIT_TAG='${GIT_TAG}'"; false; }
 	docker tag ${IMAGE_NAME} ${IMAGE_NAME}:${GIT_TAG}
 	docker push ${IMAGE_NAME}:${GIT_TAG}
-	docker push ${IMAGE_NAME}:latest
+	# docker push ${IMAGE_NAME}:latest
 
 .PHONY: image_pip_list
 image_pip_list:
