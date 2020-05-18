@@ -120,7 +120,14 @@ workflows:
   version: 2
   main:
     jobs:
-      - deploy:
+      - test:
+          filters:
+            tags:
+              only:
+                - /v.*/
+       - deploy:
+          requires:
+            - test
           filters:
             branches:
               ignore: /.*/
