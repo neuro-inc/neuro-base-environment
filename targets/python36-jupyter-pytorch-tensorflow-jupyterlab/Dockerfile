@@ -79,6 +79,9 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
         Cython \
         Pillow==6.1 \
         && \
+        
+    # OpenCV
+    $APT_INSTALL libsm6 libxext6 libxrender-dev && \ 
 
 # ==================================================================
 # jupyter
