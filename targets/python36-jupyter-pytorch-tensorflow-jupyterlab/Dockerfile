@@ -134,7 +134,7 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
         && \
 
 # ==================================================================
-# neuromation 
+# neuromation
 # ------------------------------------------------------------------
 
     $PIP_INSTALL \
@@ -236,6 +236,12 @@ PermitEmptyPasswords yes\n" > /etc/ssh/sshd_config
 # ssh port
 EXPOSE 22
 
+# ==================================================================
+# Documentation notebook
+# ------------------------------------------------------------------
+RUN mkdir -p /var/notebooks
+COPY files/var/notebooks/Storage.ipynb /var/notebooks
+
 
 # ==================================================================
 # config & cleanup
@@ -251,7 +257,7 @@ EXPOSE 8888 6006
 # Create named pipe for stdout+stderr
 ENV OUTPUT_PIPE "/output"
 
-# Force the stdout and stderr streams to be unbuffered. 
+# Force the stdout and stderr streams to be unbuffered.
 # Needed for correct work of tqdm via 'neuro exec'
 ENV PYTHONUNBUFFERED 1
 
