@@ -240,7 +240,7 @@ EXPOSE 22
 # Documentation notebook
 # ------------------------------------------------------------------
 RUN mkdir -p /var/notebooks
-COPY files/var/notebooks/Storage.ipynb /var/notebooks
+COPY files/var/notebooks/README.ipynb /var/notebooks
 
 
 # ==================================================================
