@@ -25,16 +25,17 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 # ------------------------------------------------------------------
 
     DEBIAN_FRONTEND=noninteractive $APT_INSTALL \
-        build-essential \
         apt-utils \
+        build-essential \
         ca-certificates \
-        wget \
-        git \
-        vim \
-        libssl-dev \
         curl \
-        unzip \
+        git \
+        libssl-dev \
+        rsync \
         unrar \
+        unzip \
+        vim \
+        wget \
         && \
 
     git clone https://github.com/Kitware/CMake ~/cmake && \
