@@ -44,8 +44,6 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
         htop \
         && \
 
-    rm -rf /var/lib/apt/lists/*  && \
-
 # ==================================================================
 # python
 # ------------------------------------------------------------------
@@ -184,6 +182,8 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 RUN python -m pip install \
   -v --no-cache-dir --global-option="--cpp_ext" --global-option="--cuda_ext" \
   git+https://github.com/NVIDIA/apex@2ec84ebdca59278eaf15e8ddf32476d9d6d8b904
+
+RUN rm -rf /var/lib/apt/lists/*
 
 # Setup environment for ssh session
 RUN echo "export PATH=$PATH" >> /etc/profile && \
