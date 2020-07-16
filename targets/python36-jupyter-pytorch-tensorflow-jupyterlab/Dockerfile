@@ -199,13 +199,6 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
     $PIP_INSTALL awscli && \
 
 # ==================================================================
-# SSH
-# ------------------------------------------------------------------
-
-# Install openssh
-  $APT_INSTALL openssh-server
-
-# ==================================================================
 # Apex for PyTorch mixed precision training
 # ==================================================================
 
@@ -215,30 +208,6 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 RUN python -m pip install \
   -v --no-cache-dir --global-option="--cpp_ext" --global-option="--cuda_ext" \
   git+https://github.com/NVIDIA/apex@2ec84ebdca59278eaf15e8ddf32476d9d6d8b904
-
-# Setup environment for ssh session
-RUN echo "export PATH=$PATH" >> /etc/profile && \
- echo "export LANG=$LANG" >> /etc/profile && \
- echo "export LANGUAGE=$LANGUAGE" >> /etc/profile && \
- echo "export LC_ALL=$LC_ALL" >> /etc/profile && \
- echo "export PYTHONIOENCODING=$PYTHONIOENCODING" >> /etc/profile
-
-# Create folder for openssh fifos
-RUN mkdir -p /var/run/sshd
-
-# Disable password for root
-RUN sed -i -re 's/^root:[^:]+:/root::/' /etc/shadow
-RUN sed -i -re 's/^root:.*$/root::0:0:System Administrator:\/root:\/bin\/bash/' /etc/passwd
-
-# Permit root login over ssh
-RUN echo "Subsystem    sftp    /usr/lib/sftp-server \n\
-PasswordAuthentication yes\n\
-ChallengeResponseAuthentication yes\n\
-PermitRootLogin yes \n\
-PermitEmptyPasswords yes\n" > /etc/ssh/sshd_config
-
-# ssh port
-EXPOSE 22
 
 # ==================================================================
 # Documentation notebook
@@ -257,9 +226,6 @@ RUN ldconfig && \
     rm -rf /var/lib/apt/lists/* /tmp/* ~/*
 
 EXPOSE 8888 6006
-
-# Create named pipe for stdout+stderr
-ENV OUTPUT_PIPE "/output"
 
 # Force the stdout and stderr streams to be unbuffered.
 # Needed for correct work of tqdm via 'neuro exec'
