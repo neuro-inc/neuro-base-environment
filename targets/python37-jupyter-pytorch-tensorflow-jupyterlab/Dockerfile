@@ -1,14 +1,14 @@
 # ==================================================================
 # module list
 # ------------------------------------------------------------------
-# python        3.6       (apt)
+# python        3.7       (apt)
 # jupyter       latest    (pip)
 # jupyterlab    latest    (pip)
-# pytorch       1.2.0     (pip)
+# pytorch       1.5.1     (pip)
 # tensorflow    2.0.0-rc1 (pip)
 # ==================================================================
 
-FROM nvidia/cuda:10.0-cudnn7-devel-ubuntu18.04
+FROM pytorch/pytorch:1.5.1-cuda10.1-cudnn7-devel
 ENV LANG C.UTF-8
 RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
     PIP_INSTALL="python -m pip --no-cache-dir install --upgrade" && \
@@ -36,39 +36,19 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
         unzip \
         vim \
         wget \
+        libncurses5-dev \
+        libncursesw5-dev \
+        cmake \
+        nano \
+        tmux \
+        htop \
         && \
 
-    git clone https://github.com/Kitware/CMake ~/cmake && \
-    cd ~/cmake && \
-    git checkout release && \
-    ./bootstrap && \
-    make -j"$(nproc)" install && \
+    rm -rf /var/lib/apt/lists/*  && \
 
 # ==================================================================
 # python
 # ------------------------------------------------------------------
-
-    DEBIAN_FRONTEND=noninteractive $APT_INSTALL \
-        software-properties-common \
-        && \
-    add-apt-repository ppa:deadsnakes/ppa && \
-    apt-get update && \
-    DEBIAN_FRONTEND=noninteractive $APT_INSTALL \
-        python3.6 \
-        python3.6-dev \
-        python3-distutils-extra \
-        && \
-    wget -O ~/get-pip.py \
-        https://bootstrap.pypa.io/get-pip.py && \
-    python3.6 ~/get-pip.py && \
-    ln -s /usr/bin/python3.6 /usr/local/bin/python3 && \
-    ln -s /usr/bin/python3.6 /usr/local/bin/python && \
-    $PIP_INSTALL \
-        setuptools \
-        && \
-    DEBIAN_FRONTEND=noninteractive $APT_INSTALL \
-        python3-tk \
-        && \
     # Note: Pillow version fixed, see https://github.com/python-pillow/Pillow/issues/4130#issuecomment-570452778
     $PIP_INSTALL \
         numpy \
@@ -102,7 +82,6 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 
     $PIP_INSTALL \
         future \
-        numpy \
         protobuf \
         typing \
         && \
@@ -160,16 +139,6 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
     $PIP_INSTALL \
         tqdm \
         && \
-
-# ==================================================================
-# pytorch
-# ------------------------------------------------------------------
-
-    $PIP_INSTALL \
-        torch==1.2.0 \
-        && \
-    $PIP_INSTALL \
-        torchvision==0.4.0 && \
 
 # ==================================================================
 # tensorflow
