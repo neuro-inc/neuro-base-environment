@@ -1,1 +1,0 @@
-pytest --timeout 300 -n 2 --verbose --pyargs sklearn -k "not test_sag_regressor_computed_correct"

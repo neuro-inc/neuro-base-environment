@@ -1,9 +1,0 @@
-tensorboardX
-tensorboardX.crc32c
-tensorboardX.embedding
-tensorboardX.event_file_writer
-tensorboardX.onnx_graph
-tensorboardX.record_writer
-tensorboardX.summary
-tensorboardX.writer
-tensorboardX.x2num
