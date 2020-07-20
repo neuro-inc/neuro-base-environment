@@ -6,52 +6,33 @@ defaults: &defaults
   working_directory: /template-base-image
 
 jobs:
-  test:
+  build:
     <<: *defaults
     steps:
       - checkout
       - setup_remote_docker:
           docker_layer_caching: true
-
-      - run: &install_dependencies
-          name: Install dependencies
-          command: |
-            # dependencies for building the image
-            apk add --no-cache --no-progress make
-            # dependencies for testing pip dependencies (python must support typing)
-            apk add --no-cache --no-progress "python3>=3.7.5-r1" py-pip git
-            # dependencies for testing ssh (grep must have -P option)
-            apk add --no-cache --no-progress grep==3.3-r0 openssh-client==8.1_p1-r0
-            # dependencies for testing gcloud: pip-package 'fernet' needs it
-            apk add --no-cache --no-progress py-cryptography
-            python3 -m venv venv
-            source venv/bin/activate
-            pip3 install -U pip
-            pip3 install -r testing/requirements.txt
-
       - run:
-          name: Build application Docker image
+          name: Build Docker image
           command: |
             make image_build
-
       - run:
             name: List installed pip packages
             command: |
               make image_pip_list
               
-  deploy:
+  build_and_deploy:
     <<: *defaults
     steps:
       - checkout
       - setup_remote_docker:
-          docker_layer_caching: true
-      - run: *install_dependencies
+          docker_layer_caching: false
       - run:
-          name: Build application Docker image
+          name: Build Docker image
           command: |
             make image_build
       - run:
-          name: Publish Docker Image to Docker Hub
+          name: Publish Docker Image
           command: |
             make dockerhub_login
             make image_deploy
@@ -60,14 +41,12 @@ workflows:
   version: 2
   main:
     jobs:
-      - test:
+      - build:
           filters:
             tags:
               only:
                 - /v.*/
-      - deploy:
-          requires:
-            - test
+      - build_and_deploy:
           filters:
             branches:
               ignore: /.*/
