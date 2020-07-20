@@ -12,6 +12,11 @@ jobs:
       - checkout
       - setup_remote_docker:
           docker_layer_caching: true
+      - run: &install_dependencies
+          name: Install dependencies
+          command: |
+            # dependencies for building the image
+            apk add --no-cache --no-progress make
       - run:
           name: Build Docker image
           command: |
@@ -27,6 +32,7 @@ jobs:
       - checkout
       - setup_remote_docker:
           docker_layer_caching: false
+      - run: *install_dependencies
       - run:
           name: Build Docker image
           command: |
