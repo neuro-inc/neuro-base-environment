@@ -39,14 +39,3 @@ image_deploy:
 .PHONY: image_pip_list
 image_pip_list:
 	$(DOCKER_RUN) $(IMAGE_NAME) pip list
-
-.PHONY: generate_recipes
-generate_recipes:
-	python3 testing/generate_recipes.py targets/$(DOCKERFILE_NAME)/Dockerfile
-
-.PHONY: test_dependencies_pip
-test_dependencies_pip:
-	# Note: `--network=host` is used for the Internet access (to use `pip install ...`)
-	# however this prevents SSH to start (port 22 is already bind).
-	# see https://github.com/neuromation/template-base-image/issues/21
-	$(DOCKER_RUN) $(IMAGE_TEST_DOCKER_MOUNT_OPTION) --network=host --workdir=/testing $(IMAGE_NAME) python ./run_tests.py
