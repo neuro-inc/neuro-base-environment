@@ -60,27 +60,6 @@ jobs:
             name: Run tests
             no_output_timeout: 30m
             command: |
-              # Run ssh tests:
-              make test_ssh  SSH_OPTION="-e EXPOSE_SSH=yes"   SSH_ENABLED=yes
-              make test_ssh  SSH_OPTION="-e EXPOSE_SSH=value" SSH_ENABLED=yes
-              make test_ssh  SSH_OPTION="-e EXPOSE_SSH="      SSH_ENABLED=no
-              make test_ssh  SSH_OPTION='-e EXPOSE_SSH=""'    SSH_ENABLED=no
-              make test_ssh  SSH_OPTION=""                    SSH_ENABLED=no
-              make cleanup_test_ssh
-
-              # Run tests on 'gcloud auth':
-              make _test_gcloud_false  # should be no gsutil auth
-              make _generate_gcloud_key
-              docker create -v /testing --name=test-gsutil alpine /bin/true
-              docker cp testing/ test-gsutil:/
-              make _test_gcloud_true  IMAGE_TEST_DOCKER_MOUNT_OPTION="--volumes-from=test-gsutil"   # should succeed to auth gsutil
-
-              # Run tests on 'wandb login':
-              make test_wandb  IMAGE_TEST_DOCKER_MOUNT_OPTION="--volumes-from=aux"
-
-              # Run tests on stdou+stderr redirect to /tmp/output:
-              make test_output
-
               # Run tests on pip dependencies:
               make test_dependencies_pip  IMAGE_TEST_DOCKER_MOUNT_OPTION="--volumes-from=aux"
 
@@ -88,12 +67,6 @@ jobs:
             name: Download logs dir from the remote docker
             command: |
               docker cp aux:/testing/logs testing/
-
-      - run:
-            name: Cleanup test dirs
-            command: |
-              make _delete_gcloud_key || true
-            when: always
 
       - store_artifacts:
           path: testing/logs
