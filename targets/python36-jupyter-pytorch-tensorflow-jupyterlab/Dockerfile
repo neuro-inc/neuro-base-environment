@@ -69,7 +69,6 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
     DEBIAN_FRONTEND=noninteractive $APT_INSTALL \
         python3-tk \
         && \
-    # Note: Pillow version fixed, see https://github.com/python-pillow/Pillow/issues/4130#issuecomment-570452778
     $PIP_INSTALL \
         numpy \
         scipy \
@@ -78,7 +77,7 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
         scikit-learn \
         matplotlib \
         Cython \
-        Pillow==6.1 \
+        Pillow \
         && \
         
     # OpenCV
