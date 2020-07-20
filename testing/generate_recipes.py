@@ -28,7 +28,7 @@ TARGET_PYTHON_REGEX = _get_version_assertion_regex("py")
 TARGET_ANY_REGEX = _get_version_assertion_regex("[^><= ]+")
 
 PLACEHOLDER = "PLACEHOLDER"
-PIP_MODULE_REGEX = re.compile(r"\s([a-z][^\s=]*)", re.IGNORECASE)
+PIP_MODULE_REGEX = re.compile(r"\s([a-z][^\s=]*)\s", re.IGNORECASE)
 PIP_INSTALL_COMMANDS = {"$PIP_INSTALL"}
 PIP_COMMAND_SEPARATORS = {"&&"}
 META_YML_URL_PATTERN = "https://raw.githubusercontent.com/conda-forge/{pip}-feedstock/master/recipe/meta.yaml"
@@ -53,6 +53,11 @@ def _get_deepo_pip_packages(dockerfile_text: str) -> List[str]:
     pips: List[str] = []
     in_pip_section = False
     for line in lines:
+        comment_idx = line.find("#")
+        if comment_idx != -1:
+            line = line[: comment_idx]
+        if line.lstrip().startswith("RUN"):
+            in_pip_section = False
         if any(cmd in line for cmd in PIP_INSTALL_COMMANDS):
             in_pip_section = True
         if not in_pip_section:
