@@ -196,7 +196,7 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 # aws
 # ------------------------------------------------------------------
 
-    $PIP_INSTALL awscli && \
+    $PIP_INSTALL awscli
 
 # ==================================================================
 # Apex for PyTorch mixed precision training
