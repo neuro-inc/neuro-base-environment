@@ -1,2 +1,0 @@
-# Fails with "ERROR collecting tests/resample/test_base.py": In test_resample_interpolate: function uses no argument '_index_factory'
-pytest --pyargs pandas

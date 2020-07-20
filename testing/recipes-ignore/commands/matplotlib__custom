@@ -1,2 +1,0 @@
-# TODO(artem) perhaps, matplotlib is installed incorrectly, tests fail with: "OSError: The baseline image directory does not exist. This is most likely because the test data is not installed. You may need to install matplotlib from source to get the test data." 
-pytest --pyargs matplotlib
