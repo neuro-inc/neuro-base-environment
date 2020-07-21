@@ -197,6 +197,8 @@ EXPOSE 8888 6006
 # Needed for correct work of tqdm via 'neuro exec'
 ENV PYTHONUNBUFFERED 1
 
+WORKDIR /
+
 ## Setup entrypoint
 COPY entrypoint.sh /entrypoint.sh
 
