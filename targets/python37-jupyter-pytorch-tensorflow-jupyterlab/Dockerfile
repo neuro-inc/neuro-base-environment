@@ -4,8 +4,8 @@
 # python        3.7       (apt)
 # jupyter       latest    (pip)
 # jupyterlab    latest    (pip)
-# pytorch       1.5.1     (pip)
-# tensorflow    2.0.0-rc1 (pip)
+# pytorch       1.5.1     (docker-hub)
+# tensorflow    2.2.0     (pip)
 # ==================================================================
 
 FROM pytorch/pytorch:1.5.1-cuda10.1-cudnn7-devel
@@ -142,7 +142,7 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 # ------------------------------------------------------------------
 
     $PIP_INSTALL \
-        tensorflow-gpu==2.0.0 \
+        tensorflow==2.2.0 \
         && \
 
 # ==================================================================
