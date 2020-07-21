@@ -1,5 +1,5 @@
 IMAGE_NAME?=neuromation/base
-DOCKERFILE_NAME?=python36-jupyter-pytorch-tensorflow-jupyterlab
+DOCKERFILE_NAME?=python37-jupyter-pytorch-tensorflow-jupyterlab
 
 # Git helpers:
 GIT_TAG=$(shell git tag -l --points-at HEAD)
