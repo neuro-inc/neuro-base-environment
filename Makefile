@@ -1,24 +1,6 @@
 IMAGE_NAME?=neuromation/base
 DOCKERFILE_NAME?=python37-jupyter-pytorch-tensorflow-jupyterlab
 
-# Git helpers:
-GIT_TAG=$(shell git tag -l --points-at HEAD)
-GIT_TAG_NUM=$(shell echo "${GIT_TAG}" | wc -w)
-
-# Shortcuts:
-DOCKER_RUN?=docker run --tty --rm
-ASSERT_COMMAND_FAILS=&& { echo -e 'Failure!\n'; exit 1; } || { echo -e 'Success!\n'; }
-ASSERT_COMMAND_SUCCEEDS=&& echo -e 'Success!\n'
-
-# Testing settings:
-IMAGE_TEST_DOCKER_MOUNT_OPTION?=--volume=`pwd`/testing:/testing
-
-.PHONY: dockerhub_login
-dockerhub_login:
-	[ "$${DOCKERHUB_NAME}" ]     || { echo "env var DOCKERHUB_NAME not set up.";     false; }
-	[ "$${DOCKERHUB_PASSWORD}" ] || { echo "env var DOCKERHUB_PASSWORD not set up."; false; }
-	docker login -u "$${DOCKERHUB_NAME}" -p "$${DOCKERHUB_PASSWORD}"
-
 .PHONY: image_build
 image_build:
 	# git clone https://github.com/ufoym/deepo.git
@@ -38,4 +20,4 @@ image_deploy:
 
 .PHONY: image_pip_list
 image_pip_list:
-	$(DOCKER_RUN) $(IMAGE_NAME) pip list
+	docker run --tty --rm $(IMAGE_NAME) pip list
