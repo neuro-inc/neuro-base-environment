@@ -32,7 +32,7 @@ jobs:
       DOCKER_SERVER: docker.io
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-      IMAGE_NAME: neuromation/web-shell
+      IMAGE_NAME: neuromation/base
     steps:
       - name: Checkout commit
         uses: actions/checkout@v2
