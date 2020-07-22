@@ -25,10 +25,10 @@ jobs:
       - name: Build image
         uses: whoan/docker-build-with-cache-action@v5
         with:
-          registry: $DOCKER_SERVER
-          username: $DOCKER_USERNAME
-          password: $DOCKER_PASSWORD
-          image_name: $IMAGE_NAME
+          registry: ${{ env.DOCKER_SERVER }}
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
+          image_name: ${{ env.IMAGE_NAME }}
           # image_tag: debug1
           # push_git_tag: true
           dockerfile: targets/$DOCKERFILE_NAME/Dockerfile
@@ -39,10 +39,10 @@ jobs:
       - name: DEBUG Test image
         uses: whoan/docker-build-with-cache-action@v5
         with:
-          registry: $DOCKER_SERVER
-          username: $DOCKER_USERNAME
-          password: $DOCKER_PASSWORD
-          image_name: $IMAGE_NAME
+          registry: ${{ env.DOCKER_SERVER }}
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
+          image_name: ${{ env.IMAGE_NAME }}
           # image_tag: debug1
           # push_git_tag: true
           # dockerfile: targets/$DOCKERFILE_NAME/Dockerfile
