@@ -55,5 +55,5 @@ jobs:
           test "$TAGS"  # assert $TAGS not empty
           for tag in $(echo $TAGS | tr "," " ")
           do
-            echo docker push $IMAGE_NAME:$tag
+            docker push $IMAGE_NAME:$tag
           done
