@@ -31,7 +31,7 @@ jobs:
           image_name: ${{ env.IMAGE_NAME }}
           # image_tag: debug1
           # push_git_tag: true
-          dockerfile: targets/$DOCKERFILE_NAME/Dockerfile
+          dockerfile: targets/${{ env.DOCKERFILE_NAME }}/Dockerfile
           # push_image_and_stages: |
           #   make image_pip_list
             
@@ -43,9 +43,6 @@ jobs:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
           image_name: ${{ env.IMAGE_NAME }}
-          # image_tag: debug1
-          # push_git_tag: true
-          # dockerfile: targets/$DOCKERFILE_NAME/Dockerfile
           push_image_and_stages: |
             make image_pip_list
             
