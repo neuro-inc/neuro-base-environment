@@ -11,7 +11,7 @@ image_build:
 
 .PHONY: image_diff
 image_diff:
-	diff --color=always --side-by-side  targets/$(DOCKERFILE_VERSION)/Dockerfile.deepo targets/$(DOCKERFILE_VERSION)/Dockerfile
+	diff --color=always --side-by-side  targets/$(DOCKERFILE_VERSION)/Dockerfile.deepo targets/$(DOCKERFILE_VERSION)/Dockerfile ||:
 
 .PHONY: image_deploy
 image_deploy:
