@@ -24,13 +24,13 @@ jobs:
 
       - name: Build image
         id: build
-        uses: docker/build-action@v1
+        uses: docker/build-action@v1.1.0
         with:
           repository: ${{ env.IMAGE_NAME }}
           tags: v1
 
-      - name: login
-        uses: docker/login-action@v1
+      - name: Docker login
+        uses: docker/login-action@v1.1.0
         with:
           registry: myregistry
           username: ${{ env.DOCKER_USERNAME }}
@@ -52,33 +52,33 @@ jobs:
 
 
 
-      - name: Build image
-        uses: whoan/docker-build-with-cache-action@v5
-        with:
-          registry: ${{ env.DOCKER_SERVER }}
-          username: ${{ env.DOCKER_USERNAME }}
-          password: ${{ env.DOCKER_PASSWORD }}
-          image_name: ${{ env.IMAGE_NAME }}
-          # image_tag: debug1
-          # push_git_tag: true
-          dockerfile: ${{ env.DOCKERFILE_PATH }}
-          # push_image_and_stages: |
-          #   make image_pip_list
+      # - name: Build image
+      #   uses: whoan/docker-build-with-cache-action@v5
+      #   with:
+      #     registry: ${{ env.DOCKER_SERVER }}
+      #     username: ${{ env.DOCKER_USERNAME }}
+      #     password: ${{ env.DOCKER_PASSWORD }}
+      #     image_name: ${{ env.IMAGE_NAME }}
+      #     # image_tag: debug1
+      #     # push_git_tag: true
+      #     dockerfile: ${{ env.DOCKERFILE_PATH }}
+      #     # push_image_and_stages: |
+      #     #   make image_pip_list
             
 
 
 
 
 
-      - name: DEBUG Test image
-        uses: whoan/docker-build-with-cache-action@v5
-        with:
-          registry: ${{ env.DOCKER_SERVER }}
-          username: ${{ env.DOCKER_USERNAME }}
-          password: ${{ env.DOCKER_PASSWORD }}
-          image_name: ${{ env.IMAGE_NAME }}
-          push_image_and_stages: |
-            make image_pip_list
+      # - name: DEBUG Test image
+      #   uses: whoan/docker-build-with-cache-action@v5
+      #   with:
+      #     registry: ${{ env.DOCKER_SERVER }}
+      #     username: ${{ env.DOCKER_USERNAME }}
+      #     password: ${{ env.DOCKER_PASSWORD }}
+      #     image_name: ${{ env.IMAGE_NAME }}
+      #     push_image_and_stages: |
+      #       make image_pip_list
             
 
       # - name: "Set up env vars: master branch"
