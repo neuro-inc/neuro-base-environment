@@ -9,4 +9,4 @@ y = torch.randn(1_000, 10_000).to(cuda)
 z = torch.matmul(x, y)
 
 print(z)
-print("PyTorch GPU test succeeded")
+print(f"PyTorch version: {torch.__version__}: GPU test succeeded")
