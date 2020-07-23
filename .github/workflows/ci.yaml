@@ -21,7 +21,6 @@ jobs:
 
       - name: Show diff
         run: |
-            make image_diff || true
             make image_diff
 
       - name: Login DockerHub
