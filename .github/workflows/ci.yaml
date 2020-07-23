@@ -10,9 +10,6 @@ on:
 jobs:
   build:
     env:
-      DOCKER_SERVER: docker.io
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
       IMAGE_NAME: DEBUG
       DOCKERFILE_PATH: Dockerfile.DEBUG
     
@@ -22,33 +19,29 @@ jobs:
       - name: Checkout commit
         uses: actions/checkout@v2
 
+      - name: Login DockerHub
+        env:
+          DOCKER_SERVER: docker.io
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: |
+          docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD $DOCKER_SERVER
+
       - name: Build image
-        id: build
-        uses: docker/build@v1.1.0
-        with:
-          repository: ${{ env.IMAGE_NAME }}
-          tags: v1
-
-      - name: Docker login
-        uses: docker/login@v1.1.0
-        with:
-          registry: myregistry
-          username: ${{ env.DOCKER_USERNAME }}
-          password: ${{ env.DOCKER_PASSWORD }}
-
+        run: |
+            make image_build
+ 
       - name: Push master
         if: github.ref == 'refs/heads/master'
-        uses: docker/push@v1.1.0
-        with:
-          registry: ${{ env.DOCKER_SERVER }}
-          tags: "master-$(date +%Y%m%d)-$GITHUB_RUN_NUMBER"
+        run: |
+          export GIT_TAGS="master-$(date +%Y%m%d)-$GITHUB_RUN_NUMBER"
+          make image_deploy
 
       - name: Push release
         if: startsWith(github.ref, 'refs/tags/')
-        uses: docker/push@v1.1.0
-        with:
-          registry: ${{ env.DOCKER_SERVER }}
-          tags: "latest,${GITHUB_REF#refs/tags/}"
+        run: |
+          export GIT_TAGS="latest,${GITHUB_REF#refs/tags/}"
+          make image_deploy
 
 
 
