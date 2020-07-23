@@ -48,7 +48,7 @@ jobs:
         uses: docker/push-action@v1
         with:
           registry: ${{ env.DOCKER_SERVER }}
-          tags: ${{ outputs.build.tags }}
+          tags: "latest,${GITHUB_REF#refs/tags/}"
 
 
 
