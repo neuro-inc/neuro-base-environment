@@ -10,24 +10,42 @@ on:
 jobs:
   build:
     env:
+      DOCKER_SERVER: docker.io
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
       DOCKERFILE_VERSION: python37-jupyter-pytorch-tensorflow-jupyterlab
       IMAGE_NAME: neuromation/base
-    
+      NEURO_STAGING_URL: ${{ secrets.NEURO_STAGING_URL }}
+      NEURO_TOKEN: ${{ secrets.NEURO_TOKEN }}
+
     name: Build, test and publish image
     runs-on: ubuntu-latest
     steps:
       - name: Checkout commit
         uses: actions/checkout@v2
 
+      - name: Install python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.7"
+
+      - name: Install dependencies
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install -U neuromation
+
+      - name: Configure environment
+        run: |
+          source venv/bin/activate
+          neuro config login-with-token $NEURO_TOKEN $NEURO_STAGING_URL
+          neuro config show
+
       - name: Show diff
         run: |
             make image_diff
 
       - name: Login DockerHub
-        env:
-          DOCKER_SERVER: docker.io
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: |
           docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD $DOCKER_SERVER
 
