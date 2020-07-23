@@ -18,10 +18,9 @@ image_diff:
 image_deploy:
 	@[ "${GIT_TAGS}" ] || { echo "Env var GIT_TAGS must be set"; false; }
 	for t in $(shell echo $(GIT_TAGS) | tr "," " "); do \
-      echo $$t \
       docker tag $(IMAGE_NAME):built $(IMAGE_NAME):$$t && \
-	  docker push $(IMAGE_NAME):$$t ; \
-	done
+      docker push $(IMAGE_NAME):$$t ; \
+    done
 
 .PHONY: image_pip_list
 image_pip_list:
