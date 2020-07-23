@@ -11,7 +11,7 @@ jobs:
   build:
     env:
       IMAGE_NAME: neuromation/base
-      DOCKERFILE_PATH: Dockerfile.DEBUG
+      DOCKERFILE_VERSION: python37-jupyter-pytorch-tensorflow-jupyterlab
     
     name: Build, test and publish image
     runs-on: ubuntu-latest
@@ -30,6 +30,10 @@ jobs:
       - name: Build image
         run: |
             make image_build
+ 
+      - name: List pip packages
+        run: |
+            make image_pip_list
  
       - name: Push master
         if: github.ref == 'refs/heads/master'
