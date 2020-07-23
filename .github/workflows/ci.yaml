@@ -44,7 +44,7 @@ jobs:
             make e2e_neuro_push
             make test_e2e_pytorch
             make test_e2e_tensorflow
- 
+
       - name: Push master
         if: github.ref == 'refs/heads/master'
         run: |
