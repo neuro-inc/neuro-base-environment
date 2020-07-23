@@ -39,7 +39,7 @@ jobs:
         run: |
             make image_pip_list
 
-      - name: Test image e2e
+      - name: Test image
         run: |
             make e2e_neuro_push
             make test_e2e_pytorch

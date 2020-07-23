@@ -41,7 +41,11 @@ TEST_SCRIPT=
 _test_e2e:
 	neuro mkdir -p $(TEST_STORAGE)/
 	neuro cp -u files/testing/$(TEST_SCRIPT) $(TEST_STORAGE)/
-	neuro run -s gpu-small -v $(TEST_STORAGE):/var/storage $(TEST_IMAGE_NAME):$(TEST_IMAGE_TAG) python /var/storage/$(TEST_SCRIPT)
+	neuro run \
+	    -s gpu-small \
+		-v $(TEST_STORAGE):/var/storage \
+	    $(TEST_IMAGE_NAME):$(TEST_IMAGE_TAG) \
+		python /var/storage/$(TEST_SCRIPT)
 
 
 .PHONY: test_e2e_pytorch
