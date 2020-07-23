@@ -38,14 +38,14 @@ jobs:
 
       - name: Push master
         if: github.ref == 'refs/heads/master'
-        uses: docker/push-action@v1
+        uses: docker/push-action@v1.1.0
         with:
           registry: ${{ env.DOCKER_SERVER }}
           tags: master-$(date +%Y%m%d)-$GITHUB_RUN_NUMBER
 
       - name: Push release
         if: startsWith(github.ref, 'refs/tags/')
-        uses: docker/push-action@v1
+        uses: docker/push-action@v1.1.0
         with:
           registry: ${{ env.DOCKER_SERVER }}
           tags: "latest,${GITHUB_REF#refs/tags/}"
