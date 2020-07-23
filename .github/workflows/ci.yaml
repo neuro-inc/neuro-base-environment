@@ -11,7 +11,6 @@ jobs:
   build:
     env:
       IMAGE_NAME: neuromation/base
-      DOCKERFILE_VERSION: python37-jupyter-pytorch-tensorflow-jupyterlab
     
     name: Build, test and publish image
     runs-on: ubuntu-latest
@@ -28,6 +27,8 @@ jobs:
           docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD $DOCKER_SERVER
 
       - name: Build image
+        env:
+          DOCKERFILE_VERSION: python37-jupyter-pytorch-tensorflow-jupyterlab
         run: |
             make image_build
  
