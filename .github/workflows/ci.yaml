@@ -10,10 +10,10 @@ on:
 jobs:
   build:
     env:
-      IMAGE_NAME: DEBUG
+      IMAGE_NAME: neuromation/base
       DOCKERFILE_PATH: Dockerfile.DEBUG
     
-    name: Build image
+    name: Build, test and publish image
     runs-on: ubuntu-latest
     steps:
       - name: Checkout commit
