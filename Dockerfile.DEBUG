@@ -1,5 +1,1 @@
 FROM ubuntu
-
-RUN ls -l
-
-
