@@ -33,8 +33,8 @@ jobs:
         uses: docker/login-action@v1
         with:
           registry: myregistry
-          username: ${{ DOCKER_USERNAME }}
-          password: ${{ DOCKER_PASSWORD }}
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
 
       - name: Push master
         if: github.ref == 'refs/heads/master'
