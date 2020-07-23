@@ -10,6 +10,7 @@ on:
 jobs:
   build:
     env:
+      DOCKERFILE_VERSION: python37-jupyter-pytorch-tensorflow-jupyterlab
       IMAGE_NAME: neuromation/base
     
     name: Build, test and publish image
@@ -17,6 +18,10 @@ jobs:
     steps:
       - name: Checkout commit
         uses: actions/checkout@v2
+
+      - name: Show diff
+        run: |
+            make image_diff
 
       - name: Login DockerHub
         env:
@@ -27,8 +32,6 @@ jobs:
           docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD $DOCKER_SERVER
 
       - name: Build image
-        env:
-          DOCKERFILE_VERSION: python37-jupyter-pytorch-tensorflow-jupyterlab
         run: |
             make image_build
  
