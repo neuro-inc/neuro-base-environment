@@ -1,5 +1,6 @@
 IMAGE_NAME ?= neuromation/base
 DOCKERFILE_PATH ?= targets/python37-jupyter-pytorch-tensorflow-jupyterlab/Dockerfile
+GIT_TAGS ?=
 
 
 .PHONY: image_build
@@ -11,9 +12,6 @@ image_build:
 .PHONY: image_diff
 image_diff:
 	diff --color=always --side-by-side  $(DOCKERFILE_PATH).deepo $(DOCKERFILE_PATH)
-
-
-GIT_TAGS ?=
 
 .PHONY: image_deploy
 image_deploy:

@@ -32,7 +32,7 @@ jobs:
             make image_build
  
       - name: Push master
-        if: github.ref == 'refs/heads/master'
+        # if: github.ref == 'refs/heads/master'
         run: |
           export GIT_TAGS="master-$(date +%Y%m%d)-$GITHUB_RUN_NUMBER"
           make image_deploy
