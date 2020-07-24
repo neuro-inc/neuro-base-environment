@@ -41,24 +41,25 @@ jobs:
           neuro config login-with-token $NEURO_TOKEN $NEURO_STAGING_URL
           neuro config show
 
-      - name: Show diff
-        run: |
-            make image_diff
+      # - name: Show diff
+      #   run: |
+      #       make image_diff
 
-      - name: Login DockerHub
-        run: |
-          docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD $DOCKER_SERVER
+      # - name: Login DockerHub
+      #   run: |
+      #     docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD $DOCKER_SERVER
 
-      - name: Build image
-        run: |
-            make image_build
+      # - name: Build image
+      #   run: |
+      #       make image_build
 
-      - name: List pip packages
-        run: |
-            make image_pip_list
+      # - name: List pip packages
+      #   run: |
+      #       make image_pip_list
 
       - name: Test image
         run: |
+            source venv/bin/activate
             make e2e_neuro_push
             make test_e2e_pytorch
             make test_e2e_tensorflow
