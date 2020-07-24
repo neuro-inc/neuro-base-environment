@@ -32,7 +32,9 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
         git \
         libssl-dev \
         rsync \
+        rclone \
         unrar \
+        zip \
         unzip \
         vim \
         wget \
