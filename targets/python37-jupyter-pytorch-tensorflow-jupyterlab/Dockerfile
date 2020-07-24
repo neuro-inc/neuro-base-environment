@@ -42,6 +42,7 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
         nano \
         tmux \
         htop \
+        ssh \
         && \
 
 # ==================================================================
