@@ -34,6 +34,7 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
         rsync \
         rclone \
         unrar \
+        zip \
         unzip \
         vim \
         wget \

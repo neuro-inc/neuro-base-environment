@@ -32,23 +32,26 @@ image_pip_list:
 e2e_neuro_push:
 	neuro push $(IMAGE_NAME):built $(TEST_IMAGE)
 
+TEST_PRESET=cpu-small
 TEST_CMD=
 .PHONY: _test_e2e
 _test_e2e:
 	neuro mkdir -p $(TEST_STORAGE)/
 	neuro cp -ru files/testing/ -T $(TEST_STORAGE)/
 	neuro run \
-	    -s gpu-small \
+	    -s $(TEST_PRESET) \
 		-v $(TEST_STORAGE):/var/storage \
 	    $(TEST_IMAGE) \
 		$(TEST_CMD)
 
 .PHONY: test_e2e_pytorch
 test_e2e_pytorch: TEST_CMD=python /var/storage/gpu_pytorch.py
+test_e2e_pytorch: TEST_PRESET=gpu-small
 test_e2e_pytorch: _test_e2e
 
 .PHONY: test_e2e_tensorflow
 test_e2e_tensorflow: TEST_CMD=python /var/storage/gpu_tensorflow.py
+test_e2e_tensorflow: TEST_PRESET=gpu-small
 test_e2e_tensorflow: _test_e2e
 
 .PHONY: test_e2e_dependencies
