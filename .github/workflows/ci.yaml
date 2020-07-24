@@ -60,9 +60,7 @@ jobs:
       - name: Test image
         run: |
             source venv/bin/activate
-            make e2e_neuro_push
-            make test_e2e_pytorch
-            make test_e2e_tensorflow
+            make image_test
 
       - name: Push master
         if: github.ref == 'refs/heads/master'

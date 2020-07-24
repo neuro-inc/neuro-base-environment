@@ -29,27 +29,35 @@ image_pip_list:
 	docker run --tty --rm $(IMAGE_NAME) pip list
 
 
+.PHONY: image_test
+image_test: e2e_neuro_push test_e2e_pytorch test_e2e_tensorflow test_e2e_dependencies
+
+
 .PHONY: e2e_neuro_push
 e2e_neuro_push:
 	neuro push $(IMAGE_NAME):built $(TEST_IMAGE)
 
 
-TEST_SCRIPT=
+TEST_CMD=
 .PHONY: _test_e2e
 _test_e2e:
 	neuro mkdir -p $(TEST_STORAGE)/
-	neuro cp -u files/testing/$(TEST_SCRIPT) $(TEST_STORAGE)/
+	neuro cp -ru files/testing/ -T $(TEST_STORAGE)/
 	neuro run \
 	    -s gpu-small \
 		-v $(TEST_STORAGE):/var/storage \
 	    $(TEST_IMAGE) \
-		python /var/storage/$(TEST_SCRIPT)
+		$(TEST_CMD)
 
 
 .PHONY: test_e2e_pytorch
-test_e2e_pytorch: TEST_SCRIPT=gpu_pytorch.py
+test_e2e_pytorch: TEST_CMD=python /var/storage/gpu_pytorch.py
 test_e2e_pytorch: _test_e2e
 
 .PHONY: test_e2e_tensorflow
-test_e2e_tensorflow: TEST_SCRIPT=gpu_tensorflow.py
+test_e2e_tensorflow: TEST_CMD=python /var/storage/gpu_tensorflow.py
 test_e2e_tensorflow: _test_e2e
+
+.PHONY: test_e2e_dependencies
+test_e2e_dependencies: TEST_CMD=bash /var/storage/dependencies.sh
+test_e2e_dependencies: _test_e2e
