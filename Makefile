@@ -2,6 +2,9 @@ IMAGE_NAME ?= neuromation/base
 DOCKERFILE_VERSION ?= python37-jupyter-pytorch-tensorflow-jupyterlab
 GIT_TAGS ?=
 
+TEST_IMAGE ?= image:e2e-neuro-base-environment:debug
+TEST_STORAGE ?= storage:.neuro-base-environment
+
 
 .PHONY: image_build
 image_build:
@@ -24,3 +27,29 @@ image_deploy:
 .PHONY: image_pip_list
 image_pip_list:
 	docker run --tty --rm $(IMAGE_NAME) pip list
+
+
+.PHONY: e2e_neuro_push
+e2e_neuro_push:
+	neuro push $(IMAGE_NAME):built $(TEST_IMAGE)
+
+
+TEST_SCRIPT=
+.PHONY: _test_e2e
+_test_e2e:
+	neuro mkdir -p $(TEST_STORAGE)/
+	neuro cp -u files/testing/$(TEST_SCRIPT) $(TEST_STORAGE)/
+	neuro run \
+	    -s gpu-small \
+		-v $(TEST_STORAGE):/var/storage \
+	    $(TEST_IMAGE) \
+		python /var/storage/$(TEST_SCRIPT)
+
+
+.PHONY: test_e2e_pytorch
+test_e2e_pytorch: TEST_SCRIPT=gpu_pytorch.py
+test_e2e_pytorch: _test_e2e
+
+.PHONY: test_e2e_tensorflow
+test_e2e_tensorflow: TEST_SCRIPT=gpu_tensorflow.py
+test_e2e_tensorflow: _test_e2e
