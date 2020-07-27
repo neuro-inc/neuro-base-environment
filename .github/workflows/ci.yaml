@@ -73,5 +73,5 @@ jobs:
 
       - name: Push release
         run: |
-          export GIT_TAGS="latest,v1.7.4"
+          export GIT_TAGS="latest,${GITHUB_REF#refs/tags/}"
           make image_deploy
