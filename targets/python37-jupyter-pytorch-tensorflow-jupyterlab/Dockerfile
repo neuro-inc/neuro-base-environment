@@ -4,11 +4,11 @@
 # python        3.7       (apt)
 # jupyter       latest    (pip)
 # jupyterlab    latest    (pip)
-# pytorch       1.5.1     (docker-hub)
-# tensorflow    2.2.0     (pip)
+# pytorch       1.6.0     (docker-hub)
+# tensorflow    2.3.0     (pip)
 # ==================================================================
 
-FROM pytorch/pytorch:1.5.1-cuda10.1-cudnn7-devel
+FROM pytorch/pytorch:1.6.0-cuda10.1-cudnn7-devel
 ENV LANG C.UTF-8
 RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
     PIP_INSTALL="python -m pip --no-cache-dir install --upgrade" && \
@@ -145,7 +145,7 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 # ------------------------------------------------------------------
 
     $PIP_INSTALL \
-        tensorflow==2.2.0 \
+        tensorflow==2.3.0 \
         && \
 
 # ==================================================================
