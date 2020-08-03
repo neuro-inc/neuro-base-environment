@@ -65,12 +65,6 @@ jobs:
             make test_e2e_pytorch
             make test_e2e_tensorflow
 
-      - name: Push master
-        if: github.ref == 'refs/heads/master'
-        run: |
-          export GIT_TAGS="master-$(date +%Y%m%d)-$GITHUB_RUN_NUMBER"
-          make image_deploy
-
       - name: Push release
         if: startsWith(github.ref, 'refs/tags/')
         run: |
