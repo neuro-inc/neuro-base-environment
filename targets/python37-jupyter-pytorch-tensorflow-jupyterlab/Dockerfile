@@ -190,7 +190,7 @@ COPY files/var/notebooks/README.ipynb /var/notebooks
 # ------------------------------------------------------------------
 
 # Setup environment for ssh session
-RUN  $APT_INSTALL openssh-server && \
+RUN apt-get install -y --no-install-recommends openssh-server && \
  echo "export PATH=$PATH" >> /etc/profile && \
  echo "export LANG=$LANG" >> /etc/profile && \
  echo "export LANGUAGE=$LANGUAGE" >> /etc/profile && \
