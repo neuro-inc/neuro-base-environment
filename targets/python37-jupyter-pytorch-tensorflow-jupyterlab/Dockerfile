@@ -186,6 +186,35 @@ COPY files/var/notebooks/README.ipynb /var/notebooks
 
 
 # ==================================================================
+# Set up SSH for remote debug
+# ------------------------------------------------------------------
+
+# Setup environment for ssh session
+RUN apt-get install -y --no-install-recommends openssh-server && \
+ echo "export PATH=$PATH" >> /etc/profile && \
+ echo "export LANG=$LANG" >> /etc/profile && \
+ echo "export LANGUAGE=$LANGUAGE" >> /etc/profile && \
+ echo "export LC_ALL=$LC_ALL" >> /etc/profile && \
+ echo "export PYTHONIOENCODING=$PYTHONIOENCODING" >> /etc/profile
+
+# Create folder for openssh fifos
+RUN mkdir -p /var/run/sshd
+
+# Disable password for root
+RUN sed -i -re 's/^root:[^:]+:/root::/' /etc/shadow
+RUN sed -i -re 's/^root:.*$/root::0:0:System Administrator:\/root:\/bin\/bash/' /etc/passwd
+
+# Permit root login over ssh
+RUN echo "Subsystem    sftp    /usr/lib/sftp-server \n\
+PasswordAuthentication yes\n\
+ChallengeResponseAuthentication yes\n\
+PermitRootLogin yes \n\
+PermitEmptyPasswords yes\n" > /etc/ssh/sshd_config
+
+# ssh port
+EXPOSE 22
+
+# ==================================================================
 # config & cleanup
 # ------------------------------------------------------------------
 
