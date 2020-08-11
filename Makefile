@@ -10,7 +10,7 @@ TEST_STORAGE ?= storage:.neuro-base-environment
 image_build:
 	# git clone https://github.com/ufoym/deepo.git
 	# python3 deepo/generator/generate.py --cuda-ver=10.0 --cudnn-ver=cudnn7-devel --ubuntu-ver=ubuntu18.04 targets/$(DOCKERFILE_VERSION)/Dockerfile tensorflow pytorch jupyter jupyterlab python==3.6
-	docker build -t $(IMAGE_NAME):built --cache-from ubuntu -f targets/$(DOCKERFILE_VERSION)/Dockerfile .
+	docker build -t $(IMAGE_NAME):built -f targets/$(DOCKERFILE_VERSION)/Dockerfile .
 
 .PHONY: image_diff
 image_diff:
