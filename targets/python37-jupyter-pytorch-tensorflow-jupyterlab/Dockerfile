@@ -171,6 +171,10 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 # Apex for PyTorch mixed precision training
 # ==================================================================
 
+# problem: https://github.com/neuro-inc/ml-kinect-pose-estimation/issues/59
+# solution: https://github.com/NVIDIA/apex/issues/842
+ENV TORCH_CUDA_ARCH_LIST 6.0;7.0
+
 # Somehow Apex does not use releases, and current master fails to build
 # (commit 1f2aa9156547377a023932a1512752c392d9bbdf on Apr 23, 2020).
 # So we fix installation to the version Apr 21, 2020
