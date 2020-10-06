@@ -33,10 +33,6 @@ e2e_neuro_push:
 	neuro push $(IMAGE_NAME):built $(TEST_IMAGE)
 
 
-.PHONY: test_e2e
-test_e2e: test_e2e_pytorch test_e2e_tensorflow test_e2e_apex_gpu_small test_e2e_apex_gpu_large test_e2e_dependencies
-	@echo "e2e tests succeeded!"
-
 TEST_PRESET=cpu-small
 TEST_CMD=
 .PHONY: _test_e2e
