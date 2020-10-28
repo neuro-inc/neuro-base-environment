@@ -1,14 +1,14 @@
 # ==================================================================
 # module list
 # ------------------------------------------------------------------
-# python        3.7       (apt)
+# python        3.8       (apt)
 # jupyter       latest    (pip)
 # jupyterlab    latest    (pip)
-# pytorch       1.6.0     (docker-hub)
+# pytorch       1.7.0     (docker-hub)
 # tensorflow    2.3.0     (pip)
 # ==================================================================
 
-FROM pytorch/pytorch:1.6.0-cuda10.1-cudnn7-devel
+FROM pytorch/pytorch:1.7.0-cuda11.0-cudnn8-devel
 ENV LANG C.UTF-8
 RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
     PIP_INSTALL="python -m pip --no-cache-dir install --upgrade" && \
