@@ -6,6 +6,7 @@
 # jupyterlab    latest    (pip)
 # pytorch       1.6.0     (docker-hub)
 # tensorflow    2.3.0     (pip)
+# neuromation   20.11.18  (pip)
 # ==================================================================
 
 FROM pytorch/pytorch:1.6.0-cuda10.1-cudnn7-devel
@@ -121,7 +122,7 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 # ------------------------------------------------------------------
 
     $PIP_INSTALL \
-        neuromation \
+        neuromation==20.11.18 \
         && \
 
 # ==================================================================
