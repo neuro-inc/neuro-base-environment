@@ -166,7 +166,16 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 # aws
 # ------------------------------------------------------------------
 
-    $PIP_INSTALL awscli
+    $PIP_INSTALL awscli \
+    && \
+
+# ==================================================================
+# VSCode server
+# ------------------------------------------------------------------
+
+    wget https://github.com/cdr/code-server/releases/download/v3.9.1/code-server_3.9.1_amd64.deb  && \
+    dpkg -i code-server_3.9.1_amd64.deb \
+    && \
 
 # ==================================================================
 # Apex for PyTorch mixed precision training
@@ -175,9 +184,8 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 # Somehow Apex does not use releases, and current master fails to build
 # (commit 1f2aa9156547377a023932a1512752c392d9bbdf on Apr 23, 2020).
 # So we fix installation to the version Apr 21, 2020
-RUN python -m pip install \
-  -v --no-cache-dir --global-option="--cpp_ext" --global-option="--cuda_ext" \
-  git+https://github.com/NVIDIA/apex@2ec84ebdca59278eaf15e8ddf32476d9d6d8b904
+    $PIP_INSTALL --global-option="--cpp_ext" --global-option="--cuda_ext" \
+      git+https://github.com/NVIDIA/apex@2ec84ebdca59278eaf15e8ddf32476d9d6d8b904
 
 # ==================================================================
 # Documentation notebook
