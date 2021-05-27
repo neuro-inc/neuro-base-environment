@@ -6,8 +6,8 @@
 # jupyterlab    latest    (pip)
 # pytorch       1.6.0     (docker-hub)
 # tensorflow    2.3.0     (pip)
-# neuro-cli     21.3.3    (pip)
-# neuro-flow    21.3.17   (pip)
+# neuro-cli     21.5.17    (pip)
+# neuro-flow    21.5.25   (pip)
 # neuro-extras  20.12.16  (pip)
 # ==================================================================
 
@@ -125,9 +125,9 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 # ------------------------------------------------------------------
 
     $PIP_INSTALL \
-        neuro-cli==21.3.3 \
-        neuro-flow==21.3.17 \
-        neuro-extras==20.12.16 \
+        neuro-cli==21.5.17 \
+        neuro-flow==21.5.25 \
+        neuro-extras==21.3.19 \
         && \
 
 # ==================================================================
