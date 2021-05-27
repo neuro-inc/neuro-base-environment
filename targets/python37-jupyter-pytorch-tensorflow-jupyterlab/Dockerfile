@@ -6,9 +6,9 @@
 # jupyterlab    latest    (pip)
 # pytorch       1.6.0     (docker-hub)
 # tensorflow    2.3.0     (pip)
-# neuro-cli     21.3.3    (pip)
-# neuro-flow    21.3.17   (pip)
-# neuro-extras  20.12.16  (pip)
+# neuro-cli     21.5.17    (pip)
+# neuro-flow    21.5.25   (pip)
+# neuro-extras  21.3.19  (pip)
 # ==================================================================
 
 FROM pytorch/pytorch:1.6.0-cuda10.1-cudnn7-devel
@@ -31,6 +31,7 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
         apt-utils \
         build-essential \
         ca-certificates \
+        cron \
         curl \
         git \
         libssl-dev \
@@ -124,9 +125,9 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 # ------------------------------------------------------------------
 
     $PIP_INSTALL \
-        neuro-cli==21.3.3 \
-        neuro-flow==21.3.17 \
-        neuro-extras==20.12.16 \
+        neuro-cli==21.5.17 \
+        neuro-flow==21.5.25 \
+        neuro-extras==21.3.19 \
         && \
 
 # ==================================================================
@@ -190,6 +191,14 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 # So we fix installation to the version Apr 21, 2020
     $PIP_INSTALL --global-option="--cpp_ext" --global-option="--cuda_ext" \
       git+https://github.com/NVIDIA/apex@2ec84ebdca59278eaf15e8ddf32476d9d6d8b904
+
+# ==================================================================
+# OOM guard
+# Adds a script to tune oom_killer behavior and puts it into the crontab
+# ==================================================================
+
+COPY files/root/oom_guard.sh /root/oom_guard.sh
+RUN crontab -l 2>/dev/null | { cat; echo '* * * * * /root/oom_guard.sh'; } | crontab
 
 # ==================================================================
 # Documentation notebook
