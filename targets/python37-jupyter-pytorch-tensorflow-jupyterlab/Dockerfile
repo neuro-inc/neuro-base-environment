@@ -8,7 +8,7 @@
 # tensorflow    2.3.0     (pip)
 # neuro-cli     21.5.17    (pip)
 # neuro-flow    21.5.25   (pip)
-# neuro-extras  20.12.16  (pip)
+# neuro-extras  21.3.19  (pip)
 # ==================================================================
 
 FROM pytorch/pytorch:1.6.0-cuda10.1-cudnn7-devel
