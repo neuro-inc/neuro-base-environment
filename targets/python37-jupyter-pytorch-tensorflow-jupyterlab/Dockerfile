@@ -128,6 +128,8 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
         neuro-cli==21.5.17 \
         neuro-flow==21.5.25 \
         neuro-extras==21.3.19 \
+        neuro-sdk \
+        packaging \
         && \
 
 # ==================================================================
