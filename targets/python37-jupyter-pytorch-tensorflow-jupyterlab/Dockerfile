@@ -197,8 +197,8 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 # Adds a script to tune oom_killer behavior and puts it into the crontab
 # ==================================================================
 
-COPY files/root/oom_guard.sh /root/oom_guard.sh
-RUN crontab -l 2>/dev/null | { cat; echo '* * * * * /root/oom_guard.sh'; } | crontab
+COPY files/usr/local/sbin/oom_guard.sh /usr/local/sbin/oom_guard.sh
+RUN crontab -l 2>/dev/null | { cat; echo '* * * * * /usr/local/sbin/oom_guard.sh'; } | crontab
 
 # ==================================================================
 # Documentation notebook
