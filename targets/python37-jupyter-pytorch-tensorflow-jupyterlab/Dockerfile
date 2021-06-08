@@ -6,8 +6,8 @@
 # jupyterlab    latest    (pip)
 # pytorch       1.6.0     (docker-hub)
 # tensorflow    2.3.0     (pip)
-# neuro-cli     21.5.17    (pip)
-# neuro-flow    21.5.25   (pip)
+# neuro-cli     21.6.3    (pip)
+# neuro-flow    21.6.2   (pip)
 # neuro-extras  21.3.19  (pip)
 # ==================================================================
 
@@ -125,9 +125,10 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 # ------------------------------------------------------------------
 
     $PIP_INSTALL \
-        neuro-cli==21.5.17 \
-        neuro-flow==21.5.25 \
+        neuro-cli==21.6.3 \
+        neuro-flow==21.6.2 \
         neuro-extras==21.3.19 \
+        packaging \
         && \
 
 # ==================================================================
@@ -197,8 +198,8 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 # Adds a script to tune oom_killer behavior and puts it into the crontab
 # ==================================================================
 
-COPY files/root/oom_guard.sh /root/oom_guard.sh
-RUN crontab -l 2>/dev/null | { cat; echo '* * * * * /root/oom_guard.sh'; } | crontab
+COPY files/usr/local/sbin/oom_guard.sh /usr/local/sbin/oom_guard.sh
+RUN crontab -l 2>/dev/null | { cat; echo '* * * * * /usr/local/sbin/oom_guard.sh'; } | crontab
 
 # ==================================================================
 # Documentation notebook
