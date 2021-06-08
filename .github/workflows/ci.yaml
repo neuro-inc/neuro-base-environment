@@ -33,7 +33,7 @@ jobs:
         run: |
           python -m venv venv
           source venv/bin/activate
-          pip install -U neuro-cli packaging
+          pip install -U neuro-cli packaging neuro-sdk
 
       - name: Configure environment
         run: |
