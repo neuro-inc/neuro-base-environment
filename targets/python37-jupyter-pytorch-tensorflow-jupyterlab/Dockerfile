@@ -18,180 +18,180 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
     GIT_CLONE="git clone --depth 10" && \
 
     rm -rf /var/lib/apt/lists/* \
-           /etc/apt/sources.list.d/cuda.list \
-           /etc/apt/sources.list.d/nvidia-ml.list && \
+    /etc/apt/sources.list.d/cuda.list \
+    /etc/apt/sources.list.d/nvidia-ml.list && \
 
     apt-get update && \
 
-# ==================================================================
-# tools
-# ------------------------------------------------------------------
+    # ==================================================================
+    # tools
+    # ------------------------------------------------------------------
 
     DEBIAN_FRONTEND=noninteractive $APT_INSTALL \
-        apt-utils \
-        build-essential \
-        ca-certificates \
-        cron \
-        curl \
-        git \
-        libssl-dev \
-        rsync \
-        rclone \
-        unrar \
-        zip \
-        unzip \
-        vim \
-        wget \
-        libncurses5-dev \
-        libncursesw5-dev \
-        cmake \
-        nano \
-        tmux \
-        htop \
-        ssh \
-        && \
+    apt-utils \
+    build-essential \
+    ca-certificates \
+    cron \
+    curl \
+    git \
+    libssl-dev \
+    rsync \
+    rclone \
+    unrar \
+    zip \
+    unzip \
+    vim \
+    wget \
+    libncurses5-dev \
+    libncursesw5-dev \
+    cmake \
+    nano \
+    tmux \
+    htop \
+    ssh \
+    && \
 
-# ==================================================================
-# python
-# ------------------------------------------------------------------
+    # ==================================================================
+    # python
+    # ------------------------------------------------------------------
     $PIP_INSTALL \
-        numpy \
-        scipy \
-        pandas \
-        cloudpickle \
-        scikit-learn \
-        matplotlib \
-        Cython \
-        Pillow \
-        && \
-        
+    numpy \
+    scipy \
+    pandas \
+    cloudpickle \
+    scikit-learn \
+    matplotlib \
+    Cython \
+    Pillow \
+    && \
+
     # OpenCV
     $APT_INSTALL libsm6 libxext6 libxrender-dev && \ 
 
-# ==================================================================
-# jupyter
-# ------------------------------------------------------------------
+    # ==================================================================
+    # jupyter
+    # ------------------------------------------------------------------
 
     $PIP_INSTALL \
-        jupyter \
-        && \
+    jupyter \
+    && \
 
-# ==================================================================
-# pytorch-utils
-# ------------------------------------------------------------------
+    # ==================================================================
+    # pytorch-utils
+    # ------------------------------------------------------------------
 
     $APT_INSTALL \
-        python3-yaml \
-        && \
+    python3-yaml \
+    && \
 
     $PIP_INSTALL \
-        future \
-        protobuf \
-        typing \
-        && \
+    future \
+    protobuf \
+    typing \
+    && \
 
-# ==================================================================
-# jupyterlab
-# ------------------------------------------------------------------
+    # ==================================================================
+    # jupyterlab
+    # ------------------------------------------------------------------
     # To pass test `jupyter lab build` (jupyterlab extensions), it needs nodejs>=12
     # See instructions https://github.com/nodesource/distributions/blob/master/README.md#installation-instructions
     curl -sL https://deb.nodesource.com/setup_12.x | bash - && \
     $APT_INSTALL \
-        nodejs \
-        && \
+    nodejs \
+    && \
 
     $PIP_INSTALL \
-        jupyterlab \
-        && \
+    jupyterlab \
+    && \
 
-# ==================================================================
-# tensorboard
-# ------------------------------------------------------------------
-
-    $PIP_INSTALL \
-        tensorboard \
-        && \
-
-# ==================================================================
-# tensorboardX
-# ------------------------------------------------------------------
+    # ==================================================================
+    # tensorboard
+    # ------------------------------------------------------------------
 
     $PIP_INSTALL \
-        tensorboardX \
-        && \
+    tensorboard \
+    && \
 
-# ==================================================================
-# neuromation
-# ------------------------------------------------------------------
-
-    $PIP_INSTALL \
-        neuro-cli==21.6.3 \
-        neuro-flow==21.6.2 \
-        neuro-extras==21.3.19 \
-        packaging \
-        && \
-
-# ==================================================================
-# wandb
-# ------------------------------------------------------------------
+    # ==================================================================
+    # tensorboardX
+    # ------------------------------------------------------------------
 
     $PIP_INSTALL \
-        wandb \
-        && \
+    tensorboardX \
+    && \
 
-# ==================================================================
-# tqdm
-# ------------------------------------------------------------------
-
-    $PIP_INSTALL \
-        tqdm \
-        && \
-
-# ==================================================================
-# tensorflow
-# ------------------------------------------------------------------
+    # ==================================================================
+    # neuromation
+    # ------------------------------------------------------------------
 
     $PIP_INSTALL \
-        tensorflow==2.3.0 \
-        && \
+    neuro-cli==21.6.3 \
+    neuro-flow==21.6.2 \
+    neuro-extras==21.3.19 \
+    packaging \
+    && \
 
-# ==================================================================
-# gsutils
-# ------------------------------------------------------------------
+    # ==================================================================
+    # wandb
+    # ------------------------------------------------------------------
+
+    $PIP_INSTALL \
+    wandb \
+    && \
+
+    # ==================================================================
+    # tqdm
+    # ------------------------------------------------------------------
+
+    $PIP_INSTALL \
+    tqdm \
+    && \
+
+    # ==================================================================
+    # tensorflow
+    # ------------------------------------------------------------------
+
+    $PIP_INSTALL \
+    tensorflow==2.3.0 \
+    && \
+
+    # ==================================================================
+    # gsutils
+    # ------------------------------------------------------------------
 
     echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" >> /etc/apt/sources.list.d/google-cloud-sdk.list && \
     curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg add - && \
     apt-get -y update && \
 
-  $APT_INSTALL google-cloud-sdk && \
+    $APT_INSTALL google-cloud-sdk && \
 
-  # Python API:
-  $PIP_INSTALL google-cloud-storage && \
+    # Python API:
+    $PIP_INSTALL google-cloud-storage && \
 
-# ==================================================================
-# aws
-# ------------------------------------------------------------------
+    # ==================================================================
+    # aws
+    # ------------------------------------------------------------------
 
     $PIP_INSTALL awscli \
     && \
 
-# ==================================================================
-# VSCode server
-# ------------------------------------------------------------------
+    # ==================================================================
+    # VSCode server
+    # ------------------------------------------------------------------
 
     wget https://github.com/cdr/code-server/releases/download/v3.9.1/code-server_3.9.1_amd64.deb  && \
     dpkg -i code-server_3.9.1_amd64.deb \
     && \
 
-# ==================================================================
-# Apex for PyTorch mixed precision training
-# ==================================================================
+    # ==================================================================
+    # Apex for PyTorch mixed precision training
+    # ==================================================================
 
-# Somehow Apex does not use releases, and current master fails to build
-# (commit 1f2aa9156547377a023932a1512752c392d9bbdf on Apr 23, 2020).
-# So we fix installation to the version Apr 21, 2020
+    # Somehow Apex does not use releases, and current master fails to build
+    # (commit 1f2aa9156547377a023932a1512752c392d9bbdf on Apr 23, 2020).
+    # So we fix installation to the version Apr 21, 2020
     $PIP_INSTALL --global-option="--cpp_ext" --global-option="--cuda_ext" \
-      git+https://github.com/NVIDIA/apex@2ec84ebdca59278eaf15e8ddf32476d9d6d8b904
+    git+https://github.com/NVIDIA/apex@2ec84ebdca59278eaf15e8ddf32476d9d6d8b904
 
 # ==================================================================
 # OOM guard
@@ -199,8 +199,7 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 # ==================================================================
 
 COPY files/usr/local/sbin/oom_guard.sh /usr/local/sbin/oom_guard.sh
-RUN crontab -l 2>/dev/null | { cat; echo '* * * * * /usr/local/sbin/oom_guard.sh'; } | crontab && \
-    service cron start
+RUN crontab -l 2>/dev/null | { cat; echo '* * * * * /usr/local/sbin/oom_guard.sh'; } | crontab
 
 # ==================================================================
 # Documentation notebook
@@ -215,11 +214,11 @@ COPY files/var/notebooks/README.ipynb /var/notebooks
 
 # Setup environment for ssh session
 RUN apt-get install -y --no-install-recommends openssh-server && \
- echo "export PATH=$PATH" >> /etc/profile && \
- echo "export LANG=$LANG" >> /etc/profile && \
- echo "export LANGUAGE=$LANGUAGE" >> /etc/profile && \
- echo "export LC_ALL=$LC_ALL" >> /etc/profile && \
- echo "export PYTHONIOENCODING=$PYTHONIOENCODING" >> /etc/profile
+    echo "export PATH=$PATH" >> /etc/profile && \
+    echo "export LANG=$LANG" >> /etc/profile && \
+    echo "export LANGUAGE=$LANGUAGE" >> /etc/profile && \
+    echo "export LC_ALL=$LC_ALL" >> /etc/profile && \
+    echo "export PYTHONIOENCODING=$PYTHONIOENCODING" >> /etc/profile
 
 # Create folder for openssh fifos
 RUN mkdir -p /var/run/sshd
@@ -230,10 +229,10 @@ RUN sed -i -re 's/^root:.*$/root::0:0:System Administrator:\/root:\/bin\/bash/' 
 
 # Permit root login over ssh
 RUN echo "Subsystem    sftp    /usr/lib/sftp-server \n\
-PasswordAuthentication yes\n\
-ChallengeResponseAuthentication yes\n\
-PermitRootLogin yes \n\
-PermitEmptyPasswords yes\n" > /etc/ssh/sshd_config
+    PasswordAuthentication yes\n\
+    ChallengeResponseAuthentication yes\n\
+    PermitRootLogin yes \n\
+    PermitEmptyPasswords yes\n" > /etc/ssh/sshd_config
 
 # ssh port
 EXPOSE 22

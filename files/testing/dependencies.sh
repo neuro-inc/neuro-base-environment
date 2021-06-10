@@ -26,6 +26,8 @@ gcloud --version
 aws --version
 tqdm --version
 
+service cron status
+
 ## Stupid W&B: `wandb --version` works in interactive mode!
 ## It gives you choices:
 # wandb: (1) Create a W&B account
