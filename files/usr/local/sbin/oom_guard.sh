@@ -1,13 +1,16 @@
 #!/bin/bash
 
-# This script ensures only the process with PID = 1
-# would have minimal oom_score_adj value
-# That means it will only be killed by oom_killer at the last resort
+# This script ensures that the processes are going to be killed
+# by the OOM Killer in the reversed order of their creation.
+# Therefore, the container entrypoint and cron services 
+# are going to be killed at the last step
 
 for pid in $(ps x | awk 'NR>1 {print $1}' | xargs)
 do
-  if [ "$pid" != "1" ]
+  score=$(expr 1000 - $pid)
+  if [ $score -lt -1000 ]
   then
-    echo 1000 > /proc/"$pid"/oom_score_adj
+   score=-1000
   fi
+  echo $score > /proc/"$pid"/oom_score_adj
 done
