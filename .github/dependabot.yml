@@ -6,13 +6,21 @@ updates:
     interval: daily
     time: "03:00"
   open-pull-requests-limit: 10
-  assignees:
-  - anayden
-  - artemlops
-  - YevheniiSemendiak
+  reviewers:
+    - neuro-inc/mlops
 - package-ecosystem: github-actions
   directory: "/"
   schedule:
     interval: daily
     time: "03:00"
+  reviewers:
+    - neuro-inc/mlops
   open-pull-requests-limit: 10
+- package-ecosystem: pip
+  directory: "/"
+  schedule:
+    interval: daily
+  reviewers:
+    - neuro-inc/mlops
+  allow:
+    - dependency-type: "all"
