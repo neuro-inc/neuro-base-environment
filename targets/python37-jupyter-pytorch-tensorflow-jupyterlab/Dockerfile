@@ -229,10 +229,9 @@ EXPOSE 22
 # ==================================================================
 # Neu.ro packages
 # ------------------------------------------------------------------
-COPY requiremets/neuro.txt /tmp/neuro.txt
+COPY requirements/neuro.txt /tmp/neuro.txt
 RUN ${PIP_INSTALL} -r /tmp/neuro.txt && \
     rm /tmp/neuro.txt
-
 # ==================================================================
 # config & cleanup
 # ------------------------------------------------------------------
