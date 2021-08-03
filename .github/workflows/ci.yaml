@@ -41,7 +41,7 @@ jobs:
         run: |
           python -m venv venv
           source venv/bin/activate
-          pip install -U neuro-cli neuro-sdk
+          pip install -U neuro-cli
 
       - name: Configure environment
         run: |
