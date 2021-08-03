@@ -1,14 +1,20 @@
 name: Continuous Integration
 
 on:
-  pull_request:
-  release:
-    types: [published]
   push:
+    branches: [master]
+    tags: [v*.*.*]
+  pull_request:
+    branches: [master]
+  pull_request_target:
     branches: [master]
 
 jobs:
   build:
+    if: |
+      (github.event_name != 'pull_request_target' && github.actor != 'dependabot[bot]') ||
+      (github.event_name == 'pull_request_target' && github.actor == 'dependabot[bot]')
+
     env:
       DOCKER_SERVER: docker.io
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
@@ -23,6 +29,8 @@ jobs:
     steps:
       - name: Checkout commit
         uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Install python
         uses: actions/setup-python@v2
@@ -33,7 +41,7 @@ jobs:
         run: |
           python -m venv venv
           source venv/bin/activate
-          pip install -U neuro-cli packaging neuro-sdk
+          pip install -U neuro-cli
 
       - name: Configure environment
         run: |
