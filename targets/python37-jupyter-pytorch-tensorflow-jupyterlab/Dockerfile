@@ -230,7 +230,7 @@ EXPOSE 22
 # Neu.ro packages
 # ------------------------------------------------------------------
 COPY requirements/neuro.txt /tmp/neuro.txt
-RUN ${PIP_INSTALL} -r /tmp/neuro.txt && \
+RUN python -m pip --no-cache-dir install --upgrade -r /tmp/neuro.txt && \
     rm /tmp/neuro.txt
 # ==================================================================
 # config & cleanup
