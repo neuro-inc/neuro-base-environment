@@ -51,10 +51,10 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
         && \
         # To pass test `jupyter lab build` (jupyterlab extensions), it needs nodejs>=12
         # See instructions https://github.com/nodesource/distributions/blob/master/README.md#installation-instructions
-        curl -sL https://deb.nodesource.com/setup_12.x | bash - && \
-        $APT_INSTALL nodejs && \
+        #curl -sL https://deb.nodesource.com/setup_12.x | bash - && \
+        #$APT_INSTALL nodejs && \
         # pytorch-utils
-        $APT_INSTALL python3-yaml && \
+        #$APT_INSTALL python3-yaml && \
         # gsutils
         echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" >> /etc/apt/sources.list.d/google-cloud-sdk.list && \
         curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg add - && \
@@ -75,19 +75,9 @@ RUN PIP_INSTALL="python -m pip --no-cache-dir install --upgrade" && \
     dpkg -i code-server_3.9.1_amd64.deb \
     && \
 # ==================================================================
-# Apex for PyTorch mixed precision training
-# ==================================================================
-# Somehow Apex does not use releases, and current master fails to build
-# (commit 0c2c6eea6556b208d1a8711197efc94899e754e1 on Jul 16, 2021).
-# So we fix installation to the version Jul 16, 2021
-    $PIP_INSTALL --global-option="--cpp_ext" --global-option="--cuda_ext" \
-      git+https://github.com/NVIDIA/apex@0c2c6eea6556b208d1a8711197efc94899e754e1
-
-# ==================================================================
 # OOM guard
 # Adds a script to tune oom_killer behavior and puts it into the crontab
 # ==================================================================
-
 COPY files/usr/local/sbin/oom_guard.sh /usr/local/sbin/oom_guard.sh
 RUN crontab -l 2>/dev/null | { cat; echo '* * * * * /usr/local/sbin/oom_guard.sh'; } | crontab
 
