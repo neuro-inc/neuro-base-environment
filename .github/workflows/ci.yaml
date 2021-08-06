@@ -19,7 +19,6 @@ jobs:
       DOCKER_SERVER: docker.io
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-      DOCKERFILE_VERSION: python37-jupyter-pytorch-tensorflow-jupyterlab
       IMAGE_NAME: neuromation/base
       NEURO_STAGING_URL: ${{ secrets.NEURO_STAGING_URL }}
       NEURO_TOKEN: ${{ secrets.NEURO_TOKEN }}
@@ -48,10 +47,6 @@ jobs:
           source venv/bin/activate
           neuro config login-with-token $NEURO_TOKEN $NEURO_STAGING_URL
           neuro config show
-
-      - name: Show diff
-        run: |
-            make image_diff
 
       - name: Login DockerHub
         run: |

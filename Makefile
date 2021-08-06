@@ -1,5 +1,4 @@
 IMAGE_NAME ?= neuromation/base
-DOCKERFILE_VERSION ?= python37-jupyter-pytorch-tensorflow-jupyterlab
 GIT_TAGS ?=
 
 TEST_IMAGE ?= image:e2e-neuro-base-environment:debug
@@ -8,13 +7,7 @@ TEST_STORAGE ?= storage:.neuro-base-environment
 
 .PHONY: image_build
 image_build:
-	# git clone https://github.com/ufoym/deepo.git
-	# python3 deepo/generator/generate.py --cuda-ver=10.0 --cudnn-ver=cudnn7-devel --ubuntu-ver=ubuntu18.04 targets/$(DOCKERFILE_VERSION)/Dockerfile tensorflow pytorch jupyter jupyterlab python==3.6
-	docker build -t $(IMAGE_NAME):built -f targets/$(DOCKERFILE_VERSION)/Dockerfile .
-
-.PHONY: image_diff
-image_diff:
-	diff --color=always --side-by-side  targets/$(DOCKERFILE_VERSION)/Dockerfile.deepo targets/$(DOCKERFILE_VERSION)/Dockerfile ||:
+	docker build -t $(IMAGE_NAME):built -f Dockerfile .
 
 .PHONY: image_deploy
 image_deploy:

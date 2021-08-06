@@ -14,19 +14,13 @@
 FROM pytorch/pytorch:1.6.0-cuda10.1-cudnn7-devel
 ENV LANG C.UTF-8
 RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
-    PIP_INSTALL="python -m pip --no-cache-dir install --upgrade" && \
-    GIT_CLONE="git clone --depth 10" && \
-
     rm -rf /var/lib/apt/lists/* \
            /etc/apt/sources.list.d/cuda.list \
            /etc/apt/sources.list.d/nvidia-ml.list && \
-
     apt-get update && \
-
 # ==================================================================
 # tools
 # ------------------------------------------------------------------
-
     DEBIAN_FRONTEND=noninteractive $APT_INSTALL \
         apt-utils \
         build-essential \
@@ -49,133 +43,37 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
         tmux \
         htop \
         ssh \
+        # OpenCV
+        libsm6 libxext6 libxrender-dev \ 
         && \
-
+        # To pass test `jupyter lab build` (jupyterlab extensions), it needs nodejs>=12
+        # See instructions https://github.com/nodesource/distributions/blob/master/README.md#installation-instructions
+        curl -sL https://deb.nodesource.com/setup_12.x | bash - && \
+        $APT_INSTALL nodejs && \
+        # pytorch-utils
+        $APT_INSTALL python3-yaml && \
+        # gsutils
+        echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" >> /etc/apt/sources.list.d/google-cloud-sdk.list && \
+        curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg add - && \
+        apt-get -y update && \
+        $APT_INSTALL google-cloud-sdk
 # ==================================================================
 # python
 # ------------------------------------------------------------------
-    $PIP_INSTALL \
-        numpy \
-        scipy \
-        pandas \
-        cloudpickle \
-        scikit-learn \
-        matplotlib \
-        Cython \
-        Pillow \
-        && \
-        
-    # OpenCV
-    $APT_INSTALL libsm6 libxext6 libxrender-dev && \ 
-
-# ==================================================================
-# jupyter
-# ------------------------------------------------------------------
-
-    $PIP_INSTALL \
-        jupyter \
-        && \
-
-# ==================================================================
-# pytorch-utils
-# ------------------------------------------------------------------
-
-    $APT_INSTALL \
-        python3-yaml \
-        && \
-
-    $PIP_INSTALL \
-        future \
-        protobuf \
-        typing \
-        && \
-
-# ==================================================================
-# jupyterlab
-# ------------------------------------------------------------------
-    # To pass test `jupyter lab build` (jupyterlab extensions), it needs nodejs>=12
-    # See instructions https://github.com/nodesource/distributions/blob/master/README.md#installation-instructions
-    curl -sL https://deb.nodesource.com/setup_12.x | bash - && \
-    $APT_INSTALL \
-        nodejs \
-        && \
-
-    $PIP_INSTALL \
-        jupyterlab \
-        && \
-
-# ==================================================================
-# tensorboard
-# ------------------------------------------------------------------
-
-    $PIP_INSTALL \
-        tensorboard \
-        && \
-
-# ==================================================================
-# tensorboardX
-# ------------------------------------------------------------------
-
-    $PIP_INSTALL \
-        tensorboardX \
-        && \
-
-# ==================================================================
-# wandb
-# ------------------------------------------------------------------
-
-    $PIP_INSTALL \
-        wandb \
-        && \
-
-# ==================================================================
-# tqdm
-# ------------------------------------------------------------------
-
-    $PIP_INSTALL \
-        tqdm \
-        && \
-
-# ==================================================================
-# tensorflow
-# ------------------------------------------------------------------
-
-    $PIP_INSTALL \
-        tensorflow==2.3.0 \
-        && \
-
-# ==================================================================
-# gsutils
-# ------------------------------------------------------------------
-
-    echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" >> /etc/apt/sources.list.d/google-cloud-sdk.list && \
-    curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg add - && \
-    apt-get -y update && \
-
-  $APT_INSTALL google-cloud-sdk && \
-
-  # Python API:
-  $PIP_INSTALL google-cloud-storage && \
-
-# ==================================================================
-# aws
-# ------------------------------------------------------------------
-
-    $PIP_INSTALL awscli \
-    && \
-
+COPY requirements/python.txt /tmp/requirements/python.txt
+RUN PIP_INSTALL="python -m pip --no-cache-dir install --upgrade" && \
+    $PIP_INSTALL pip && \
+    $PIP_INSTALL /tmp/requirements/python.txt && \
+    rm /tmp/requirements/python.txt && \
 # ==================================================================
 # VSCode server
 # ------------------------------------------------------------------
-
     wget https://github.com/cdr/code-server/releases/download/v3.9.1/code-server_3.9.1_amd64.deb  && \
     dpkg -i code-server_3.9.1_amd64.deb \
     && \
-
 # ==================================================================
 # Apex for PyTorch mixed precision training
 # ==================================================================
-
 # Somehow Apex does not use releases, and current master fails to build
 # (commit 1f2aa9156547377a023932a1512752c392d9bbdf on Apr 23, 2020).
 # So we fix installation to the version Apr 21, 2020
@@ -229,9 +127,9 @@ EXPOSE 22
 # ==================================================================
 # Neu.ro packages
 # ------------------------------------------------------------------
-COPY requirements/neuro.txt /tmp/neuro.txt
-RUN python -m pip --no-cache-dir install --upgrade -r /tmp/neuro.txt && \
-    rm /tmp/neuro.txt
+COPY requirements/neuro.txt /tmp/requirements/neuro.txt
+RUN python -m pip --no-cache-dir install --upgrade -r /tmp/requirements/neuro.txt && \
+    rm /tmp/requirements/neuro.txt
 # ==================================================================
 # config & cleanup
 # ------------------------------------------------------------------
