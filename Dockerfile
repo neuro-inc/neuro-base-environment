@@ -63,7 +63,7 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 COPY requirements/python.txt /tmp/requirements/python.txt
 RUN PIP_INSTALL="python -m pip --no-cache-dir install --upgrade" && \
     $PIP_INSTALL pip && \
-    $PIP_INSTALL /tmp/requirements/python.txt && \
+    $PIP_INSTALL -r /tmp/requirements/python.txt && \
     rm /tmp/requirements/python.txt && \
 # ==================================================================
 # VSCode server
