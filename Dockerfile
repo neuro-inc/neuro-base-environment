@@ -72,8 +72,7 @@ RUN PIP_INSTALL="python -m pip --no-cache-dir install --upgrade" && \
 # VSCode server
 # ------------------------------------------------------------------
     wget https://github.com/cdr/code-server/releases/download/v3.9.1/code-server_3.9.1_amd64.deb  && \
-    dpkg -i code-server_3.9.1_amd64.deb \
-    && \
+    dpkg -i code-server_3.9.1_amd64.deb
 # ==================================================================
 # OOM guard
 # Adds a script to tune oom_killer behavior and puts it into the crontab
