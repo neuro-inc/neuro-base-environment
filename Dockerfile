@@ -4,8 +4,9 @@
 # python        3.7       (apt)
 # jupyter       latest    (pip)
 # jupyterlab    latest    (pip)
-# pytorch       1.6.0     (docker-hub)
-# tensorflow    2.3.0     (pip)
+# pytorch       1.9.0     (docker-hub)
+# tensorflow    2.5.0     (pip)
+# caffe-cuda    latest    (apt)
 # neuro-cli     21.6.3    (pip)
 # neuro-flow    21.6.2   (pip)
 # neuro-extras  21.3.19  (pip)
@@ -44,7 +45,9 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
         htop \
         ssh \
         # OpenCV
-        libsm6 libxext6 libxrender-dev \ 
+        libsm6 libxext6 libxrender-dev \
+        # PyCaffe2
+        caffe-cuda \
         && \
         # To pass test `jupyter lab build` (jupyterlab extensions), it needs nodejs>=12
         # See instructions https://github.com/nodesource/distributions/blob/master/README.md#installation-instructions
