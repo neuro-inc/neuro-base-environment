@@ -11,7 +11,7 @@
 # neuro-extras  21.3.19  (pip)
 # ==================================================================
 
-FROM pytorch/pytorch:1.6.0-cuda10.1-cudnn7-devel
+FROM pytorch/pytorch:1.9.0-cuda11.1-cudnn8-devel
 ENV LANG C.UTF-8
 RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
     rm -rf /var/lib/apt/lists/* \
@@ -75,10 +75,10 @@ RUN PIP_INSTALL="python -m pip --no-cache-dir install --upgrade" && \
 # Apex for PyTorch mixed precision training
 # ==================================================================
 # Somehow Apex does not use releases, and current master fails to build
-# (commit 1f2aa9156547377a023932a1512752c392d9bbdf on Apr 23, 2020).
-# So we fix installation to the version Apr 21, 2020
+# (commit 0c2c6eea6556b208d1a8711197efc94899e754e1 on Jul 16, 2021).
+# So we fix installation to the version Jul 16, 2021
     $PIP_INSTALL --global-option="--cpp_ext" --global-option="--cuda_ext" \
-      git+https://github.com/NVIDIA/apex@2ec84ebdca59278eaf15e8ddf32476d9d6d8b904
+      git+https://github.com/NVIDIA/apex@0c2c6eea6556b208d1a8711197efc94899e754e1
 
 # ==================================================================
 # OOM guard
