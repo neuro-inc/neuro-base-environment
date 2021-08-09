@@ -11,7 +11,7 @@
 # neuro-flow    21.6.2   (pip)
 # neuro-extras  21.3.19  (pip)
 # ==================================================================
-ARG BASE_IMAGE=pytorch/pytorch:1.9.0-cuda11.1-cudnn8-devel
+ARG BASE_IMAGE=pytorch/pytorch:1.9.0-cuda11.1-cudnn8-runtime
 FROM $BASE_IMAGE
 ENV LANG C.UTF-8
 RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
