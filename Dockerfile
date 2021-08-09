@@ -12,7 +12,7 @@
 # neuro-extras  21.3.19  (pip)
 # ==================================================================
 
-FROM pytorch/pytorch:1.9.0-cuda11.1-cudnn8-devel
+FROM pytorch/pytorch:1.9.0-cuda11.1-cudnn8-runtime
 ENV LANG C.UTF-8
 RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
     rm -rf /var/lib/apt/lists/* \
