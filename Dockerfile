@@ -11,8 +11,7 @@
 # neuro-flow    21.6.2   (pip)
 # neuro-extras  21.3.19  (pip)
 # ==================================================================
-ARG BASE_IMAGE=pytorch/pytorch:1.9.0-cuda11.1-cudnn8-runtime
-FROM $BASE_IMAGE
+FROM tensorflow/tensorflow:2.5.0-gpu-jupyter
 ENV LANG C.UTF-8
 RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
     rm -rf /var/lib/apt/lists/* \
@@ -67,7 +66,7 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 COPY requirements/python.txt /tmp/requirements/python.txt
 RUN PIP_INSTALL="python -m pip --no-cache-dir install --upgrade" && \
     $PIP_INSTALL pip && \
-    $PIP_INSTALL -r /tmp/requirements/python.txt && \
+    $PIP_INSTALL -r /tmp/requirements/python.txt -f https://download.pytorch.org/whl/torch_stable.html && \
     rm /tmp/requirements/python.txt && \
 # ==================================================================
 # VSCode server
