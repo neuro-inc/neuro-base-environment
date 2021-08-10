@@ -1,11 +1,11 @@
 # ==================================================================
 # module list
 # ------------------------------------------------------------------
-# python        3.7       (apt)
+# python        3.6.9     (docker-hub)
 # jupyter       latest    (pip)
 # jupyterlab    latest    (pip)
-# pytorch       1.9.0     (docker-hub)
-# tensorflow    2.5.0     (pip)
+# pytorch       1.9.0     (pip)
+# tensorflow    2.5.0     (docker-hub)
 # caffe-cuda    latest    (apt)
 # neuro-cli     21.6.3    (pip)
 # neuro-flow    21.6.2   (pip)
