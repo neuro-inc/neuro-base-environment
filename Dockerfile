@@ -51,15 +51,16 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
         && \
         # To pass test `jupyter lab build` (jupyterlab extensions), it needs nodejs>=12
         # See instructions https://github.com/nodesource/distributions/blob/master/README.md#installation-instructions
-        #curl -sL https://deb.nodesource.com/setup_12.x | bash - && \
-        #$APT_INSTALL nodejs && \
-        # pytorch-utils
-        #$APT_INSTALL python3-yaml && \
+        curl -sL https://deb.nodesource.com/setup_12.x | bash - && \
+        $APT_INSTALL nodejs && \
         # gsutils
         echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" >> /etc/apt/sources.list.d/google-cloud-sdk.list && \
         curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg add - && \
         apt-get -y update && \
-        $APT_INSTALL google-cloud-sdk
+        $APT_INSTALL google-cloud-sdk && \
+        apt-get clean && \
+        apt-get autoremove && \
+        rm -rf /var/lib/apt/lists/* /tmp/* ~/*
 # ==================================================================
 # python
 # ------------------------------------------------------------------
@@ -93,11 +94,14 @@ COPY files/var/notebooks/README.ipynb /var/notebooks
 
 # Setup environment for ssh session
 RUN apt-get install -y --no-install-recommends openssh-server && \
- echo "export PATH=$PATH" >> /etc/profile && \
- echo "export LANG=$LANG" >> /etc/profile && \
- echo "export LANGUAGE=$LANGUAGE" >> /etc/profile && \
- echo "export LC_ALL=$LC_ALL" >> /etc/profile && \
- echo "export PYTHONIOENCODING=$PYTHONIOENCODING" >> /etc/profile
+    echo "export PATH=$PATH" >> /etc/profile && \
+    echo "export LANG=$LANG" >> /etc/profile && \
+    echo "export LANGUAGE=$LANGUAGE" >> /etc/profile && \
+    echo "export LC_ALL=$LC_ALL" >> /etc/profile && \
+    echo "export PYTHONIOENCODING=$PYTHONIOENCODING" >> /etc/profile && \
+    apt-get clean && \
+    apt-get autoremove && \
+    rm -rf /var/lib/apt/lists/* /tmp/* ~/*
 
 # Create folder for openssh fifos
 RUN mkdir -p /var/run/sshd
@@ -123,13 +127,10 @@ COPY requirements/neuro.txt /tmp/requirements/neuro.txt
 RUN python -m pip --no-cache-dir install --upgrade -r /tmp/requirements/neuro.txt && \
     rm /tmp/requirements/neuro.txt
 # ==================================================================
-# config & cleanup
+# config
 # ------------------------------------------------------------------
 
-RUN ldconfig && \
-    apt-get clean && \
-    apt-get autoremove && \
-    rm -rf /var/lib/apt/lists/* /tmp/* ~/*
+RUN ldconfig
 
 EXPOSE 8888 6006
 
