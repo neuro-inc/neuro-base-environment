@@ -1,15 +1,14 @@
 # ==================================================================
 # module list
 # ------------------------------------------------------------------
-# python        3.6.9     (docker-hub)
+# python        3.8.10    (apt)
 # jupyter       latest    (pip)
-# jupyterlab    latest    (pip)
+# jupyterlab    3.1.4     (pip)
 # pytorch       1.9.0     (pip)
-# tensorflow    2.5.0     (docker-hub)
-# caffe-cuda    latest    (apt)
+# tensorflow    2.5.0     (pip)
 # neuro-cli     21.6.3    (pip)
-# neuro-flow    21.6.2   (pip)
-# neuro-extras  21.3.19  (pip)
+# neuro-flow    21.6.2    (pip)
+# neuro-extras  21.3.19   (pip)
 # ==================================================================
 FROM nvidia/cuda:11.2.2-cudnn8-devel-ubuntu20.04
 ENV LANG C.UTF-8
@@ -42,8 +41,6 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
         ssh \
         # OpenCV
         libsm6 libxext6 libxrender-dev \
-        # PyCaffe2
-        caffe-cuda \
         && \
         ln -s $(which python3) /usr/bin/python && \
         # To pass test `jupyter lab build` (jupyterlab extensions), it needs nodejs>=12
