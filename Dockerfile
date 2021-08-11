@@ -11,25 +11,21 @@
 # neuro-flow    21.6.2   (pip)
 # neuro-extras  21.3.19  (pip)
 # ==================================================================
-FROM tensorflow/tensorflow:2.5.0-gpu-jupyter
+FROM nvidia/cuda:11.2.2-cudnn8-devel-ubuntu20.04
 ENV LANG C.UTF-8
 RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
-    rm -rf /var/lib/apt/lists/* \
-           /etc/apt/sources.list.d/cuda.list \
-           /etc/apt/sources.list.d/nvidia-ml.list && \
     apt-get update && \
 # ==================================================================
 # tools
 # ------------------------------------------------------------------
     DEBIAN_FRONTEND=noninteractive $APT_INSTALL \
         apt-utils \
-        build-essential \
-        ca-certificates \
         cron \
         curl \
         git \
-        gnupg2 \
         libssl-dev \
+        python3-dev \
+        python3-pip \
         rsync \
         rclone \
         unrar \
@@ -49,6 +45,7 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
         # PyCaffe2
         caffe-cuda \
         && \
+        ln -s $(which python3) /usr/bin/python && \
         # To pass test `jupyter lab build` (jupyterlab extensions), it needs nodejs>=12
         # See instructions https://github.com/nodesource/distributions/blob/master/README.md#installation-instructions
         curl -sL https://deb.nodesource.com/setup_12.x | bash - && \
@@ -64,7 +61,7 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
         rm -rf /usr/lib/python3/dist-packages/yaml && \
         rm -rf /usr/lib/python3/dist-packages/PyYAML-* && \
         apt-get clean && \
-        apt-get autoremove && \
+        apt-get autoremove -y && \
         rm -rf /var/lib/apt/lists/* /tmp/* ~/*
 # ==================================================================
 # python
