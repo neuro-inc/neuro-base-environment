@@ -32,6 +32,7 @@ _test_e2e:
 	neuro mkdir -p $(TEST_STORAGE)/
 	neuro cp -ru files/testing/ -T $(TEST_STORAGE)/
 	neuro run \
+		--pass-config \
 	    -s $(TEST_PRESET) \
 		-v $(TEST_STORAGE):/var/storage \
 	    $(TEST_IMAGE) \

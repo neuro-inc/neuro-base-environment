@@ -58,6 +58,11 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
         curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg add - && \
         apt-get -y update && \
         $APT_INSTALL google-cloud-sdk && \
+        # Remove PyYAML before other pip tools installation 
+        # since APT installs outdated PyYAML as dist package, which breaks pip's deps management
+        # https://stackoverflow.com/questions/49911550/how-to-upgrade-disutils-package-pyyaml
+        rm -rf /usr/lib/python3/dist-packages/yaml && \
+        rm -rf /usr/lib/python3/dist-packages/PyYAML-* && \
         apt-get clean && \
         apt-get autoremove && \
         rm -rf /var/lib/apt/lists/* /tmp/* ~/*
