@@ -66,8 +66,8 @@ jobs:
           elif [[ ${{ matrix.base-image }} =~ devel ]]; then
             export BASE_IMAGE_TYPE="devel";
           fi
-          echo "::set-output name=BASE_IMAGE_TYPE::$BASE_IMAGE_TYPE"
           make image_build
+          echo "::set-output name=BASE_IMAGE_TYPE::$BASE_IMAGE_TYPE"
 
       - name: List pip packages
         env:
