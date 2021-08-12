@@ -15,6 +15,12 @@ jobs:
       (github.event_name != 'pull_request_target' && github.actor != 'dependabot[bot]') ||
       (github.event_name == 'pull_request_target' && github.actor == 'dependabot[bot]')
 
+    strategy:
+      matrix:
+        base-image: 
+          - nvidia/cuda:11.2.2-cudnn8-devel-ubuntu20.04
+          - nvidia/cuda:11.2.2-cudnn8-runtime-ubuntu20.04
+
     env:
       DOCKER_SERVER: docker.io
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
@@ -22,6 +28,7 @@ jobs:
       IMAGE_NAME: neuromation/base
       NEURO_STAGING_URL: ${{ secrets.NEURO_STAGING_URL }}
       NEURO_TOKEN: ${{ secrets.NEURO_TOKEN }}
+      BASE_IMAGE: ${{ matrix.base-image }}
 
     name: Build, test and publish image
     runs-on: ubuntu-latest
@@ -54,7 +61,15 @@ jobs:
 
       - name: Build image
         run: |
-            make image_build
+          if [[ ${{ matrix.base-image }} =~ runtime ]]; then
+            export BASE_IMAGE_TYPE="runtime";
+          else if [[ ${{ matrix.base-imae }} =~ devel ]]; then
+            export BASE_IMAGE_TYPE="devel";
+          fi
+
+          echo "BASE_IMAGE_TYPE=$BASE_IMAGE_TYPE" >> $GITHUB_ENV
+          # now BASE_IMAGE_TYPE env var will appear in all subsequent steps, expect the current one
+          make image_build
 
       - name: List pip packages
         run: |
@@ -71,5 +86,8 @@ jobs:
       - name: Push release
         if: startsWith(github.ref, 'refs/tags/')
         run: |
-          export GIT_TAGS="latest,${GITHUB_REF#refs/tags/}"
+          export TARGET_IMAGE_TAGS="latest-$BASE_IMAGE_TYPE,${GITHUB_REF#refs/tags/}-$BASE_IMAGE_TYPE";
+          if [[ $BASE_IMAGE_TYPE == runtime ]]; then
+            export TARGET_IMAGE_TAGS="latest,$TARGET_IMAGE_TAGS";
+          fi
           make image_deploy
