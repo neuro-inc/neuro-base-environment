@@ -1,36 +1,34 @@
-IMAGE_NAME ?= neuromation/base
-DOCKERFILE_VERSION ?= python37-jupyter-pytorch-tensorflow-jupyterlab
-GIT_TAGS ?=
+TARGET_IMAGE_NAME ?= neuromation/base
+TARGET_IMAGE_TAGS ?=
 
-TEST_IMAGE ?= image:e2e-neuro-base-environment:debug
+TEST_IMAGE_NAME ?= image:e2e-neuro-base-environment
 TEST_STORAGE ?= storage:.neuro-base-environment
 
+BASE_IMAGE ?= nvidia/cuda:11.2.2-cudnn8-runtime-ubuntu20.04
+BASE_IMAGE_TYPE ?=
 
 .PHONY: image_build
 image_build:
-	# git clone https://github.com/ufoym/deepo.git
-	# python3 deepo/generator/generate.py --cuda-ver=10.0 --cudnn-ver=cudnn7-devel --ubuntu-ver=ubuntu18.04 targets/$(DOCKERFILE_VERSION)/Dockerfile tensorflow pytorch jupyter jupyterlab python==3.6
-	docker build -t $(IMAGE_NAME):built -f targets/$(DOCKERFILE_VERSION)/Dockerfile .
-
-.PHONY: image_diff
-image_diff:
-	diff --color=always --side-by-side  targets/$(DOCKERFILE_VERSION)/Dockerfile.deepo targets/$(DOCKERFILE_VERSION)/Dockerfile ||:
+	docker build \
+		-t $(TARGET_IMAGE_NAME):built-$(BASE_IMAGE_TYPE) \
+		--build-arg BASE_IMAGE=${BASE_IMAGE} \
+		-f Dockerfile .
 
 .PHONY: image_deploy
 image_deploy:
-	@[ "${GIT_TAGS}" ] || { echo "Env var GIT_TAGS must be set"; false; }
-	for t in $(shell echo $(GIT_TAGS) | tr "," " "); do \
-      docker tag $(IMAGE_NAME):built $(IMAGE_NAME):$$t && \
-      docker push $(IMAGE_NAME):$$t ; \
+	@[ "${TARGET_IMAGE_TAGS}" ] || { echo "Env var TARGET_IMAGE_TAGS must be set"; false; }
+	for t in $(shell echo $(TARGET_IMAGE_TAGS) | tr "," " "); do \
+      docker tag $(TARGET_IMAGE_NAME):built-$(BASE_IMAGE_TYPE) $(TARGET_IMAGE_NAME):$$t && \
+      docker push $(TARGET_IMAGE_NAME):$$t ; \
     done
 
 .PHONY: image_pip_list
 image_pip_list:
-	docker run --tty --rm $(IMAGE_NAME) pip list
+	docker run --tty --rm $(TARGET_IMAGE_NAME):built-$(BASE_IMAGE_TYPE) pip list
 
 .PHONY: e2e_neuro_push
 e2e_neuro_push:
-	neuro push $(IMAGE_NAME):built $(TEST_IMAGE)
+	neuro push $(TARGET_IMAGE_NAME):built-$(BASE_IMAGE_TYPE) $(TEST_IMAGE_NAME):$(BASE_IMAGE_TYPE)
 
 TEST_PRESET=cpu-small
 TEST_CMD=
@@ -39,9 +37,10 @@ _test_e2e:
 	neuro mkdir -p $(TEST_STORAGE)/
 	neuro cp -ru files/testing/ -T $(TEST_STORAGE)/
 	neuro run \
+		--pass-config \
 	    -s $(TEST_PRESET) \
 		-v $(TEST_STORAGE):/var/storage \
-	    $(TEST_IMAGE) \
+	    $(TEST_IMAGE_NAME):$(BASE_IMAGE_TYPE) \
 		$(TEST_CMD)
 
 .PHONY: test_e2e_pytorch

@@ -15,14 +15,20 @@ jobs:
       (github.event_name != 'pull_request_target' && github.actor != 'dependabot[bot]') ||
       (github.event_name == 'pull_request_target' && github.actor == 'dependabot[bot]')
 
+    strategy:
+      matrix:
+        base-image: 
+          - nvidia/cuda:11.2.2-cudnn8-devel-ubuntu20.04
+          - nvidia/cuda:11.2.2-cudnn8-runtime-ubuntu20.04
+
     env:
       DOCKER_SERVER: docker.io
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-      DOCKERFILE_VERSION: python37-jupyter-pytorch-tensorflow-jupyterlab
       IMAGE_NAME: neuromation/base
       NEURO_STAGING_URL: ${{ secrets.NEURO_STAGING_URL }}
       NEURO_TOKEN: ${{ secrets.NEURO_TOKEN }}
+      BASE_IMAGE: ${{ matrix.base-image }}
 
     name: Build, test and publish image
     runs-on: ubuntu-latest
@@ -49,23 +55,30 @@ jobs:
           neuro config login-with-token $NEURO_TOKEN $NEURO_STAGING_URL
           neuro config show
 
-      - name: Show diff
-        run: |
-            make image_diff
-
       - name: Login DockerHub
         run: |
           docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD $DOCKER_SERVER
 
       - name: Build image
+        id: build-image
         run: |
-            make image_build
+          if [[ ${{ matrix.base-image }} =~ runtime ]]; then
+            export BASE_IMAGE_TYPE="runtime";
+          elif [[ ${{ matrix.base-image }} =~ devel ]]; then
+            export BASE_IMAGE_TYPE="devel";
+          fi
+          make image_build
+          echo "::set-output name=BASE_IMAGE_TYPE::$BASE_IMAGE_TYPE"
 
       - name: List pip packages
+        env:
+          BASE_IMAGE_TYPE: ${{ steps.build-image.outputs.BASE_IMAGE_TYPE }}
         run: |
             make image_pip_list
 
       - name: Test image
+        env:
+          BASE_IMAGE_TYPE: ${{ steps.build-image.outputs.BASE_IMAGE_TYPE }}
         run: |
             source venv/bin/activate
             make e2e_neuro_push
@@ -74,7 +87,12 @@ jobs:
             make test_e2e_tensorflow
 
       - name: Push release
+        env:
+          BASE_IMAGE_TYPE: ${{ steps.build-image.outputs.BASE_IMAGE_TYPE }}
         if: startsWith(github.ref, 'refs/tags/')
         run: |
-          export GIT_TAGS="latest,${GITHUB_REF#refs/tags/}"
+          export TARGET_IMAGE_TAGS="latest-$BASE_IMAGE_TYPE,${GITHUB_REF#refs/tags/}-$BASE_IMAGE_TYPE";
+          if [[ $BASE_IMAGE_TYPE == runtime ]]; then
+            export TARGET_IMAGE_TAGS="latest,$TARGET_IMAGE_TAGS";
+          fi
           make image_deploy
