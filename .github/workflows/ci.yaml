@@ -63,7 +63,7 @@ jobs:
         run: |
           if [[ ${{ matrix.base-image }} =~ runtime ]]; then
             export BASE_IMAGE_TYPE="runtime";
-          else if [[ ${{ matrix.base-image }} =~ devel ]]; then
+          elif [[ ${{ matrix.base-image }} =~ devel ]]; then
             export BASE_IMAGE_TYPE="devel";
           fi
 
