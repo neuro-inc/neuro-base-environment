@@ -60,6 +60,7 @@ jobs:
           docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD $DOCKER_SERVER
 
       - name: Build image
+        id: build-image
         run: |
           if [[ ${{ matrix.base-image }} =~ runtime ]]; then
             export BASE_IMAGE_TYPE="runtime";
@@ -71,13 +72,13 @@ jobs:
 
       - name: List pip packages
         env:
-          BASE_IMAGE_TYPE: ${{ steps.build_image.outputs.BASE_IMAGE_TYPE }}
+          BASE_IMAGE_TYPE: ${{ steps.build-image.outputs.BASE_IMAGE_TYPE }}
         run: |
             make image_pip_list
 
       - name: Test image
         env:
-          BASE_IMAGE_TYPE: ${{ steps.build_image.outputs.BASE_IMAGE_TYPE }}
+          BASE_IMAGE_TYPE: ${{ steps.build-image.outputs.BASE_IMAGE_TYPE }}
         run: |
             source venv/bin/activate
             make e2e_neuro_push
@@ -87,7 +88,7 @@ jobs:
 
       - name: Push release
         env:
-          BASE_IMAGE_TYPE: ${{ steps.build_image.outputs.BASE_IMAGE_TYPE }}
+          BASE_IMAGE_TYPE: ${{ steps.build-image.outputs.BASE_IMAGE_TYPE }}
         if: startsWith(github.ref, 'refs/tags/')
         run: |
           export TARGET_IMAGE_TAGS="latest-$BASE_IMAGE_TYPE,${GITHUB_REF#refs/tags/}-$BASE_IMAGE_TYPE";
