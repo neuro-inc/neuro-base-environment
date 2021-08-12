@@ -66,16 +66,18 @@ jobs:
           elif [[ ${{ matrix.base-image }} =~ devel ]]; then
             export BASE_IMAGE_TYPE="devel";
           fi
-
-          echo "BASE_IMAGE_TYPE=$BASE_IMAGE_TYPE" >> $GITHUB_ENV
-          # now BASE_IMAGE_TYPE env var will appear in all subsequent steps, expect the current one
+          echo "::set-output name=BASE_IMAGE_TYPE::$BASE_IMAGE_TYPE"
           make image_build
 
       - name: List pip packages
+        env:
+          BASE_IMAGE_TYPE: ${{ steps.build_image.outputs.BASE_IMAGE_TYPE }}
         run: |
             make image_pip_list
 
       - name: Test image
+        env:
+          BASE_IMAGE_TYPE: ${{ steps.build_image.outputs.BASE_IMAGE_TYPE }}
         run: |
             source venv/bin/activate
             make e2e_neuro_push
@@ -84,6 +86,8 @@ jobs:
             make test_e2e_tensorflow
 
       - name: Push release
+        env:
+          BASE_IMAGE_TYPE: ${{ steps.build_image.outputs.BASE_IMAGE_TYPE }}
         if: startsWith(github.ref, 'refs/tags/')
         run: |
           export TARGET_IMAGE_TAGS="latest-$BASE_IMAGE_TYPE,${GITHUB_REF#refs/tags/}-$BASE_IMAGE_TYPE";
