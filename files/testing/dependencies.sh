@@ -22,7 +22,6 @@ nvtop --version
 jupyter --version
 tensorboard --version
 
-gcloud --version
 aws --version
 tqdm --version
 
