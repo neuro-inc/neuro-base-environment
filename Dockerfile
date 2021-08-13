@@ -7,7 +7,6 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 # tools
 # ------------------------------------------------------------------
     DEBIAN_FRONTEND=noninteractive $APT_INSTALL \
-        apt-utils \
         cron \
         curl \
         git \
@@ -30,8 +29,6 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
         tmux \
         htop \
         ssh \
-        # OpenCV
-        libsm6 libxext6 libxrender-dev \
         && \
         # NVTop >>
         git clone --depth 1 --branch 1.2.2 -q https://github.com/Syllo/nvtop.git nvtop && \
@@ -45,11 +42,6 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
         # See instructions https://github.com/nodesource/distributions/blob/master/README.md#installation-instructions
         curl -sL https://deb.nodesource.com/setup_12.x | bash - && \
         $APT_INSTALL nodejs && \
-        # gsutils
-        echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" >> /etc/apt/sources.list.d/google-cloud-sdk.list && \
-        curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg add - && \
-        apt-get -y update && \
-        $APT_INSTALL google-cloud-sdk && \
         # Remove PyYAML before other pip tools installation 
         # since APT installs outdated PyYAML as dist package, which breaks pip's deps management
         # https://stackoverflow.com/questions/49911550/how-to-upgrade-disutils-package-pyyaml

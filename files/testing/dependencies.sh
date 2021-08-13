@@ -43,7 +43,6 @@ python -c "import PIL as pkg; print(f'{pkg.__package__} version: {pkg.__version_
 python -c "import jupyterlab as pkg; print(f'{pkg.__package__} version: {pkg.__version__}')"
 python -c "import tqdm as pkg; print(f'{pkg.__package__} version: {pkg.__version__}')"
 python -c "import awscli as pkg; print(f'{pkg.__package__} version: {pkg.__version__}')"
-python -c "import google.cloud.storage as pkg; print(f'{pkg.__package__} version: {pkg.__version__}')"
 python -c "import tensorboardX as pkg; print(f'{pkg.__package__} version: {pkg.__version__}')"
 python -c "import cv2 as pkg; print(f'{pkg.__package__} version: {pkg.__version__}')"
 python -c "import torchvision as pkg; print(f'{pkg.__package__} version: {pkg.__version__}')"
