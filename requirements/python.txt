@@ -12,7 +12,7 @@ google-cloud-storage==1.41.1
 future==0.18.2
 protobuf==3.17.3
 typing==3.7.4.3
-tensorflow-gpu==2.5.1
+tensorflow-gpu==2.6.0
 tensorboardX==2.4
 
 # Are taken from https://download.pytorch.org/whl/torch_stable.html
