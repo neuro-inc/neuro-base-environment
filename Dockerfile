@@ -68,7 +68,7 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
         rm -rf /usr/lib/python3/dist-packages/yaml && \
         rm -rf /usr/lib/python3/dist-packages/PyYAML-* && \
         apt-get clean && \
-        apt-get autoremove -y && \
+        apt-get autoremove -y --purge && \
         rm -rf /var/lib/apt/lists/* /tmp/* ~/*
 # ==================================================================
 # python
