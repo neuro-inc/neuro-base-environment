@@ -24,6 +24,7 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
         libncurses5-dev \
         libncursesw5-dev \
         gcc \
+        g++ \
         make \
         cmake \
         nano \
