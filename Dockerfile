@@ -35,6 +35,8 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
         wget \
         libncurses5-dev \
         libncursesw5-dev \
+        gcc \
+        make \
         cmake \
         nano \
         tmux \
@@ -43,6 +45,13 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
         # OpenCV
         libsm6 libxext6 libxrender-dev \
         && \
+        # NVTop >>
+        git clone --depth 1 --branch 1.2.2 -q https://github.com/Syllo/nvtop.git nvtop && \
+        mkdir -p nvtop/build && cd nvtop/build && \
+        cmake --log-level=WARNING .. && \
+        make --quiet install && \
+        cd ../.. && rm -r nvtop && \
+        # <<
         ln -s $(which python3) /usr/bin/python && \
         # To pass test `jupyter lab build` (jupyterlab extensions), it needs nodejs>=12
         # See instructions https://github.com/nodesource/distributions/blob/master/README.md#installation-instructions
@@ -68,12 +77,13 @@ COPY requirements/python.txt /tmp/requirements/python.txt
 RUN PIP_INSTALL="python -m pip --no-cache-dir install --upgrade" && \
     $PIP_INSTALL pip && \
     $PIP_INSTALL -r /tmp/requirements/python.txt -f https://download.pytorch.org/whl/torch_stable.html && \
-    rm /tmp/requirements/python.txt && \
+    rm -r /tmp/requirements && \
 # ==================================================================
 # VSCode server
 # ------------------------------------------------------------------
     wget https://github.com/cdr/code-server/releases/download/v3.9.1/code-server_3.9.1_amd64.deb  && \
-    dpkg -i code-server_3.9.1_amd64.deb
+    dpkg -i code-server_3.9.1_amd64.deb && \
+    rm code-server_3.9.1_amd64.deb
 # ==================================================================
 # OOM guard
 # Adds a script to tune oom_killer behavior and puts it into the crontab
@@ -125,7 +135,7 @@ EXPOSE 22
 # ------------------------------------------------------------------
 COPY requirements/neuro.txt /tmp/requirements/neuro.txt
 RUN python -m pip --no-cache-dir install --upgrade -r /tmp/requirements/neuro.txt && \
-    rm /tmp/requirements/neuro.txt
+    rm -r /tmp/requirements
 # ==================================================================
 # config
 # ------------------------------------------------------------------
@@ -138,7 +148,7 @@ EXPOSE 8888 6006
 # Needed for correct work of tqdm via 'neuro exec'
 ENV PYTHONUNBUFFERED 1
 
-WORKDIR /
+WORKDIR /project
 
 ## Setup entrypoint
 COPY entrypoint.sh /entrypoint.sh

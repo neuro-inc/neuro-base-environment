@@ -17,6 +17,7 @@ nano --version
 tmux -V
 ssh -V
 git --version
+nvtop --version
 
 jupyter --version
 tensorboard --version
