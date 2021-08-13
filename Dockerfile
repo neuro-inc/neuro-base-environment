@@ -1,15 +1,3 @@
-# ==================================================================
-# module list
-# ------------------------------------------------------------------
-# python        3.8.10    (apt)
-# jupyter       latest    (pip)
-# jupyterlab    3.1.4     (pip)
-# pytorch       1.9.0     (pip)
-# tensorflow    2.5.0     (pip)
-# neuro-cli     21.6.3    (pip)
-# neuro-flow    21.6.2    (pip)
-# neuro-extras  21.3.19   (pip)
-# ==================================================================
 ARG BASE_IMAGE=nvidia/cuda:11.2.2-cudnn8-devel-ubuntu20.04
 FROM ${BASE_IMAGE}
 ENV LANG C.UTF-8
