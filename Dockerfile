@@ -7,6 +7,7 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 # tools
 # ------------------------------------------------------------------
     DEBIAN_FRONTEND=noninteractive $APT_INSTALL \
+        apt-utils \
         cron \
         curl \
         git \
