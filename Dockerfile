@@ -7,7 +7,6 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 # tools
 # ------------------------------------------------------------------
     DEBIAN_FRONTEND=noninteractive $APT_INSTALL \
-        apt-utils \
         cron \
         curl \
         git \
@@ -24,7 +23,6 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
         libncurses5-dev \
         libncursesw5-dev \
         gcc \
-        g++ \
         make \
         cmake \
         nano \
@@ -63,7 +61,7 @@ RUN PIP_INSTALL="python -m pip --no-cache-dir install --upgrade" && \
 # ==================================================================
 # VSCode server
 # ------------------------------------------------------------------
-    wget https://github.com/cdr/code-server/releases/download/v3.9.1/code-server_3.9.1_amd64.deb  && \
+    wget -q https://github.com/cdr/code-server/releases/download/v3.9.1/code-server_3.9.1_amd64.deb  && \
     dpkg -i code-server_3.9.1_amd64.deb && \
     rm code-server_3.9.1_amd64.deb
 # ==================================================================
