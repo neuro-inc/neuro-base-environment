@@ -46,3 +46,13 @@ python -c "import tensorboardX as pkg; print(f'{pkg.__package__} version: {pkg._
 python -c "import cv2 as pkg; print(f'{pkg.__package__} version: {pkg.__version__}')"
 python -c "import torchvision as pkg; print(f'{pkg.__package__} version: {pkg.__version__}')"
 python -c "import torchaudio as pkg; print(f'{pkg.__package__} version: {pkg.__version__}')"
+
+# execute TF beginners notebook
+wget -q https://storage.googleapis.com/tensorflow_docs/docs/site/en/tutorials/quickstart/beginner.ipynb -O beginner.ipynb
+jupyter nbconvert --to notebook --execute --inplace --ExecutePreprocessor.timeout=600 beginner.ipynb
+rm beginner.ipynb
+
+# execute Pytorch quickstart notebook
+wget -q https://pytorch.org/tutorials/_downloads/c30c1dcf2bc20119bcda7e734ce0eb42/quickstart_tutorial.ipynb -O quickstart_tutorial.ipynb
+jupyter nbconvert --to notebook --execute --inplace --ExecutePreprocessor.timeout=600 quickstart_tutorial.ipynb
+rm quickstart_tutorial.ipynb

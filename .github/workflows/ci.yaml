@@ -83,8 +83,6 @@ jobs:
             source venv/bin/activate
             make e2e_neuro_push
             make test_e2e_dependencies
-            make test_e2e_pytorch
-            make test_e2e_tensorflow
 
       - name: Push release
         env:
