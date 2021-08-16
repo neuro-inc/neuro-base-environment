@@ -82,7 +82,7 @@ jobs:
         run: |
             source venv/bin/activate
             make e2e_neuro_push
-            make test_e2e_dependencies
+            make test_dependencies
 
       - name: Push release
         env:
