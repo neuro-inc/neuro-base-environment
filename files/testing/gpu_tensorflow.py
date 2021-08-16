@@ -8,4 +8,4 @@ y = tf.random.normal(shape=[1_000, 10_000])
 z = tf.matmul(x, y)
 
 print(z)
-print(f"TensorFlow version {tf.__version__}: GPU test succeeded")
+print(f"TensorFlow version {tf.__version__}: GPU availability test succeeded")

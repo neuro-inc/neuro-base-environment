@@ -1,15 +1,3 @@
-# ==================================================================
-# module list
-# ------------------------------------------------------------------
-# python        3.8.10    (apt)
-# jupyter       latest    (pip)
-# jupyterlab    3.1.4     (pip)
-# pytorch       1.9.0     (pip)
-# tensorflow    2.5.0     (pip)
-# neuro-cli     21.6.3    (pip)
-# neuro-flow    21.6.2    (pip)
-# neuro-extras  21.3.19   (pip)
-# ==================================================================
 ARG BASE_IMAGE=nvidia/cuda:11.2.2-cudnn8-devel-ubuntu20.04
 FROM ${BASE_IMAGE}
 ENV LANG C.UTF-8
@@ -19,7 +7,6 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 # tools
 # ------------------------------------------------------------------
     DEBIAN_FRONTEND=noninteractive $APT_INSTALL \
-        apt-utils \
         cron \
         curl \
         git \
@@ -35,31 +22,33 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
         wget \
         libncurses5-dev \
         libncursesw5-dev \
+        gcc \
+        make \
         cmake \
         nano \
         tmux \
         htop \
         ssh \
-        # OpenCV
-        libsm6 libxext6 libxrender-dev \
         && \
+        # NVTop >>
+        git clone --depth 1 --branch 1.2.2 -q https://github.com/Syllo/nvtop.git nvtop && \
+        mkdir -p nvtop/build && cd nvtop/build && \
+        cmake --log-level=WARNING .. && \
+        make --quiet install && \
+        cd ../.. && rm -r nvtop && \
+        # <<
         ln -s $(which python3) /usr/bin/python && \
         # To pass test `jupyter lab build` (jupyterlab extensions), it needs nodejs>=12
         # See instructions https://github.com/nodesource/distributions/blob/master/README.md#installation-instructions
         curl -sL https://deb.nodesource.com/setup_12.x | bash - && \
         $APT_INSTALL nodejs && \
-        # gsutils
-        echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" >> /etc/apt/sources.list.d/google-cloud-sdk.list && \
-        curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg add - && \
-        apt-get -y update && \
-        $APT_INSTALL google-cloud-sdk && \
         # Remove PyYAML before other pip tools installation 
         # since APT installs outdated PyYAML as dist package, which breaks pip's deps management
         # https://stackoverflow.com/questions/49911550/how-to-upgrade-disutils-package-pyyaml
         rm -rf /usr/lib/python3/dist-packages/yaml && \
         rm -rf /usr/lib/python3/dist-packages/PyYAML-* && \
         apt-get clean && \
-        apt-get autoremove -y && \
+        apt-get autoremove -y --purge && \
         rm -rf /var/lib/apt/lists/* /tmp/* ~/*
 # ==================================================================
 # python
@@ -68,12 +57,13 @@ COPY requirements/python.txt /tmp/requirements/python.txt
 RUN PIP_INSTALL="python -m pip --no-cache-dir install --upgrade" && \
     $PIP_INSTALL pip && \
     $PIP_INSTALL -r /tmp/requirements/python.txt -f https://download.pytorch.org/whl/torch_stable.html && \
-    rm /tmp/requirements/python.txt && \
+    rm -r /tmp/requirements && \
 # ==================================================================
 # VSCode server
 # ------------------------------------------------------------------
-    wget https://github.com/cdr/code-server/releases/download/v3.9.1/code-server_3.9.1_amd64.deb  && \
-    dpkg -i code-server_3.9.1_amd64.deb
+    wget -q https://github.com/cdr/code-server/releases/download/v3.11.1/code-server_3.11.1_amd64.deb  && \
+    dpkg -i code-server_3.11.1_amd64.deb && \
+    rm code-server_3.11.1_amd64.deb
 # ==================================================================
 # OOM guard
 # Adds a script to tune oom_killer behavior and puts it into the crontab
@@ -125,7 +115,7 @@ EXPOSE 22
 # ------------------------------------------------------------------
 COPY requirements/neuro.txt /tmp/requirements/neuro.txt
 RUN python -m pip --no-cache-dir install --upgrade -r /tmp/requirements/neuro.txt && \
-    rm /tmp/requirements/neuro.txt
+    rm -r /tmp/requirements
 # ==================================================================
 # config
 # ------------------------------------------------------------------
@@ -138,7 +128,7 @@ EXPOSE 8888 6006
 # Needed for correct work of tqdm via 'neuro exec'
 ENV PYTHONUNBUFFERED 1
 
-WORKDIR /
+WORKDIR /project
 
 ## Setup entrypoint
 COPY entrypoint.sh /entrypoint.sh

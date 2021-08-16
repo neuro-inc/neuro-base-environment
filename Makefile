@@ -3,6 +3,7 @@ TARGET_IMAGE_TAGS ?=
 
 TEST_IMAGE_NAME ?= image:e2e-neuro-base-environment
 TEST_STORAGE ?= storage:.neuro-base-environment
+TEST_STORAGE_SUFFIX := $(shell bash -c 'echo $$(date +"%Y-%m-%d--%H-%M-%S")-$$RANDOM')
 
 BASE_IMAGE ?= nvidia/cuda:11.2.2-cudnn8-runtime-ubuntu20.04
 BASE_IMAGE_TYPE ?=
@@ -30,29 +31,17 @@ image_pip_list:
 e2e_neuro_push:
 	neuro push $(TARGET_IMAGE_NAME):built-$(BASE_IMAGE_TYPE) $(TEST_IMAGE_NAME):$(BASE_IMAGE_TYPE)
 
-TEST_PRESET=cpu-small
-TEST_CMD=
-.PHONY: _test_e2e
-_test_e2e:
-	neuro mkdir -p $(TEST_STORAGE)/
-	neuro cp -ru files/testing/ -T $(TEST_STORAGE)/
+TEST_PRESET=gpu-small
+TEST_CMD=bash /var/storage/dependencies.sh
+.PHONY: test_dependencies
+test_dependencies:
+	neuro mkdir -p $(TEST_STORAGE)/$(TEST_STORAGE_SUFFIX)
+	neuro cp -ru files/testing/ -T $(TEST_STORAGE)/$(TEST_STORAGE_SUFFIX)
 	neuro run \
 		--pass-config \
 	    -s $(TEST_PRESET) \
-		-v $(TEST_STORAGE):/var/storage \
+		-v $(TEST_STORAGE)/$(TEST_STORAGE_SUFFIX):/var/storage \
+		--workdir /var/storage \
 	    $(TEST_IMAGE_NAME):$(BASE_IMAGE_TYPE) \
 		$(TEST_CMD)
-
-.PHONY: test_e2e_pytorch
-test_e2e_pytorch: TEST_CMD=python /var/storage/gpu_pytorch.py
-test_e2e_pytorch: TEST_PRESET=gpu-k80-small-p
-test_e2e_pytorch: _test_e2e
-
-.PHONY: test_e2e_tensorflow
-test_e2e_tensorflow: TEST_CMD=python /var/storage/gpu_tensorflow.py
-test_e2e_tensorflow: TEST_PRESET=gpu-k80-small-p
-test_e2e_tensorflow: _test_e2e
-
-.PHONY: test_e2e_dependencies
-test_e2e_dependencies: TEST_CMD=bash /var/storage/dependencies.sh
-test_e2e_dependencies: _test_e2e
+	neuro rm -r $(TEST_STORAGE)/$(TEST_STORAGE_SUFFIX)
