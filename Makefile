@@ -3,7 +3,7 @@ TARGET_IMAGE_TAGS ?=
 
 TEST_IMAGE_NAME ?= image:e2e-neuro-base-environment
 TEST_STORAGE ?= storage:.neuro-base-environment
-TEST_STORAGE_SUFFIX := $(shell bash -c 'echo $$(date +"%Y/%m/%d-%H:%M:%S")-$$RANDOM')
+TEST_STORAGE_SUFFIX := $(shell bash -c 'echo $$(date +"%Y-%m-%d--%H-%M-%S")-$$RANDOM')
 
 BASE_IMAGE ?= nvidia/cuda:11.2.2-cudnn8-runtime-ubuntu20.04
 BASE_IMAGE_TYPE ?=
