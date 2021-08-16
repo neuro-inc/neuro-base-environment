@@ -47,6 +47,11 @@ python -c "import cv2 as pkg; print(f'{pkg.__package__} version: {pkg.__version_
 python -c "import torchvision as pkg; print(f'{pkg.__package__} version: {pkg.__version__}')"
 python -c "import torchaudio as pkg; print(f'{pkg.__package__} version: {pkg.__version__}')"
 
+### Framework-specific tests
+# test gpu availability in DL frameworks
+python gpu_pytorch.py
+python gpu_tensorflow.py
+
 # execute TF beginners notebook
 wget -q https://storage.googleapis.com/tensorflow_docs/docs/site/en/tutorials/quickstart/beginner.ipynb -O beginner.ipynb
 jupyter nbconvert --to notebook --execute --inplace --ExecutePreprocessor.timeout=600 beginner.ipynb

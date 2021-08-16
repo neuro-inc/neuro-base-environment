@@ -30,20 +30,17 @@ image_pip_list:
 e2e_neuro_push:
 	neuro push $(TARGET_IMAGE_NAME):built-$(BASE_IMAGE_TYPE) $(TEST_IMAGE_NAME):$(BASE_IMAGE_TYPE)
 
-TEST_PRESET=cpu-small
-TEST_CMD=
-.PHONY: _test_e2e
-_test_e2e:
+TEST_PRESET=gpu-small
+TEST_CMD=bash /var/storage/dependencies.sh
+.PHONY: test_dependencies
+test_dependencies:
 	neuro mkdir -p $(TEST_STORAGE)/
 	neuro cp -ru files/testing/ -T $(TEST_STORAGE)/
 	neuro run \
 		--pass-config \
 	    -s $(TEST_PRESET) \
 		-v $(TEST_STORAGE):/var/storage \
+		--workdir /var/storage \
 	    $(TEST_IMAGE_NAME):$(BASE_IMAGE_TYPE) \
 		$(TEST_CMD)
-
-.PHONY: test_e2e_dependencies
-test_e2e_dependencies: TEST_CMD=bash /var/storage/dependencies.sh
-test_e2e_dependencies: TEST_PRESET=gpu-small
-test_e2e_dependencies: _test_e2e
+	neuro rm -r $(TEST_STORAGE)
