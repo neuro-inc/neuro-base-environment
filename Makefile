@@ -39,6 +39,7 @@ test_dependencies:
 	neuro cp -ru files/testing/ -T $(TEST_STORAGE)/$(TEST_STORAGE_SUFFIX)
 	neuro run \
 		--pass-config \
+		--schedule-timeout 20m \
 	    -s $(TEST_PRESET) \
 		-v $(TEST_STORAGE)/$(TEST_STORAGE_SUFFIX):/var/storage \
 		--workdir /var/storage \
