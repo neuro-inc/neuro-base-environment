@@ -4,7 +4,7 @@ cloudpickle==1.6.0
 scikit-learn==0.24.2
 matplotlib==3.4.3
 Pillow==8.3.1
-jupyterlab==3.1.7
+jupyterlab==3.1.9
 ipywidgets==7.6.3
 tqdm==4.62.2
 awscli==1.20.31
