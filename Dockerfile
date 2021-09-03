@@ -115,7 +115,7 @@ EXPOSE 22
 # ------------------------------------------------------------------
 COPY requirements/neuro.txt requirements/pipx.txt /tmp/requirements/
 RUN python -m pip --no-cache-dir install --upgrade -r /tmp/requirements/neuro.txt && \
-    cat /tmp/requirements/pipx.txt | xargs -rn pipx install && \
+    cat /tmp/requirements/pipx.txt | xargs -rn 1 pipx install && \
     rm -r /tmp/requirements 
 # ==================================================================
 # config
