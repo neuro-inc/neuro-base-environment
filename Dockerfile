@@ -13,6 +13,7 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
         libssl-dev \
         python3-dev \
         python3-pip \
+        python3-venv \
         rsync \
         rclone \
         unrar \
