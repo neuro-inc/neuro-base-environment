@@ -32,6 +32,8 @@ jobs:
 
     name: Build, test and publish image
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+
     steps:
       - name: Checkout commit
         uses: actions/checkout@v2

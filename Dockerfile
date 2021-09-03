@@ -55,7 +55,7 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 # ------------------------------------------------------------------
 COPY requirements/python.txt /tmp/requirements/python.txt
 RUN PIP_INSTALL="python -m pip --no-cache-dir install --upgrade" && \
-    $PIP_INSTALL pip && \
+    $PIP_INSTALL pip pipx && \
     $PIP_INSTALL -r /tmp/requirements/python.txt -f https://download.pytorch.org/whl/torch_stable.html && \
     rm -r /tmp/requirements && \
 # ==================================================================
@@ -111,11 +111,12 @@ PermitEmptyPasswords yes\n" > /etc/ssh/sshd_config
 EXPOSE 22
 
 # ==================================================================
-# Neu.ro packages
+# Neu.ro packages + some isolated via pipx packages
 # ------------------------------------------------------------------
-COPY requirements/neuro.txt /tmp/requirements/neuro.txt
+COPY requirements/neuro.txt requirements/pipx.txt /tmp/requirements/
 RUN python -m pip --no-cache-dir install --upgrade -r /tmp/requirements/neuro.txt && \
-    rm -r /tmp/requirements
+    cat /tmp/requirements/pipx.txt | xargs -rn pipx install && \
+    rm -r /tmp/requirements 
 # ==================================================================
 # config
 # ------------------------------------------------------------------
