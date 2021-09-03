@@ -90,6 +90,7 @@ RUN apt-get install -y --no-install-recommends openssh-server && \
     echo "export LANGUAGE=$LANGUAGE" >> /etc/profile && \
     echo "export LC_ALL=$LC_ALL" >> /etc/profile && \
     echo "export PYTHONIOENCODING=$PYTHONIOENCODING" >> /etc/profile && \
+    source /etc/profile && \
     apt-get clean && \
     apt-get autoremove && \
     rm -rf /var/lib/apt/lists/* /tmp/* ~/*
