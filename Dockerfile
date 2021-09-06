@@ -78,7 +78,6 @@ RUN crontab -l 2>/dev/null | { cat; echo '* * * * * /usr/local/sbin/oom_guard.sh
 RUN mkdir -p /var/notebooks
 COPY files/var/notebooks/README.ipynb /var/notebooks
 
-
 # ==================================================================
 # Set up SSH for remote debug
 # ------------------------------------------------------------------
@@ -116,6 +115,8 @@ EXPOSE 22
 # Neu.ro packages + some isolated via pipx packages
 # ------------------------------------------------------------------
 COPY requirements/neuro.txt requirements/pipx.txt /tmp/requirements/
+# Used for pipx
+ENV PATH=/root/.local/bin:$PATH
 RUN python -m pip --no-cache-dir install --upgrade -r /tmp/requirements/neuro.txt && \
     cat /tmp/requirements/pipx.txt | xargs -rn 1 pipx install && \
     rm -r /tmp/requirements 
