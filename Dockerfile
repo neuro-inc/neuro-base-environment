@@ -43,7 +43,7 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
         # See instructions https://github.com/nodesource/distributions/blob/master/README.md#installation-instructions
         curl -sL https://deb.nodesource.com/setup_12.x | bash - && \
         $APT_INSTALL nodejs && \
-        # Remove PyYAML before other pip tools installation 
+        # Remove PyYAML before other pip tools installation
         # since APT installs outdated PyYAML as dist package, which breaks pip's deps management
         # https://stackoverflow.com/questions/49911550/how-to-upgrade-disutils-package-pyyaml
         rm -rf /usr/lib/python3/dist-packages/yaml && \
@@ -119,7 +119,7 @@ COPY requirements/neuro.txt requirements/pipx.txt /tmp/requirements/
 ENV PATH=/root/.local/bin:$PATH
 RUN python -m pip --no-cache-dir install --upgrade -r /tmp/requirements/neuro.txt && \
     cat /tmp/requirements/pipx.txt | xargs -rn 1 pipx install && \
-    rm -r /tmp/requirements 
+    rm -r /tmp/requirements
 # ==================================================================
 # config
 # ------------------------------------------------------------------
