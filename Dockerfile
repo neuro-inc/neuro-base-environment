@@ -13,6 +13,7 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
         libssl-dev \
         python3-dev \
         python3-pip \
+        python3-venv \
         rsync \
         rclone \
         unrar \
@@ -42,7 +43,7 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
         # See instructions https://github.com/nodesource/distributions/blob/master/README.md#installation-instructions
         curl -sL https://deb.nodesource.com/setup_12.x | bash - && \
         $APT_INSTALL nodejs && \
-        # Remove PyYAML before other pip tools installation 
+        # Remove PyYAML before other pip tools installation
         # since APT installs outdated PyYAML as dist package, which breaks pip's deps management
         # https://stackoverflow.com/questions/49911550/how-to-upgrade-disutils-package-pyyaml
         rm -rf /usr/lib/python3/dist-packages/yaml && \
@@ -55,7 +56,7 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 # ------------------------------------------------------------------
 COPY requirements/python.txt /tmp/requirements/python.txt
 RUN PIP_INSTALL="python -m pip --no-cache-dir install --upgrade" && \
-    $PIP_INSTALL pip && \
+    $PIP_INSTALL pip pipx && \
     $PIP_INSTALL -r /tmp/requirements/python.txt -f https://download.pytorch.org/whl/torch_stable.html && \
     rm -r /tmp/requirements && \
 # ==================================================================
@@ -77,18 +78,18 @@ RUN crontab -l 2>/dev/null | { cat; echo '* * * * * /usr/local/sbin/oom_guard.sh
 RUN mkdir -p /var/notebooks
 COPY files/var/notebooks/README.ipynb /var/notebooks
 
-
 # ==================================================================
 # Set up SSH for remote debug
 # ------------------------------------------------------------------
 
 # Setup environment for ssh session
 RUN apt-get install -y --no-install-recommends openssh-server && \
-    echo "export PATH=$PATH" >> /etc/profile && \
+    echo "export PATH=/root/.local/bin:$PATH" >> /etc/profile && \
     echo "export LANG=$LANG" >> /etc/profile && \
     echo "export LANGUAGE=$LANGUAGE" >> /etc/profile && \
     echo "export LC_ALL=$LC_ALL" >> /etc/profile && \
     echo "export PYTHONIOENCODING=$PYTHONIOENCODING" >> /etc/profile && \
+    . /etc/profile && \
     apt-get clean && \
     apt-get autoremove && \
     rm -rf /var/lib/apt/lists/* /tmp/* ~/*
@@ -111,10 +112,13 @@ PermitEmptyPasswords yes\n" > /etc/ssh/sshd_config
 EXPOSE 22
 
 # ==================================================================
-# Neu.ro packages
+# Neu.ro packages + some isolated via pipx packages
 # ------------------------------------------------------------------
-COPY requirements/neuro.txt /tmp/requirements/neuro.txt
+COPY requirements/neuro.txt requirements/pipx.txt /tmp/requirements/
+# Used for pipx
+ENV PATH=/root/.local/bin:$PATH
 RUN python -m pip --no-cache-dir install --upgrade -r /tmp/requirements/neuro.txt && \
+    cat /tmp/requirements/pipx.txt | xargs -rn 1 pipx install && \
     rm -r /tmp/requirements
 # ==================================================================
 # config

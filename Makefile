@@ -8,6 +8,11 @@ TEST_STORAGE_SUFFIX := $(shell bash -c 'echo $$(date +"%Y-%m-%d--%H-%M-%S")-$$RA
 BASE_IMAGE ?= nvidia/cuda:11.2.2-cudnn8-runtime-ubuntu20.04
 BASE_IMAGE_TYPE ?=
 
+.PHONY: setup
+setup:
+	pip install pre-commit
+	pre-commit install
+
 .PHONY: image_build
 image_build:
 	docker build \
