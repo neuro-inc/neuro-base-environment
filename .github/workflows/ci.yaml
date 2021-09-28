@@ -32,7 +32,7 @@ jobs:
 
     name: Build, test and publish image
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
 
     steps:
       - name: Checkout commit
