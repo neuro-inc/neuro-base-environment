@@ -10,6 +10,20 @@ on:
     branches: [master]
 
 jobs:
+  # https://github.community/t/how-to-limit-concurrent-workflow-runs/16844/16
+  # We limit it, since our tests are runnig on GPU presets,
+  #   if we fire several of them at the same time, it might lead to cluster-scaleup failures
+  pre-ci:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Wait another CI to complete'
+        uses: softprops/turnstyle@v1
+        with:
+          poll-interval-seconds: 10
+          continue-after-seconds: 2400
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   build:
     if: |
       (github.event_name != 'pull_request_target' && github.actor != 'dependabot[bot]') ||
@@ -22,13 +36,9 @@ jobs:
           - nvidia/cuda:11.2.2-cudnn8-runtime-ubuntu20.04
 
     env:
-      DOCKER_SERVER: docker.io
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
       IMAGE_NAME: neuromation/base
       NEURO_STAGING_URL: ${{ secrets.NEURO_STAGING_URL }}
       NEURO_TOKEN: ${{ secrets.NEURO_TOKEN }}
-      BASE_IMAGE: ${{ matrix.base-image }}
 
     name: Build, test and publish image
     runs-on: ubuntu-latest
@@ -57,30 +67,47 @@ jobs:
           neuro config login-with-token $NEURO_TOKEN $NEURO_STAGING_URL
           neuro config show
 
-      - name: Login DockerHub
-        run: |
-          docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD $DOCKER_SERVER
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1.6.0
 
-      - name: Build image
-        id: build-image
+      - name: Login DockerHub
+        uses: docker/login-action@v1.10.0
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+
+      - name: Get image tags
+        id: get-image-type
         run: |
           if [[ ${{ matrix.base-image }} =~ runtime ]]; then
             export BASE_IMAGE_TYPE="runtime";
           elif [[ ${{ matrix.base-image }} =~ devel ]]; then
             export BASE_IMAGE_TYPE="devel";
           fi
-          make image_build
           echo "::set-output name=BASE_IMAGE_TYPE::$BASE_IMAGE_TYPE"
+          echo "::set-output name=platform_image_tag::neuromation/base:built-$BASE_IMAGE_TYPE"
+
+      - name: Build image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          builder: ${{ steps.buildx.outputs.name }}
+          build-args: |
+            BASE_IMAGE=${{ matrix.base-image }}
+          load: true  # Load image into the local docker for test below
+          tags: ${{ steps.get-image-type.outputs.platform_image_tag }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: List pip packages
-        env:
-          BASE_IMAGE_TYPE: ${{ steps.build-image.outputs.BASE_IMAGE_TYPE }}
         run: |
-            make image_pip_list
+            docker run --tty --rm ${{ steps.get-image-type.outputs.platform_image_tag }} pip list
 
       - name: Test image
         env:
-          BASE_IMAGE_TYPE: ${{ steps.build-image.outputs.BASE_IMAGE_TYPE }}
+          BASE_IMAGE_TYPE: ${{ steps.get-image-type.outputs.BASE_IMAGE_TYPE }}
         run: |
             source venv/bin/activate
             make e2e_neuro_push
@@ -88,7 +115,7 @@ jobs:
 
       - name: Push release
         env:
-          BASE_IMAGE_TYPE: ${{ steps.build-image.outputs.BASE_IMAGE_TYPE }}
+          BASE_IMAGE_TYPE: ${{ steps.get-image-type.outputs.BASE_IMAGE_TYPE }}
         if: startsWith(github.ref, 'refs/tags/')
         run: |
           export TARGET_IMAGE_TAGS="latest-$BASE_IMAGE_TYPE,${GITHUB_REF#refs/tags/}-$BASE_IMAGE_TYPE";

@@ -28,10 +28,6 @@ image_deploy:
       docker push $(TARGET_IMAGE_NAME):$$t ; \
     done
 
-.PHONY: image_pip_list
-image_pip_list:
-	docker run --tty --rm $(TARGET_IMAGE_NAME):built-$(BASE_IMAGE_TYPE) pip list
-
 .PHONY: e2e_neuro_push
 e2e_neuro_push:
 	neuro push $(TARGET_IMAGE_NAME):built-$(BASE_IMAGE_TYPE) $(TEST_IMAGE_NAME):$(BASE_IMAGE_TYPE)
