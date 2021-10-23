@@ -95,12 +95,12 @@ jobs:
         with:
           context: .
           builder: ${{ steps.buildx.outputs.name }}
-          build-args: |
-            BASE_IMAGE=${{ matrix.base-image }}
           load: true  # Load image into the local docker for test below
           tags: ${{ steps.get-image-type.outputs.platform_image_tag }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=neuro-base-environment
+          cache-to: type=gha,scope=neuro-base-environment,mode=max
+          build-args: |
+            BASE_IMAGE=${{ matrix.base-image }}
 
       - name: List pip packages
         run: |
