@@ -104,7 +104,7 @@ jobs:
 
       - name: List pip packages
         run: |
-            docker run --tty --rm ${{ steps.get-image-type.outputs.platform_image_tag }} pip list
+            docker run --tty --rm docker.io/${{ steps.get-image-type.outputs.platform_image_tag }} pip list
 
       - name: Test image
         env:
