@@ -97,7 +97,7 @@ jobs:
             export BASE_IMAGE_TYPE="devel";
           fi
           echo "::set-output name=BASE_IMAGE_TYPE::$BASE_IMAGE_TYPE"
-          echo "::set-output name=platform_image_tag::neuromation/base:built-$(BASE_IMAGE_TYPE)"
+          echo "::set-output name=platform_image_tag::neuromation/base:built-$BASE_IMAGE_TYPE"
 
       - name: Build image
         uses: docker/build-push-action@v2
