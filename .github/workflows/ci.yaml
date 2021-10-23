@@ -107,6 +107,7 @@ jobs:
           build-args: |
             BASE_IMAGE=${{ matrix.base-image }}
           push: false # Would be pushed to Platform first, and if release - to DockerHub
+          load: true  # Load image into the local docker
           tags: ${{ steps.get-image-type.outputs.platform_image_tag }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
