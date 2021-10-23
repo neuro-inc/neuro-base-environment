@@ -36,13 +36,9 @@ jobs:
           - nvidia/cuda:11.2.2-cudnn8-runtime-ubuntu20.04
 
     env:
-      DOCKER_SERVER: docker.io
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
       IMAGE_NAME: neuromation/base
       NEURO_STAGING_URL: ${{ secrets.NEURO_STAGING_URL }}
       NEURO_TOKEN: ${{ secrets.NEURO_TOKEN }}
-      BASE_IMAGE: ${{ matrix.base-image }}
 
     name: Build, test and publish image
     runs-on: ubuntu-latest
@@ -71,30 +67,65 @@ jobs:
           neuro config login-with-token $NEURO_TOKEN $NEURO_STAGING_URL
           neuro config show
 
-      - name: Login DockerHub
-        run: |
-          docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD $DOCKER_SERVER
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@master
+        with:
+          install: true
 
-      - name: Build image
-        id: build-image
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: buildx-cache-${{ github.sha }}
+          restore-keys: |
+            buildx-cache
+
+      - name: Login DockerHub
+        uses: docker/login-action@v1.10.0
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+
+      - name: Get image tags
+        id: get-image-type
         run: |
           if [[ ${{ matrix.base-image }} =~ runtime ]]; then
             export BASE_IMAGE_TYPE="runtime";
           elif [[ ${{ matrix.base-image }} =~ devel ]]; then
             export BASE_IMAGE_TYPE="devel";
           fi
-          make image_build
           echo "::set-output name=BASE_IMAGE_TYPE::$BASE_IMAGE_TYPE"
+          echo "::set-output name=platform_image_tag::neuromation/base:built-$(BASE_IMAGE_TYPE)"
+
+      - name: Build image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          builder: ${{ steps.buildx.outputs.name }}
+          build-args:
+            - BASE_IMAGE=${{ matrix.base-image }}
+          push: false # Would be pushed to Platform first, and if release - to DockerHub
+          tags: ${{ steps.get-image-type.outputs.platform_image_tag }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new
+
+        # Temp fix
+        # https://github.com/docker/build-push-action/issues/252
+        # https://github.com/moby/buildkit/issues/1896
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
       - name: List pip packages
-        env:
-          BASE_IMAGE_TYPE: ${{ steps.build-image.outputs.BASE_IMAGE_TYPE }}
         run: |
-            make image_pip_list
+            docker run --tty --rm ${{ steps.get-image-type.outputs.platform_image_tag }} pip list
 
       - name: Test image
         env:
-          BASE_IMAGE_TYPE: ${{ steps.build-image.outputs.BASE_IMAGE_TYPE }}
+          BASE_IMAGE_TYPE: ${{ steps.get-image-type.outputs.BASE_IMAGE_TYPE }}
         run: |
             source venv/bin/activate
             make e2e_neuro_push
@@ -102,7 +133,7 @@ jobs:
 
       - name: Push release
         env:
-          BASE_IMAGE_TYPE: ${{ steps.build-image.outputs.BASE_IMAGE_TYPE }}
+          BASE_IMAGE_TYPE: ${{ steps.get-image-type.outputs.BASE_IMAGE_TYPE }}
         if: startsWith(github.ref, 'refs/tags/')
         run: |
           export TARGET_IMAGE_TAGS="latest-$BASE_IMAGE_TYPE,${GITHUB_REF#refs/tags/}-$BASE_IMAGE_TYPE";
