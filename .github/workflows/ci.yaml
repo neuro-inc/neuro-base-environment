@@ -104,8 +104,8 @@ jobs:
         with:
           context: .
           builder: ${{ steps.buildx.outputs.name }}
-          build-args:
-            - BASE_IMAGE=${{ matrix.base-image }}
+          build-args: |
+            BASE_IMAGE=${{ matrix.base-image }}
           push: false # Would be pushed to Platform first, and if release - to DockerHub
           tags: ${{ steps.get-image-type.outputs.platform_image_tag }}
           cache-from: type=local,src=/tmp/.buildx-cache
