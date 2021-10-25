@@ -9,18 +9,9 @@ on:
   pull_request_target:
     branches: [master]
 
-jobs:
-  # https://github.community/t/how-to-limit-concurrent-workflow-runs/16844/16
-  # We limit it, since our tests are runnig on GPU presets,
-  #   if we fire several of them at the same time, it might lead to cluster-scaleup failures
-  pre-ci:
-    runs-on: ubuntu-latest
-    steps:
-      - name: 'Wait another CI run to complete'
-        uses: beckermr/turnstyle-python@v1
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+concurrency: CI
 
+jobs:
   build:
     if: |
       (github.event_name != 'pull_request_target' && github.actor != 'dependabot[bot]') ||
@@ -37,7 +28,6 @@ jobs:
       BASE_IMAGE: ${{ matrix.base-image }}
     name: Build, test and publish image
     runs-on: ubuntu-latest
-    needs: [pre-ci]
     timeout-minutes: 40
     steps:
       - name: Checkout commit
