@@ -92,7 +92,10 @@ jobs:
 
       - name: Remove dotnet
         # https://github.com/docker/build-push-action/issues/490
-        run: sudo rm -rf /usr/share/dotnet
+        run: |
+          df -h
+          docker buildx du
+          sudo rm -rf /usr/share/dotnet
 
       - name: Build image
         uses: docker/build-push-action@v2.7.0
@@ -105,6 +108,12 @@ jobs:
           cache-to: type=gha,scope=neuro-base-environment,mode=max
           build-args: |
             BASE_IMAGE=${{ matrix.base-image }}
+
+      - name: Disk
+        # https://github.com/docker/build-push-action/issues/490
+        run: |
+          df -h
+          docker buildx du
 
       - name: List pip packages
         run: |
