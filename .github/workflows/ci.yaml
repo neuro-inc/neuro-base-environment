@@ -90,6 +90,10 @@ jobs:
           echo "::set-output name=BASE_IMAGE_TYPE::$BASE_IMAGE_TYPE"
           echo "::set-output name=platform_image_tag::neuromation/base:built-$BASE_IMAGE_TYPE"
 
+      - name: Remove dotnet
+        # https://github.com/docker/build-push-action/issues/490
+        run: sudo rm -rf /usr/share/dotnet
+
       - name: Build image
         uses: docker/build-push-action@v2.7.0
         with:
