@@ -80,6 +80,8 @@ jobs:
           echo "::set-output name=platform_image_tag::neuromation/base:built-$BASE_IMAGE_TYPE"
 
       - name: Build image
+        env:
+          BASE_IMAGE_TYPE: ${{ steps.get-image-tags.outputs.BASE_IMAGE_TYPE }}
         run: |
           make image_build
 
