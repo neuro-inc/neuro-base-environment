@@ -57,7 +57,7 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 COPY requirements/python.txt /tmp/requirements/python.txt
 RUN PIP_INSTALL="python -m pip --no-cache-dir install --upgrade" && \
     $PIP_INSTALL pip pipx && \
-    $PIP_INSTALL -r /tmp/requirements/python.txt -f https://download.pytorch.org/whl/torch_stable.html && \
+    $PIP_INSTALL -r /tmp/requirements/python.txt --extra-index-url https://download.pytorch.org/whl && \
     rm -r /tmp/requirements && \
 # ==================================================================
 # VSCode server

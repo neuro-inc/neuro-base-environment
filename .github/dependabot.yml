@@ -1,7 +1,11 @@
 version: 2
+registries:
+  pytorch:
+    type: python-index
+    url: https://download.pytorch.org/whl
 updates:
 - package-ecosystem: docker
-  directory: "/targets/python37-jupyter-pytorch-tensorflow-jupyterlab"
+  directory: "/"
   schedule:
     interval: daily
     time: "03:00"
@@ -24,3 +28,5 @@ updates:
     - neuro-inc/mlops
   allow:
     - dependency-type: "all"
+  registries:
+    - pytorch
