@@ -13,6 +13,6 @@ tensorboardX==2.4
 tensorflow-gpu==2.6.0
 torch==1.9.1+cu111
 torchaudio==0.9.1
-torchvision==0.10.1+cu111
+torchvision==0.11.1
 tqdm==4.62.3
 typing==3.7.4.3
