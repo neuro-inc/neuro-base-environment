@@ -42,6 +42,7 @@ jobs:
 
     name: Build, test and publish image
     runs-on: ubuntu-latest
+    needs: [pre-ci]
     timeout-minutes: 40
 
     steps:
@@ -89,21 +90,25 @@ jobs:
           echo "::set-output name=BASE_IMAGE_TYPE::$BASE_IMAGE_TYPE"
           echo "::set-output name=platform_image_tag::neuromation/base:built-$BASE_IMAGE_TYPE"
 
+      - name: Remove dotnet
+        # https://github.com/docker/build-push-action/issues/490
+        run: sudo rm -rf /usr/share/dotnet
+
       - name: Build image
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v2.7.0
         with:
           context: .
           builder: ${{ steps.buildx.outputs.name }}
-          build-args: |
-            BASE_IMAGE=${{ matrix.base-image }}
           load: true  # Load image into the local docker for test below
           tags: ${{ steps.get-image-type.outputs.platform_image_tag }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=neuro-base-environment
+          cache-to: type=gha,scope=neuro-base-environment,mode=max
+          build-args: |
+            BASE_IMAGE=${{ matrix.base-image }}
 
       - name: List pip packages
         run: |
-            docker run --tty --rm ${{ steps.get-image-type.outputs.platform_image_tag }} pip list
+            docker run --tty --rm docker.io/${{ steps.get-image-type.outputs.platform_image_tag }} pip list
 
       - name: Test image
         env:
