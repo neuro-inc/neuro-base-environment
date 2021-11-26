@@ -31,3 +31,4 @@ updates:
   registries:
     - pytorch
   insecure-external-code-execution: allow
+  open-pull-requests-limit: 10
