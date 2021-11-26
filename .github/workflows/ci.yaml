@@ -22,7 +22,7 @@ jobs:
           - nvidia/cuda:11.2.2-cudnn8-devel-ubuntu20.04
           - nvidia/cuda:11.2.2-cudnn8-runtime-ubuntu20.04
     env:
-      IMAGE_NAME: neuromation/base
+      IMAGE_NAME: ghcr.io/neuro-inc/base
       NEURO_STAGING_URL: ${{ secrets.NEURO_STAGING_URL }}
       NEURO_TOKEN: ${{ secrets.NEURO_TOKEN }}
       BASE_IMAGE: ${{ matrix.base-image }}
@@ -52,6 +52,13 @@ jobs:
           neuro config login-with-token $NEURO_TOKEN $NEURO_STAGING_URL
           neuro config show
 
+      - name: Login ghcr.io
+        uses: docker/login-action@v1.10.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Login DockerHub
         uses: docker/login-action@v1.10.0
         with:
@@ -67,7 +74,7 @@ jobs:
             export BASE_IMAGE_TYPE="devel";
           fi
           echo "::set-output name=BASE_IMAGE_TYPE::$BASE_IMAGE_TYPE"
-          echo "::set-output name=platform_image_tag::neuromation/base:built-$BASE_IMAGE_TYPE"
+          echo "::set-output name=platform_image_tag::ghcr.io/neuro-inc/base:built-$BASE_IMAGE_TYPE"
 
       - name: Build image
         env:
@@ -97,3 +104,8 @@ jobs:
             export TARGET_IMAGE_TAGS="latest,$TARGET_IMAGE_TAGS";
           fi
           make image_deploy
+          if [[ $BASE_IMAGE_TYPE == runtime ]]; then
+            # publish legacy images
+            TARGET_IMAGE_NAME="neuromation/base"
+            make image_deploy
+          fi

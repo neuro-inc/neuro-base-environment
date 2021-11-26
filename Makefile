@@ -1,4 +1,4 @@
-TARGET_IMAGE_NAME ?= neuromation/base
+TARGET_IMAGE_NAME ?= ghcr.io/neuro-inc/base
 TARGET_IMAGE_TAGS ?=
 
 TEST_IMAGE_NAME ?= image:e2e-neuro-base-environment
