@@ -30,3 +30,4 @@ updates:
     - dependency-type: "all"
   registries:
     - pytorch
+  insecure-external-code-execution: allow
