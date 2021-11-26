@@ -1,7 +1,7 @@
 Neuro Platform Base Image
 ====================
 
-Base docker image used in [Neuro Platform Template](https://github.com/neuromation/cookiecutter-neuro-project/), deployed on DockerHub as [`neuromation/base`](https://hub.docker.com/r/neuromation/base).
+Base docker image used in [Neuro Platform Template](https://github.com/neuromation/cookiecutter-neuro-project/), deployed on GitHub as [`ghcr.io/neuro-inc/base`](https://github.com/orgs/neuro-inc/packages/container/package/base).
 
 Versions
 ---
