@@ -9,7 +9,7 @@ Pillow==8.4.0
 protobuf==3.19.1
 scikit-learn==1.0.1
 scipy==1.7.1
-tensorboardX==2.4
+tensorboardX==2.4.1
 tensorflow-gpu==2.6.1
 torch==1.10.0+cu111
 torchaudio==0.10.0+cu111
