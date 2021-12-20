@@ -28,6 +28,8 @@ updates:
     - neuro-inc/mlops
   allow:
     - dependency-type: "all"
+  ignore:
+    - dependency-name: "torch"
   registries:
     - pytorch
   insecure-external-code-execution: allow
