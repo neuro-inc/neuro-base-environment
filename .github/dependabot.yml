@@ -29,9 +29,7 @@ updates:
   allow:
     - dependency-type: "all"
   ignore:
-    # PyTorch builds for AMD processors
     - dependency-name: "torch*"
-      versions: "*rocm*"
   registries:
     - pytorch
   insecure-external-code-execution: allow
