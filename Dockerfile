@@ -112,13 +112,12 @@ PermitEmptyPasswords yes\n" > /etc/ssh/sshd_config
 EXPOSE 22
 
 # ==================================================================
-# Neu.ro packages + some isolated via pipx packages
+# Neu.ro and other isolated via pipx Python packages
 # ------------------------------------------------------------------
-COPY requirements/neuro.txt requirements/pipx.txt /tmp/requirements/
+COPY requirements/pipx.txt /tmp/requirements/
 # Used for pipx
 ENV PATH=/root/.local/bin:$PATH
-RUN python -m pip --no-cache-dir install --upgrade -r /tmp/requirements/neuro.txt && \
-    cat /tmp/requirements/pipx.txt | xargs -rn 1 pipx install && \
+RUN cat /tmp/requirements/pipx.txt | xargs -rn 1 pipx install && \
     rm -r /tmp/requirements
 # ==================================================================
 # config
