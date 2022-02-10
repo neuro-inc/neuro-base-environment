@@ -44,6 +44,5 @@ test_dependencies:
 	    -s $(TEST_PRESET) \
 		-v $(TEST_STORAGE)/$(TEST_STORAGE_SUFFIX):/var/storage \
 		--workdir /var/storage \
-	    $(TEST_IMAGE_NAME):$(BASE_IMAGE_TYPE) \
-		$(TEST_CMD)
+	    $(TEST_IMAGE_NAME):$(BASE_IMAGE_TYPE) -- $(TEST_CMD)
 	neuro rm -r $(TEST_STORAGE)/$(TEST_STORAGE_SUFFIX)
