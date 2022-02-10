@@ -21,6 +21,7 @@ nvtop --version
 
 jupyter --version
 tensorboard --version
+wandb --version
 
 aws --version
 tqdm --version
@@ -45,7 +46,7 @@ python -c "import tensorboardX as pkg; print(f'{pkg.__package__} version: {pkg._
 python -c "import cv2 as pkg; print(f'{pkg.__package__} version: {pkg.__version__}')"
 python -c "import torchvision as pkg; print(f'{pkg.__package__} version: {pkg.__version__}')"
 python -c "import torchaudio as pkg; print(f'{pkg.__package__} version: {pkg.__version__}')"
-
+pip check -v
 ### Framework-specific tests
 # test gpu availability in DL frameworks
 python gpu_pytorch.py
