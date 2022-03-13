@@ -3,7 +3,7 @@ future==0.18.2
 ipywidgets==7.6.5
 jupyterlab==3.2.9
 matplotlib==3.5.1
-opencv-python-headless==4.5.5.62
+opencv-python-headless==4.5.5.64
 pandas==1.4.1
 Pillow==9.0.1
 protobuf==3.19.4
