@@ -2,7 +2,7 @@ ARG BASE_IMAGE=nvidia/cuda:11.2.2-cudnn8-devel-ubuntu20.04
 FROM ${BASE_IMAGE}
 ENV LANG C.UTF-8
 RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
-    apt-get update && \
+    apt-get update -qq && \
 # ==================================================================
 # tools
 # ------------------------------------------------------------------
@@ -23,6 +23,7 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
         wget \
         libncurses5-dev \
         libncursesw5-dev \
+        libglib2.0-0 \
         gcc \
         make \
         cmake \
@@ -43,6 +44,10 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
         # See instructions https://github.com/nodesource/distributions/blob/master/README.md#installation-instructions
         curl -sL https://deb.nodesource.com/setup_12.x | bash - && \
         $APT_INSTALL nodejs && \
+        # Git-LFS >>
+        curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && \
+        DEBIAN_FRONTEND=noninteractive $APT_INSTALL git-lfs && \
+        # <<
         # Remove PyYAML before other pip tools installation
         # since APT installs outdated PyYAML as dist package, which breaks pip's deps management
         # https://stackoverflow.com/questions/49911550/how-to-upgrade-disutils-package-pyyaml

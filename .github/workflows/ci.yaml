@@ -28,7 +28,7 @@ jobs:
       BASE_IMAGE: ${{ matrix.base-image }}
     name: Build, test and publish image
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 150
     steps:
       - name: Checkout commit
         uses: actions/checkout@v3
