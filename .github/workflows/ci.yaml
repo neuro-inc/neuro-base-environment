@@ -28,7 +28,7 @@ jobs:
       BASE_IMAGE: ${{ matrix.base-image }}
     name: Build, test and publish image
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 120
     steps:
       - name: Checkout commit
         uses: actions/checkout@v3
@@ -50,6 +50,8 @@ jobs:
         run: |
           source venv/bin/activate
           neuro config login-with-token $NEURO_TOKEN $NEURO_STAGING_URL
+          # This is TMP work-around due to https://neuromation.slack.com/archives/C0185V3TMJN/p1649170174903439
+          neuro config switch-cluster green-hgx-2
           neuro config show
 
       - name: Login ghcr.io
