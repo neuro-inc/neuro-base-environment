@@ -17,6 +17,7 @@ nano --version
 tmux -V
 ssh -V
 git --version
+git-lfs --version
 nvtop --version
 
 jupyter --version
