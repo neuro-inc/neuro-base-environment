@@ -1,9 +1,9 @@
-ARG BASE_IMAGE=nvidia/cuda:11.6.2-cudnn8-devel-ubuntu20.04
+ARG BASE_IMAGE=nvidia/cuda:11.2.2-cudnn8-devel-ubuntu20.04
 FROM ${BASE_IMAGE}
 ENV LANG C.UTF-8
 RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
     apt-get update -qq && \
-    apt-key del A4B469963BF863CC && \
+    apt-key del 7fa2af80 && \
     apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/3bf863cc.pub && \
     apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu2004/x86_64/7fa2af80.pub && \
 # ==================================================================
