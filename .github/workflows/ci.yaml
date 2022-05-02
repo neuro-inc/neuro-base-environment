@@ -46,8 +46,8 @@ jobs:
           source venv/bin/activate
           pip install -U neuro-cli
           # This is TMP work-around due to https://github.com/neuro-inc/neuro-cli/pull/2671
-          pip uninstall click -y
-          pip install click==8.1.2 -y --no-cache-dir
+          pip uninstall -y click
+          pip install -y --no-cache-dir click==8.1.2
 
       - name: Configure environment
         run: |
