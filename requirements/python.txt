@@ -3,7 +3,7 @@ future==0.18.2
 ipywidgets==7.7.0
 jupyterlab==3.4.0
 matplotlib==3.5.2
-mlflow[extras]==1.25.1
+mlflow[extras]==1.26.0
 opencv-python-headless==4.5.5.64
 pandas==1.4.2
 Pillow==9.1.0
