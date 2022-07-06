@@ -53,6 +53,7 @@ jobs:
         run: |
           source venv/bin/activate
           neuro config login-with-token $NEURO_TOKEN $NEURO_STAGING_URL
+          neuro config switch-cluster green-a4000-1
           neuro config show
 
       - name: Login ghcr.io
