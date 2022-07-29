@@ -1,2 +1,2 @@
 awscli==1.25.21
-neuro-all==22.7.0
+neuro-all==22.7.1
