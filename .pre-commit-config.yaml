@@ -5,7 +5,7 @@ repos:
   - id: check-merge-conflict
     exclude: "rst$"
 - repo: https://github.com/asottile/yesqa
-  rev: v1.3.0
+  rev: v1.4.0
   hooks:
   - id: yesqa
 - repo: https://github.com/PyCQA/isort
@@ -38,11 +38,11 @@ repos:
     files: |
       .gitignore
 - repo: https://github.com/asottile/pyupgrade
-  rev: 'v2.37.1'
+  rev: 'v2.37.3'
   hooks:
   - id: pyupgrade
     args: ['--py36-plus']
 - repo: https://github.com/PyCQA/flake8
-  rev: '4.0.1'
+  rev: '5.0.4'
   hooks:
   - id: flake8
