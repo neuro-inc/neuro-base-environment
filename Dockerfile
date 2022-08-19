@@ -141,7 +141,7 @@ RUN cat /tmp/requirements/pipx.txt | xargs -rn 1 pipx install && \
     pipx list --json && \
     # This is TMP work-around due to https://github.com/neuro-inc/neuro-cli/pull/2671
     pipx runpip neuro-all uninstall -y click && \
-    pipx runpip neuro-all install click==8.1.2 && \
+    pipx runpip neuro-all install click==8.1.3 && \
     rm -r /tmp/requirements
 # ==================================================================
 # config
