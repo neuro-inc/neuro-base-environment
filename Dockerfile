@@ -60,8 +60,23 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 # python
 # ------------------------------------------------------------------
 COPY requirements/python.txt /tmp/requirements/python.txt
-RUN PIP_INSTALL="python -m pip --no-cache-dir install --upgrade" && \
+# ==================================================================
+# Miniconda
+# ------------------------------------------------------------------
+RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py39_4.12.0-Linux-x86_64.sh -O ~/miniconda.sh && \
+    /bin/bash ~/miniconda.sh -b -p /opt/conda && \
+    rm ~/miniconda.sh && \
+    ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
+    echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc && \
+    echo "conda activate base" >> ~/.bashrc && \
+    . /opt/conda/etc/profile.d/conda.sh && \
+    conda activate base && \
+# ==================================================================
+# Python
+# ------------------------------------------------------------------
+    PIP_INSTALL="python -m pip --no-cache-dir install --upgrade" && \
     $PIP_INSTALL pip pipx && \
+    python3 -m pipx ensurepath && \
     $PIP_INSTALL -r /tmp/requirements/python.txt --extra-index-url https://download.pytorch.org/whl && \
     rm -r /tmp/requirements && \
 # ==================================================================
@@ -121,8 +136,9 @@ EXPOSE 22
 # ------------------------------------------------------------------
 COPY requirements/pipx.txt /tmp/requirements/
 # Used for pipx
-ENV PATH=/root/.local/bin:$PATH
+ENV PATH=/opt/conda/bin:/root/.local/bin/:$PATH
 RUN cat /tmp/requirements/pipx.txt | xargs -rn 1 pipx install && \
+    pipx list --json && \
     # This is TMP work-around due to https://github.com/neuro-inc/neuro-cli/pull/2671
     pipx runpip neuro-all uninstall -y click && \
     pipx runpip neuro-all install click==8.1.2 && \
