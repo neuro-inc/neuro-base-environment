@@ -96,7 +96,7 @@ RUN crontab -l 2>/dev/null | { cat; echo '* * * * * /usr/local/sbin/oom_guard.sh
 # Documentation notebook
 # ------------------------------------------------------------------
 RUN mkdir -p /var/notebooks
-COPY files/var/notebooks/README.ipynb /var/notebooks
+COPY files/var/notebooks/tutorial-fastai-dogs-cats-mlflow-deploy.ipynb /var/notebooks
 
 # ==================================================================
 # Set up SSH for remote debug
