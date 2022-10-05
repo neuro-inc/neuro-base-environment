@@ -1,7 +1,7 @@
 cloudpickle==2.1.0
 future==0.18.2
 ipywidgets==8.0.1
-jupyterlab==3.4.5
+jupyterlab==3.4.8
 matplotlib==3.5.3
 mlflow[extras]==1.28.0
 opencv-python-headless==4.6.0.66
