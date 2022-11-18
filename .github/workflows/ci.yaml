@@ -53,7 +53,7 @@ jobs:
         run: |
           source venv/bin/activate
           neuro config login-with-token $NEURO_TOKEN $NEURO_STAGING_URL
-          neuro config switch-er revenuegrid-aws
+          neuro config switch-cluster revenuegrid-aws
           neuro config show
 
       - name: Login ghcr.io
