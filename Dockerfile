@@ -42,8 +42,8 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
         ln -s $(which python3) /usr/bin/python && \
         # To pass test `jupyter lab build` (jupyterlab extensions), it needs nodejs>=12
         # See instructions https://github.com/nodesource/distributions/blob/master/README.md#installation-instructions
-        curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash - &&\
-        $APT_INSTALL nodejs && \
+        # curl -fsSL https://deb.nodesource.com/setup_lts.x | -E bash - &&\
+        # $APT_INSTALL nodejs && \
         # Git-LFS >>
         curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && \
         DEBIAN_FRONTEND=noninteractive $APT_INSTALL git-lfs && \
