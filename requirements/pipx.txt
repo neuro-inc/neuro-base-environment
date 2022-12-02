@@ -1,2 +1,2 @@
-awscli==1.25.21
+awscli==1.27.13
 neuro-all==22.8.1

@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=nvidia/cuda:11.2.2-cudnn8-devel-ubuntu20.04
+ARG BASE_IMAGE=nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
 FROM ${BASE_IMAGE}
 ENV LANG C.UTF-8
 RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
@@ -42,8 +42,8 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
         ln -s $(which python3) /usr/bin/python && \
         # To pass test `jupyter lab build` (jupyterlab extensions), it needs nodejs>=12
         # See instructions https://github.com/nodesource/distributions/blob/master/README.md#installation-instructions
-        curl -sL https://deb.nodesource.com/setup_12.x | bash - && \
-        $APT_INSTALL nodejs && \
+        # curl -fsSL https://deb.nodesource.com/setup_lts.x | -E bash - &&\
+        # $APT_INSTALL nodejs && \
         # Git-LFS >>
         curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && \
         DEBIAN_FRONTEND=noninteractive $APT_INSTALL git-lfs && \

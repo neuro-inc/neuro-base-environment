@@ -5,7 +5,7 @@ TEST_IMAGE_NAME ?= image:e2e-neuro-base-environment
 TEST_STORAGE ?= storage:.neuro-base-environment
 TEST_STORAGE_SUFFIX := $(shell bash -c 'echo $$(date +"%Y-%m-%d--%H-%M-%S")-$$RANDOM')
 
-BASE_IMAGE ?= nvidia/cuda:11.2.2-cudnn8-runtime-ubuntu20.04
+BASE_IMAGE ?= nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu22.04
 BASE_IMAGE_TYPE ?=
 
 .PHONY: setup
@@ -32,7 +32,7 @@ image_deploy:
 e2e_neuro_push:
 	neuro push $(TARGET_IMAGE_NAME):built-$(BASE_IMAGE_TYPE) $(TEST_IMAGE_NAME):$(BASE_IMAGE_TYPE)
 
-TEST_PRESET=gpu-small
+TEST_PRESET=gpu-large
 TEST_CMD=bash /var/storage/dependencies.sh
 .PHONY: test_dependencies
 test_dependencies:
