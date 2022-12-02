@@ -38,16 +38,13 @@ jobs:
       - name: Install python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.7"
+          python-version: "3.9"
 
       - name: Install dependencies
         run: |
           python -m venv venv
           source venv/bin/activate
           pip install -U neuro-cli
-          # This is TMP work-around due to https://github.com/neuro-inc/neuro-cli/pull/2671
-          pip uninstall -y click
-          pip install --no-cache-dir click==8.1.2
 
       - name: Configure environment
         run: |
