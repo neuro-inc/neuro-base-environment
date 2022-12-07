@@ -16,4 +16,4 @@ torchaudio==0.13.0+cu116
 torchvision==0.14.0+cu116
 tqdm==4.64.1
 typing==3.7.4.3
-wandb[aws]==0.13.5
+wandb[aws]==0.13.6
