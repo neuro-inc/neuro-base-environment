@@ -6,7 +6,7 @@ matplotlib==3.6.2
 mlflow[extras]==2.0.1
 opencv-python-headless==4.6.0.66
 pandas==1.5.2
-Pillow==9.3.0
+Pillow==9.4.0
 scikit-learn==1.2.0
 scipy==1.9.3
 tensorboardX==2.5.1
