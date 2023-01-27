@@ -19,8 +19,8 @@ jobs:
     strategy:
       matrix:
         base-image:
-          - nvidia/cuda:11.6.2-cudnn8-devel-ubuntu22.04
-          - nvidia/cuda:11.6.2-cudnn8-runtime-ubuntu22.04
+          - nvidia/cuda:11.6.2-cudnn8-devel-ubuntu20.04
+          - nvidia/cuda:11.6.2-cudnn8-runtime-ubuntu20.04
     env:
       IMAGE_NAME: ghcr.io/neuro-inc/base
       NEURO_STAGING_URL: ${{ secrets.NEURO_STAGING_URL }}
