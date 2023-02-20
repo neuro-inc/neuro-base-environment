@@ -8,7 +8,7 @@ opencv-python-headless==4.6.0.66
 pandas==1.5.2
 Pillow==9.3.0
 scikit-learn==1.2.0
-scipy==1.9.3
+scipy==1.10.1
 tensorboardX==2.5.1
 tensorflow-gpu==2.10.1
 torch==1.13.0+cu116
