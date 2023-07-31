@@ -26,6 +26,7 @@ jobs:
           - Dockerfile.minimal
     env:
       IMAGE_NAME: ghcr.io/neuro-inc/base
+      NEURO_CLUSTER: onprem-poc
       NEURO_STAGING_URL: ${{ secrets.NEURO_STAGING_URL }}
       NEURO_TOKEN: ${{ secrets.NEURO_TOKEN }}
       BASE_IMAGE: ${{ matrix.base-image }}
@@ -53,7 +54,7 @@ jobs:
         run: |
           source venv/bin/activate
           neuro config login-with-token $NEURO_TOKEN $NEURO_STAGING_URL
-          neuro config switch-cluster revenuegrid-aws
+          neuro config switch-cluster $NEURO_CLUSTER
           neuro config show
 
       - name: Login ghcr.io
