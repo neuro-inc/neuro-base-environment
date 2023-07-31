@@ -20,7 +20,7 @@ image_build:
 	docker build \
 		-t $(TARGET_IMAGE_NAME):built-$(BASE_IMAGE_TYPE) \
 		--build-arg BASE_IMAGE=${BASE_IMAGE} \
-		-f ${DOCKERFILE} .
+		-f $(DOCKERFILE) .
 
 .PHONY: image_deploy
 image_deploy:
