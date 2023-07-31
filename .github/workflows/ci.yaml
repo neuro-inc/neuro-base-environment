@@ -77,6 +77,9 @@ jobs:
           elif [[ ${{ matrix.base-image }} =~ devel ]]; then
             export BASE_IMAGE_TYPE="devel";
           fi
+          if [[ ${{ matrix.dockerfile }} =~ minimal ]]; then
+            export BASE_IMAGE_TYPE="$BASE_IMAGE_TYPE-minimal";
+          fi
           echo "::set-output name=BASE_IMAGE_TYPE::$BASE_IMAGE_TYPE"
           echo "::set-output name=platform_image_tag::ghcr.io/neuro-inc/base:built-$BASE_IMAGE_TYPE"
 
