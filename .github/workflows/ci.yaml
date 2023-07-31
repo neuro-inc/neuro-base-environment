@@ -21,6 +21,9 @@ jobs:
         base-image:
           - nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
           - nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu22.04
+        dockerfile:
+          - Dockerfile
+          - Dockerfile.minimal
     env:
       IMAGE_NAME: ghcr.io/neuro-inc/base
       NEURO_STAGING_URL: ${{ secrets.NEURO_STAGING_URL }}
@@ -80,6 +83,7 @@ jobs:
       - name: Build image
         env:
           BASE_IMAGE_TYPE: ${{ steps.get-image-tags.outputs.BASE_IMAGE_TYPE }}
+          DOCKERFILE: $${{ matrix.dockerfile }}
         run: |
           make image_build
 

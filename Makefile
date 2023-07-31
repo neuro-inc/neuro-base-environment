@@ -8,6 +8,8 @@ TEST_STORAGE_SUFFIX := $(shell bash -c 'echo $$(date +"%Y-%m-%d--%H-%M-%S")-$$RA
 BASE_IMAGE ?= nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu22.04
 BASE_IMAGE_TYPE ?=
 
+DOCKERFILE ?= Dockerfile
+
 .PHONY: setup
 setup:
 	pip install pre-commit
@@ -18,7 +20,7 @@ image_build:
 	docker build \
 		-t $(TARGET_IMAGE_NAME):built-$(BASE_IMAGE_TYPE) \
 		--build-arg BASE_IMAGE=${BASE_IMAGE} \
-		-f Dockerfile .
+		-f ${DOCKERFILE} .
 
 .PHONY: image_deploy
 image_deploy:
