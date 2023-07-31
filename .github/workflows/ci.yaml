@@ -87,7 +87,7 @@ jobs:
       - name: Build image
         env:
           BASE_IMAGE_TYPE: ${{ steps.get-image-tags.outputs.BASE_IMAGE_TYPE }}
-          DOCKERFILE: $${{ matrix.dockerfile }}
+          DOCKERFILE: ${{ matrix.dockerfile }}
         run: |
           make image_build
 
