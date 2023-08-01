@@ -26,3 +26,5 @@ neuro --version
 neuro-extras --version
 neuro-flow --version
 neuro config show
+
+nvidia-smi
