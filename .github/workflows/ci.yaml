@@ -87,7 +87,7 @@ jobs:
       - name: Cleanup tool cache
         run: |
           du -h -d 1 /opt/hostedtoolcache
-          rm -rf /opt/hostedtoolcache
+          rm -rf /opt/hostedtoolcache/go /opt/hostedtoolcache/CodeQL
 
 
       - name: Build image
