@@ -84,6 +84,11 @@ jobs:
           echo "::set-output name=BASE_IMAGE_TYPE::$BASE_IMAGE_TYPE"
           echo "::set-output name=platform_image_tag::ghcr.io/neuro-inc/base:built-$BASE_IMAGE_TYPE"
 
+      - name: Cleanup tool cache
+        run: |
+          rm -rf /opt/hostedtoolcache
+
+
       - name: Build image
         env:
           BASE_IMAGE_TYPE: ${{ steps.get-image-tags.outputs.BASE_IMAGE_TYPE }}
