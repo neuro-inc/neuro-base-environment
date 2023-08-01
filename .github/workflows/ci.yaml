@@ -107,6 +107,9 @@ jobs:
         run: |
           source venv/bin/activate
           make e2e_neuro_push
+          if [[ ${{ matrix.dockerfile }} =~ minimal ]]; then
+            export TEST_CMD="bash /var/storage/dependencies.minimal.sh";
+          fi
           make test_dependencies
 
       - name: Push release

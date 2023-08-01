@@ -35,7 +35,7 @@ e2e_neuro_push:
 	neuro push $(TARGET_IMAGE_NAME):built-$(BASE_IMAGE_TYPE) $(TEST_IMAGE_NAME):$(BASE_IMAGE_TYPE)
 
 TEST_PRESET=gpu-large
-TEST_CMD=bash /var/storage/dependencies.sh
+TEST_CMD ?= bash /var/storage/dependencies.sh
 .PHONY: test_dependencies
 test_dependencies:
 	neuro mkdir -p $(TEST_STORAGE)/$(TEST_STORAGE_SUFFIX)
