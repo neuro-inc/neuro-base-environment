@@ -34,7 +34,7 @@ image_deploy:
 e2e_neuro_push:
 	neuro push $(TARGET_IMAGE_NAME):built-$(BASE_IMAGE_TYPE) $(TEST_IMAGE_NAME):$(BASE_IMAGE_TYPE)
 
-TEST_PRESET=gpu-large
+TEST_PRESET ?= gpu-large
 TEST_CMD ?= bash /var/storage/dependencies.sh
 .PHONY: test_dependencies
 test_dependencies:
