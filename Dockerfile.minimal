@@ -55,7 +55,7 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 # ==================================================================
 # python
 # ------------------------------------------------------------------
-COPY requirements/python.txt /tmp/requirements/python.txt
+COPY requirements/python.minimal.txt /tmp/requirements/python.txt
 COPY libdevice_fix.sh /tmp/libdevice_fix.sh
 # ==================================================================
 # Miniconda
@@ -75,26 +75,14 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py311_23.5.2-0-L
     PIP_INSTALL="python -m pip --no-cache-dir install --upgrade" && \
     $PIP_INSTALL pip pipx && \
     python3 -m pipx ensurepath && \
-    $PIP_INSTALL -r /tmp/requirements/python.txt --extra-index-url https://download.pytorch.org/whl && \
-    rm -r /tmp/requirements && \
-# ==================================================================
-# VSCode server
-# ------------------------------------------------------------------
-    wget -q https://github.com/cdr/code-server/releases/download/v3.11.1/code-server_3.11.1_amd64.deb  && \
-    dpkg -i code-server_3.11.1_amd64.deb && \
-    rm code-server_3.11.1_amd64.deb
+    $PIP_INSTALL -r /tmp/requirements/python.txt && \
+    rm -r /tmp/requirements
 # ==================================================================
 # OOM guard
 # Adds a script to tune oom_killer behavior and puts it into the crontab
 # ==================================================================
 COPY files/usr/local/sbin/oom_guard.sh /usr/local/sbin/oom_guard.sh
 RUN crontab -l 2>/dev/null | { cat; echo '* * * * * /usr/local/sbin/oom_guard.sh'; } | crontab
-
-# ==================================================================
-# Documentation notebook
-# ------------------------------------------------------------------
-RUN mkdir -p /var/notebooks
-COPY files/var/notebooks/README.ipynb /var/notebooks
 
 # ==================================================================
 # Set up SSH for remote debug
@@ -132,7 +120,7 @@ EXPOSE 22
 # ==================================================================
 # Neu.ro and other isolated via pipx Python packages
 # ------------------------------------------------------------------
-COPY requirements/pipx.txt /tmp/requirements/
+COPY requirements/pipx.minimal.txt /tmp/requirements/pipx.txt
 # Used for pipx
 ENV PATH=/opt/conda/bin:/root/.local/bin/:$PATH
 RUN cat /tmp/requirements/pipx.txt | xargs -rn 1 pipx install && \

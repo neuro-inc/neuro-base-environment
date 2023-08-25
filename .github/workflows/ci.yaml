@@ -21,8 +21,12 @@ jobs:
         base-image:
           - nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
           - nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu22.04
+        dockerfile:
+          - Dockerfile
+          - Dockerfile.minimal
     env:
       IMAGE_NAME: ghcr.io/neuro-inc/base
+      NEURO_CLUSTER: onprem-poc
       NEURO_STAGING_URL: ${{ secrets.NEURO_STAGING_URL }}
       NEURO_TOKEN: ${{ secrets.NEURO_TOKEN }}
       BASE_IMAGE: ${{ matrix.base-image }}
@@ -50,7 +54,7 @@ jobs:
         run: |
           source venv/bin/activate
           neuro config login-with-token $NEURO_TOKEN $NEURO_STAGING_URL
-          neuro config switch-cluster revenuegrid-aws
+          neuro config switch-cluster $NEURO_CLUSTER
           neuro config show
 
       - name: Login ghcr.io
@@ -74,12 +78,22 @@ jobs:
           elif [[ ${{ matrix.base-image }} =~ devel ]]; then
             export BASE_IMAGE_TYPE="devel";
           fi
+          if [[ ${{ matrix.dockerfile }} =~ minimal ]]; then
+            export BASE_IMAGE_TYPE="$BASE_IMAGE_TYPE-minimal";
+          fi
           echo "::set-output name=BASE_IMAGE_TYPE::$BASE_IMAGE_TYPE"
           echo "::set-output name=platform_image_tag::ghcr.io/neuro-inc/base:built-$BASE_IMAGE_TYPE"
+
+      - name: Cleanup tool cache
+        run: |
+          du -h -d 1 /opt/hostedtoolcache
+          rm -rf /opt/hostedtoolcache/go /opt/hostedtoolcache/CodeQL
+
 
       - name: Build image
         env:
           BASE_IMAGE_TYPE: ${{ steps.get-image-tags.outputs.BASE_IMAGE_TYPE }}
+          DOCKERFILE: ${{ matrix.dockerfile }}
         run: |
           make image_build
 
@@ -90,9 +104,13 @@ jobs:
       - name: Test image
         env:
           BASE_IMAGE_TYPE: ${{ steps.get-image-tags.outputs.BASE_IMAGE_TYPE }}
+          TEST_PRESET: gpu-1x3090
         run: |
           source venv/bin/activate
           make e2e_neuro_push
+          if [[ ${{ matrix.dockerfile }} =~ minimal ]]; then
+            export TEST_CMD="bash /var/storage/dependencies.minimal.sh";
+          fi
           make test_dependencies
 
       - name: Push release

@@ -8,6 +8,8 @@ TEST_STORAGE_SUFFIX := $(shell bash -c 'echo $$(date +"%Y-%m-%d--%H-%M-%S")-$$RA
 BASE_IMAGE ?= nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu22.04
 BASE_IMAGE_TYPE ?=
 
+DOCKERFILE ?= Dockerfile
+
 .PHONY: setup
 setup:
 	pip install pre-commit
@@ -18,7 +20,7 @@ image_build:
 	docker build \
 		-t $(TARGET_IMAGE_NAME):built-$(BASE_IMAGE_TYPE) \
 		--build-arg BASE_IMAGE=${BASE_IMAGE} \
-		-f Dockerfile .
+		-f $(DOCKERFILE) .
 
 .PHONY: image_deploy
 image_deploy:
@@ -32,8 +34,8 @@ image_deploy:
 e2e_neuro_push:
 	neuro push $(TARGET_IMAGE_NAME):built-$(BASE_IMAGE_TYPE) $(TEST_IMAGE_NAME):$(BASE_IMAGE_TYPE)
 
-TEST_PRESET=gpu-large
-TEST_CMD=bash /var/storage/dependencies.sh
+TEST_PRESET ?= gpu-large
+TEST_CMD ?= bash /var/storage/dependencies.sh
 .PHONY: test_dependencies
 test_dependencies:
 	neuro mkdir -p $(TEST_STORAGE)/$(TEST_STORAGE_SUFFIX)
