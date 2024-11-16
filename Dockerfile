@@ -80,7 +80,7 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py311_24.9.2-0-L
 # ==================================================================
 # VSCode server
 # ------------------------------------------------------------------
-    wget -q https://github.com/coder/code-server/releases/download/v4.95.2/code-server_4.95.2_amd64.deb  && \
+    wget -q https://github.com/cdr/code-server/releases/download/v3.11.1/code-server_3.11.1_amd64.deb && \
     dpkg -i code-server_3.11.1_amd64.deb && \
     rm code-server_3.11.1_amd64.deb
 # ==================================================================
