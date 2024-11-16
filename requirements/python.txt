@@ -11,9 +11,9 @@ scikit-learn==1.2.0
 scipy==1.10.1
 tensorboardX==2.6.2
 tensorflow==2.13.0
-torch==2.0.1+cu117
-torchaudio==2.0.2+cu117
-torchvision==0.15.2+cu117
+torch==2.6.0+cu126
+torchaudio==2.0.2+cu126
+torchvision==0.15.2+cu126
 tqdm==4.64.1
 typing==3.7.4.3
 wandb[aws]==0.13.11

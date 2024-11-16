@@ -19,8 +19,8 @@ jobs:
     strategy:
       matrix:
         base-image:
-          - nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
-          - nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu22.04
+          - nvidia/cuda:12.6.2-cudnn-devel-ubuntu24.04
+          - nvidia/cuda:12.6.2-cudnn-runtime-ubuntu24.04
         dockerfile:
           - Dockerfile
           - Dockerfile.minimal
@@ -48,14 +48,14 @@ jobs:
         run: |
           python -m venv venv
           source venv/bin/activate
-          pip install -U neuro-cli
+          pip install -U apolo-cli
 
       - name: Configure environment
         run: |
           source venv/bin/activate
-          neuro config login-with-token $NEURO_TOKEN $NEURO_STAGING_URL
-          neuro config switch-cluster $NEURO_CLUSTER
-          neuro config show
+          apolo config login-with-token $NEURO_TOKEN $NEURO_STAGING_URL
+          apolo config switch-cluster $NEURO_CLUSTER
+          apolo config show
 
       - name: Login ghcr.io
         uses: docker/login-action@v2

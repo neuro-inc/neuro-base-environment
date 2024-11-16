@@ -5,7 +5,7 @@ TEST_IMAGE_NAME ?= image:e2e-neuro-base-environment
 TEST_STORAGE ?= storage:.neuro-base-environment
 TEST_STORAGE_SUFFIX := $(shell bash -c 'echo $$(date +"%Y-%m-%d--%H-%M-%S")-$$RANDOM')
 
-BASE_IMAGE ?= nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu22.04
+BASE_IMAGE ?= nvidia/cuda:12.6.2-cudnn-devel-ubuntu24.04
 BASE_IMAGE_TYPE ?=
 
 DOCKERFILE ?= Dockerfile
@@ -38,13 +38,13 @@ TEST_PRESET ?= gpu-large
 TEST_CMD ?= bash /var/storage/dependencies.sh
 .PHONY: test_dependencies
 test_dependencies:
-	neuro mkdir -p $(TEST_STORAGE)/$(TEST_STORAGE_SUFFIX)
-	neuro cp -ru files/testing/ -T $(TEST_STORAGE)/$(TEST_STORAGE_SUFFIX)
-	neuro run \
+	apolo mkdir -p $(TEST_STORAGE)/$(TEST_STORAGE_SUFFIX)
+	apolo cp -ru files/testing/ -T $(TEST_STORAGE)/$(TEST_STORAGE_SUFFIX)
+	apolo run \
 		--pass-config \
 		--schedule-timeout 20m \
 	    -s $(TEST_PRESET) \
 		-v $(TEST_STORAGE)/$(TEST_STORAGE_SUFFIX):/var/storage \
 		--workdir /var/storage \
 	    $(TEST_IMAGE_NAME):$(BASE_IMAGE_TYPE) -- $(TEST_CMD)
-	neuro rm -r $(TEST_STORAGE)/$(TEST_STORAGE_SUFFIX)
+	apolo rm -r $(TEST_STORAGE)/$(TEST_STORAGE_SUFFIX)

@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
+ARG BASE_IMAGE=nvidia/cuda:12.6.2-cudnn-devel-ubuntu24.04
 FROM ${BASE_IMAGE}
 ENV LANG C.UTF-8
 RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
@@ -60,7 +60,7 @@ COPY libdevice_fix.sh /tmp/libdevice_fix.sh
 # ==================================================================
 # Miniconda
 # ------------------------------------------------------------------
-RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py311_23.5.2-0-Linux-x86_64.sh -O ~/miniconda.sh && \
+RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py311_24.9.2-0-Linux-x86_64.sh -O ~/miniconda.sh && \
     /bin/bash ~/miniconda.sh -b -p /opt/conda && \
     rm ~/miniconda.sh && \
     ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
@@ -80,7 +80,7 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py311_23.5.2-0-L
 # ==================================================================
 # VSCode server
 # ------------------------------------------------------------------
-    wget -q https://github.com/cdr/code-server/releases/download/v3.11.1/code-server_3.11.1_amd64.deb  && \
+    wget -q https://github.com/coder/code-server/releases/download/v4.95.2/code-server_4.95.2_amd64.deb  && \
     dpkg -i code-server_3.11.1_amd64.deb && \
     rm code-server_3.11.1_amd64.deb
 # ==================================================================
@@ -138,8 +138,8 @@ ENV PATH=/opt/conda/bin:/root/.local/bin/:$PATH
 RUN cat /tmp/requirements/pipx.txt | xargs -rn 1 pipx install && \
     pipx list --json && \
     # This is TMP work-around due to https://github.com/neuro-inc/neuro-cli/pull/2671
-    pipx runpip neuro-all uninstall -y click && \
-    pipx runpip neuro-all install click==8.1.3 && \
+    pipx runpip apolo-all uninstall -y click && \
+    pipx runpip apolo-all install click==8.1.3 && \
     rm -r /tmp/requirements
 # ==================================================================
 # config

@@ -29,10 +29,10 @@ tqdm --version
 
 service cron status
 
-neuro --version
-neuro-extras --version
-neuro-flow --version
-neuro config show
+apolo --version
+apolo-extras --version
+apolo-flow --version
+apolo config show
 
 # sanity check of python libs
 python -c "import scipy as pkg; print(f'{pkg.__package__} version: {pkg.__version__}')"

@@ -1,7 +1,7 @@
-Neuro Platform Base Image
+Apolo Platform Base Image
 ====================
 
-Base docker image used in [Neuro Platform Template](https://github.com/neuromation/cookiecutter-neuro-project/), deployed on GitHub as [`ghcr.io/neuro-inc/base`](https://github.com/orgs/neuro-inc/packages/container/package/base).
+Base docker image used in [Apolo Platform Template](https://github.com/neuro-inc/flow-template), deployed on GitHub as [`ghcr.io/neuro-inc/base`](https://github.com/orgs/neuro-inc/packages/container/package/base).
 
 Versions
 ---
@@ -10,8 +10,8 @@ Versions
 
 Notes
 -----
-1. This image is designed for [Neuro Platform](https://neu.ro/platform) only. Running it on public machine might be insecure.
-2. Setting environment variable `EXPOSE_SSH` enables SSH server with root account without password. This is safe to do within [Neuro Platform](https://neu.ro/platform), but very dangerous otherwise.
+1. This image is designed for [Apolo Platform](https://apolo.us) only. Running it on public machine might be insecure.
+2. Setting environment variable `EXPOSE_SSH` enables SSH server with root account without password. This is safe to do within [Apolo Platform](https://apolo.us), but very dangerous otherwise.
 
 License
 -------
@@ -19,4 +19,4 @@ This project is licensed under the terms of the [Apache License](/LICENSE)
 
 Additional info
 ---------------
-For more details, see [Neuro Platform documentation](https://docs.neu.ro).
+For more details, see [Apolo Platform documentation](https://docs.apolo.us/index).
