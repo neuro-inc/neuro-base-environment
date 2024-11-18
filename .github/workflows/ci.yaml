@@ -26,9 +26,6 @@ jobs:
           - Dockerfile.minimal
     env:
       IMAGE_NAME: ghcr.io/neuro-inc/base
-      NEURO_CLUSTER: onprem-poc
-      NEURO_STAGING_URL: ${{ secrets.NEURO_STAGING_URL }}
-      NEURO_TOKEN: ${{ secrets.NEURO_TOKEN }}
       BASE_IMAGE: ${{ matrix.base-image }}
     name: Build, test and publish image
     runs-on: ubuntu-latest
@@ -87,7 +84,6 @@ jobs:
         run: |
           du -h -d 1 /opt/hostedtoolcache
           rm -rf /opt/hostedtoolcache/go /opt/hostedtoolcache/CodeQL
-
 
       - name: Build image
         env:
