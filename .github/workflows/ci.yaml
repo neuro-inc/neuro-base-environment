@@ -103,7 +103,7 @@ jobs:
       - name: Test image
         env:
           BASE_IMAGE_TYPE: ${{ steps.get-image-tags.outputs.BASE_IMAGE_TYPE }}
-          TEST_PRESET: gpu-1x3090
+          TEST_PRESET: gpu-l4-x1
         run: |
           source venv/bin/activate
           make e2e_neuro_push
