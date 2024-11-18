@@ -53,8 +53,7 @@ jobs:
       - name: Configure environment
         run: |
           source venv/bin/activate
-          apolo config login-with-token $NEURO_TOKEN $NEURO_STAGING_URL
-          apolo config switch-cluster $NEURO_CLUSTER
+          apolo config login-with-token $NEURO_TOKEN https://api.dev.apolo.us/api/v1
           apolo config show
 
       - name: Login ghcr.io
