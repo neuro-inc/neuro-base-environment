@@ -4,7 +4,7 @@ ipywidgets==8.0.4
 jupyterlab==3.6.1
 matplotlib==3.7.1
 mlflow[extras]==2.17.2
-opencv-python-headless==4.7.0.72
+opencv-python-headless==4.10.0.84
 pandas==2.2.3
 Pillow==9.4.0
 scikit-learn==1.5.2
@@ -16,4 +16,4 @@ torchaudio==2.5.1+cu124
 torchvision==0.20.1+cu124
 tqdm==4.66.5
 typing==3.7.4.3
-wandb[aws]==0.13.11
+wandb[aws]==0.18.7
