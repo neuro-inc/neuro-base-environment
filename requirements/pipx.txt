@@ -1,3 +1,2 @@
-apolo-all==24.10.2
-apolo-sdk==24.11.1
+apolo-all==24.11.0
 awscli==1.36.4
