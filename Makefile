@@ -5,7 +5,7 @@ TEST_IMAGE_NAME ?= image:e2e-neuro-base-environment
 TEST_STORAGE ?= storage:.neuro-base-environment
 TEST_STORAGE_SUFFIX := $(shell bash -c 'echo $$(date +"%Y-%m-%d--%H-%M-%S")-$$RANDOM')
 
-BASE_IMAGE ?= nvidia/cuda:12.6.2-cudnn-devel-ubuntu24.04
+BASE_IMAGE ?= nvidia/cuda:12.4.0-cudnn-devel-ubuntu24.04
 BASE_IMAGE_TYPE ?=
 
 DOCKERFILE ?= Dockerfile
