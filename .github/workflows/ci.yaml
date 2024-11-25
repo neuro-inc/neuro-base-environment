@@ -19,8 +19,8 @@ jobs:
     strategy:
       matrix:
         base-image:
-          - nvidia/cuda:12.4.0-cudnn-devel-ubuntu24.04
-          - nvidia/cuda:12.4.0-cudnn-runtime-ubuntu24.04
+          - nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
+          - nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
         dockerfile:
           - Dockerfile
           - Dockerfile.minimal

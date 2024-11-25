@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=nvidia/cuda:12.4.0-cudnn-devel-ubuntu24.04
+ARG BASE_IMAGE=nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
 FROM ${BASE_IMAGE}
 ENV LANG C.UTF-8
 RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
