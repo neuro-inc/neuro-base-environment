@@ -75,7 +75,7 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py311_24.9.2-0-L
     PIP_INSTALL="python -m pip --no-cache-dir install --upgrade" && \
     $PIP_INSTALL pip pipx && \
     python3 -m pipx ensurepath && \
-    $PIP_INSTALL -r /tmp/requirements/python.txt --extra-index-url https://download.pytorch.org/whl && \
+    $PIP_INSTALL -r /tmp/requirements/python.txt --extra-index-url https://download.pytorch.org/whl --use-feature=2020-resolver && \
     rm -r /tmp/requirements && \
 # ==================================================================
 # VSCode server
