@@ -54,7 +54,7 @@ python gpu_pytorch.py
 python gpu_tensorflow.py
 
 # execute TF beginners notebook
-wget -q https://storage.googleapis.com/tensorflow_docs/docs/site/en/tutorials/quickstart/beginner.ipynb -O beginner.ipynb
+wget -q https://raw.githubusercontent.com/tensorflow/docs/refs/heads/master/site/en/tutorials/quickstart/beginner.ipynb -O beginner.ipynb
 jupyter nbconvert --to notebook --execute --inplace --ExecutePreprocessor.timeout=600 beginner.ipynb
 rm beginner.ipynb
 
