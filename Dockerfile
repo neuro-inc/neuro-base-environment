@@ -82,15 +82,15 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py311_24.9.2-0-L
     conda create -y -n torch python=3.11 && \
     conda activate torch && \
     $PIP_INSTALL -r /tmp/requirements/python.txt && \
-    $PIP_INSTALL -r --no-cache-dir -r /tmp/requirements/torch.txt --extra-index-url https://download.pytorch.org/whl && \
+    $PIP_INSTALL -r /tmp/requirements/torch.txt --extra-index-url https://download.pytorch.org/whl && \
     conda deactivate && \
 # ==================================================================
-# Create a Separate Conda Environment for TORCH
+# Create a Separate Conda Environment for TENSORFLOW
 # ------------------------------------------------------------------
     conda create -y -n tf python=3.11 && \
     conda activate tf && \
     $PIP_INSTALL -r /tmp/requirements/python.txt && \
-    $PIP_INSTALL -r --no-cache-dir -r /tmp/requirements/tf.txt && \
+    $PIP_INSTALL -r /tmp/requirements/tf.txt && \
     conda deactivate && \
 # ================================================================== \
 # Remove the requirements folder \
