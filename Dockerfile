@@ -76,7 +76,6 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py311_24.9.2-0-L
     $PIP_INSTALL pip pipx && \
     python3 -m pipx ensurepath && \
     $PIP_INSTALL -r /tmp/requirements/python.txt --extra-index-url https://download.pytorch.org/whl && \
-    rm -r /tmp/requirements && \
 # ==================================================================
 # Create a Separate Conda Environment for TORCH
 # ------------------------------------------------------------------
@@ -93,6 +92,10 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py311_24.9.2-0-L
     $PIP_INSTALL -r /tmp/requirements/python.txt && \
     $PIP_INSTALL -r --no-cache-dir -r /tmp/requirements/tf.txt && \
     conda deactivate && \
+# ================================================================== \
+# Remove the requirements folder \
+# ------------------------------------------------------------------ \
+    rm -r /tmp/requirements && \
 # ==================================================================
 # VSCode server
 # ------------------------------------------------------------------
