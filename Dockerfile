@@ -57,6 +57,16 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 # ------------------------------------------------------------------
 COPY requirements/python.txt /tmp/requirements/python.txt
 COPY libdevice_fix.sh /tmp/libdevice_fix.sh
+
+# ==================================================================
+# torch
+# ------------------------------------------------------------------
+COPY requirements/torch.txt /tmp/requirements/torch.txt
+
+# ==================================================================
+# tf
+# ------------------------------------------------------------------
+COPY requirements/tf.txt /tmp/requirements/tf.txt
 # ==================================================================
 # Miniconda
 # ------------------------------------------------------------------
