@@ -17,7 +17,7 @@ setup:
 
 .PHONY: image_build
 image_build:
-	docker build --platform linux/amd64 \
+	docker build \
 		-t $(TARGET_IMAGE_NAME):built-$(BASE_IMAGE_TYPE) \
 		--build-arg BASE_IMAGE=${BASE_IMAGE} \
 		-f $(DOCKERFILE) .
