@@ -21,7 +21,6 @@ git-lfs --version
 nvtop --version
 
 jupyter --version
-tensorboard --version
 wandb --version
 
 aws --version
