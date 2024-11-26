@@ -111,7 +111,8 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py311_24.9.2-0-L
 # ------------------------------------------------------------------
     wget -q https://github.com/cdr/code-server/releases/download/v3.11.1/code-server_3.11.1_amd64.deb && \
     dpkg -i code-server_3.11.1_amd64.deb && \
-    rm code-server_3.11.1_amd64.deb
+    rm code-server_3.11.1_amd64.deb \
+
 # ==================================================================
 # OOM guard
 # Adds a script to tune oom_killer behavior and puts it into the crontab
