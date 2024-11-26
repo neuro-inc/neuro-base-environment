@@ -78,6 +78,22 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py311_24.9.2-0-L
     $PIP_INSTALL -r /tmp/requirements/python.txt --extra-index-url https://download.pytorch.org/whl && \
     rm -r /tmp/requirements && \
 # ==================================================================
+# Create a Separate Conda Environment for TORCH
+# ------------------------------------------------------------------
+    conda create -y -n torch python=3.11 && \
+    conda activate torch && \
+    $PIP_INSTALL -r /tmp/requirements/python.txt && \
+    $PIP_INSTALL -r --no-cache-dir -r /tmp/requirements/torch.txt --extra-index-url https://download.pytorch.org/whl && \
+    conda deactivate && \
+# ==================================================================
+# Create a Separate Conda Environment for TORCH
+# ------------------------------------------------------------------
+    conda create -y -n tf python=3.11 && \
+    conda activate tf && \
+    $PIP_INSTALL -r /tmp/requirements/python.txt && \
+    $PIP_INSTALL -r --no-cache-dir -r /tmp/requirements/tf.txt && \
+    conda deactivate && \
+# ==================================================================
 # VSCode server
 # ------------------------------------------------------------------
     wget -q https://github.com/cdr/code-server/releases/download/v3.11.1/code-server_3.11.1_amd64.deb && \
