@@ -93,8 +93,12 @@ jobs:
           make image_build
 
       - name: List pip packages
+        id: list-pip-packages
         run: |
           docker run --tty --rm ${{ steps.get-image-tags.outputs.platform_image_tag }} pip list
+          docker run --tty --rm ${{ steps.get-image-tags.outputs.platform_image_tag }} pip freeze > pip_dependencies.txt
+        env:
+          IMAGE_TAG: ${{ steps.get-image-tags.outputs.platform_image_tag }}
 
       - name: Test image
         env:
@@ -117,9 +121,47 @@ jobs:
           if [[ $BASE_IMAGE_TYPE == runtime ]]; then
             export TARGET_IMAGE_TAGS="latest,$TARGET_IMAGE_TAGS";
           fi
+          echo "$TARGET_IMAGE_TAGS" > released_tags.txt
           make image_deploy
           if [[ $BASE_IMAGE_TYPE == runtime ]]; then
             # publish legacy images
             TARGET_IMAGE_NAME="neuromation/base"
             make image_deploy
           fi
+
+      - name: Append Docker images and dependencies to release notes
+        if: startsWith(github.ref, 'refs/tags/')
+        id: update-release
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const pipDependencies = fs.readFileSync('pip_dependencies.txt', 'utf8');
+            const baseImage = "ghcr.io/neuro-inc/base";
+            const dockerTags = fs.readFileSync('released_tags.txt', 'utf8')
+              .split(',')
+              .map(tag => `- \`${tag.trim()}\``)
+              .join('\n');
+            // Generate the list of concatenated Docker image names with tags
+            const dockerImages = dockerTags.map(tag => `- \`${baseImage}:${tag}\``)
+              .join('\n');
+
+            const dockerImage = `${{ steps.get-image-tags.outputs.platform_image_tag }}`;
+            const releaseBody = `
+            ## Docker Images Released
+            \`\`\`
+            ${dockerImages}
+            \`\`\`
+
+            ## Pip Dependencies
+            \`\`\`
+            ${pipDependencies}
+            \`\`\`
+            `;
+            const release_id = context.payload.release.id;
+            await github.rest.repos.updateRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: release_id,
+              body: releaseBody
+            });
