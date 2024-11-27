@@ -94,7 +94,7 @@ jobs:
 
       - name: List pip packages minimal
         if: ${{ matrix.dockerfile == 'Dockerfile.minimal' }}
-        id: list-pip-packages
+        id: list-pip-packages-minimal
         run: |
           docker run --tty --rm ${{ steps.get-image-tags.outputs.platform_image_tag }} pip list
           docker run --tty --rm ${{ steps.get-image-tags.outputs.platform_image_tag }} pip freeze > pip_dependencies.txt
@@ -188,9 +188,9 @@ jobs:
               body: releaseBody
             });
 
-      - name: Append Docker images and dependencies to release notes
+      - name: Append Docker images and dependencies to release notes minimal
         if: startsWith(github.ref, 'refs/tags/') && matrix.dockerfile == 'Dockerfile.minimal'
-        id: update-release
+        id: update-release-minimal
         uses: actions/github-script@v6
         with:
           script: |
