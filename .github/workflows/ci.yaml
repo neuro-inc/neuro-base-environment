@@ -92,11 +92,21 @@ jobs:
         run: |
           make image_build
 
-      - name: List pip packages
+      - name: List pip packages minimal
+        if: ${{ matrix.dockerfile == 'Dockerfile.minimal' }}
         id: list-pip-packages
         run: |
-          docker run --tty --rm ${{ steps.get-image-tags.outputs.platform_image_tag }} bash -c "source /opt/conda/bin/activate base && pip list; exit 0"
-          docker run --tty --rm ${{ steps.get-image-tags.outputs.platform_image_tag }} bash -c "source /opt/conda/bin/activate base && pip freeze" > pip_dependencies.txt
+          docker run --tty --rm ${{ steps.get-image-tags.outputs.platform_image_tag }} pip list
+          docker run --tty --rm ${{ steps.get-image-tags.outputs.platform_image_tag }} pip freeze > pip_dependencies.txt
+        env:
+          IMAGE_TAG: ${{ steps.get-image-tags.outputs.platform_image_tag }}
+
+      - name: List pip packages
+        if: ${{ matrix.dockerfile == 'Dockerfile' }}
+        id: list-pip-packages
+        run: |
+          docker run --tty --rm ${{ steps.get-image-tags.outputs.platform_image_tag }} pip list
+          docker run --tty --rm ${{ steps.get-image-tags.outputs.platform_image_tag }} pip freeze > pip_dependencies.txt
           docker run --tty --rm ${{ steps.get-image-tags.outputs.platform_image_tag }} bash -c "source /opt/conda/bin/activate tf && pip freeze" > pip_dependencies_tf.txt
           docker run --tty --rm ${{ steps.get-image-tags.outputs.platform_image_tag }} bash -c "source /opt/conda/bin/activate torch && pip freeze" > pip_dependencies_torch.txt
         env:
@@ -132,7 +142,7 @@ jobs:
           fi
 
       - name: Append Docker images and dependencies to release notes
-        if: startsWith(github.ref, 'refs/tags/')
+        if: startsWith(github.ref, 'refs/tags/') && matrix.dockerfile == 'Dockerfile'
         id: update-release
         uses: actions/github-script@v6
         with:
@@ -165,9 +175,46 @@ jobs:
             \`\`\`
             ${pipDependenciesTorch}
             \`\`\`
-            ## Pip Dependencies torch env
+            ## Pip Dependencies tf env
             \`\`\`
             ${pipDependenciesTF}
+            \`\`\`
+            `;
+            const release_id = context.payload.release.id;
+            await github.rest.repos.updateRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: release_id,
+              body: releaseBody
+            });
+
+      - name: Append Docker images and dependencies to release notes
+        if: startsWith(github.ref, 'refs/tags/') && matrix.dockerfile == 'Dockerfile.minimal'
+        id: update-release
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const pipDependencies = fs.readFileSync('pip_dependencies.txt', 'utf8');
+            const baseImage = "ghcr.io/neuro-inc/base";
+            const dockerTags = fs.readFileSync('released_tags.txt', 'utf8')
+              .split(',')
+              .map(tag => `- \`${tag.trim()}\``)
+              .join('\n');
+            // Generate the list of concatenated Docker image names with tags
+            const dockerImages = dockerTags.map(tag => `- \`${baseImage}:${tag}\``)
+              .join('\n');
+
+            const dockerImage = `${{ steps.get-image-tags.outputs.platform_image_tag }}`;
+            const releaseBody = `
+            ## Docker Images Released
+            \`\`\`
+            ${dockerImages}
+            \`\`\`
+
+            ## Pip Dependencies
+            \`\`\`
+            ${pipDependencies}
             \`\`\`
             `;
             const release_id = context.payload.release.id;
