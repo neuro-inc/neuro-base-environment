@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
+ARG BASE_IMAGE=nvidia/cuda:12.6.2-cudnn-devel-ubuntu24.04
 FROM ${BASE_IMAGE}
 ENV LANG C.UTF-8
 RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
@@ -57,10 +57,20 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 # ------------------------------------------------------------------
 COPY requirements/python.txt /tmp/requirements/python.txt
 COPY libdevice_fix.sh /tmp/libdevice_fix.sh
+
+# ==================================================================
+# torch
+# ------------------------------------------------------------------
+COPY requirements/torch.txt /tmp/requirements/torch.txt
+
+# ==================================================================
+# tf
+# ------------------------------------------------------------------
+COPY requirements/tf.txt /tmp/requirements/tf.txt
 # ==================================================================
 # Miniconda
 # ------------------------------------------------------------------
-RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py311_23.5.2-0-Linux-x86_64.sh -O ~/miniconda.sh && \
+RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py311_24.9.2-0-Linux-x86_64.sh -O ~/miniconda.sh && \
     /bin/bash ~/miniconda.sh -b -p /opt/conda && \
     rm ~/miniconda.sh && \
     ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
@@ -76,11 +86,30 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py311_23.5.2-0-L
     $PIP_INSTALL pip pipx && \
     python3 -m pipx ensurepath && \
     $PIP_INSTALL -r /tmp/requirements/python.txt --extra-index-url https://download.pytorch.org/whl && \
+# ==================================================================
+# Create a Separate Conda Environment for TORCH
+# ------------------------------------------------------------------
+    conda create -y -n torch python=3.11 && \
+    conda activate torch && \
+    $PIP_INSTALL -r /tmp/requirements/python.txt && \
+    $PIP_INSTALL -r /tmp/requirements/torch.txt --extra-index-url https://download.pytorch.org/whl && \
+    conda deactivate && \
+# ==================================================================
+# Create a Separate Conda Environment for TENSORFLOW
+# ------------------------------------------------------------------
+    conda create -y -n tf python=3.11 && \
+    conda activate tf && \
+    $PIP_INSTALL -r /tmp/requirements/python.txt && \
+    $PIP_INSTALL -r /tmp/requirements/tf.txt && \
+    conda deactivate && \
+# ================================================================== \
+# Remove the requirements folder \
+# ------------------------------------------------------------------ \
     rm -r /tmp/requirements && \
 # ==================================================================
 # VSCode server
 # ------------------------------------------------------------------
-    wget -q https://github.com/cdr/code-server/releases/download/v3.11.1/code-server_3.11.1_amd64.deb  && \
+    wget -q https://github.com/cdr/code-server/releases/download/v3.11.1/code-server_3.11.1_amd64.deb && \
     dpkg -i code-server_3.11.1_amd64.deb && \
     rm code-server_3.11.1_amd64.deb
 # ==================================================================
@@ -137,9 +166,6 @@ COPY requirements/pipx.txt /tmp/requirements/
 ENV PATH=/opt/conda/bin:/root/.local/bin/:$PATH
 RUN cat /tmp/requirements/pipx.txt | xargs -rn 1 pipx install && \
     pipx list --json && \
-    # This is TMP work-around due to https://github.com/neuro-inc/neuro-cli/pull/2671
-    pipx runpip neuro-all uninstall -y click && \
-    pipx runpip neuro-all install click==8.1.3 && \
     rm -r /tmp/requirements
 # ==================================================================
 # config

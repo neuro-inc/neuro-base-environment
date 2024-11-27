@@ -1,1 +1,1 @@
-neuro-all==23.7.1
+apolo-all==24.11.1

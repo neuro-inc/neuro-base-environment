@@ -19,16 +19,13 @@ jobs:
     strategy:
       matrix:
         base-image:
-          - nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
-          - nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu22.04
+          - nvidia/cuda:12.6.2-cudnn-devel-ubuntu24.04
+          - nvidia/cuda:12.6.2-cudnn-runtime-ubuntu24.04
         dockerfile:
           - Dockerfile
           - Dockerfile.minimal
     env:
       IMAGE_NAME: ghcr.io/neuro-inc/base
-      NEURO_CLUSTER: onprem-poc
-      NEURO_STAGING_URL: ${{ secrets.NEURO_STAGING_URL }}
-      NEURO_TOKEN: ${{ secrets.NEURO_TOKEN }}
       BASE_IMAGE: ${{ matrix.base-image }}
     name: Build, test and publish image
     runs-on: ubuntu-latest
@@ -48,14 +45,13 @@ jobs:
         run: |
           python -m venv venv
           source venv/bin/activate
-          pip install -U neuro-cli
+          pip install -U apolo-cli
 
       - name: Configure environment
         run: |
           source venv/bin/activate
-          neuro config login-with-token $NEURO_TOKEN $NEURO_STAGING_URL
-          neuro config switch-cluster $NEURO_CLUSTER
-          neuro config show
+          apolo config login-with-token ${{ secrets.CLIENT_TEST_E2E_USER_NAME }} https://api.dev.apolo.us/api/v1
+          apolo config show
 
       - name: Login ghcr.io
         uses: docker/login-action@v2
@@ -89,7 +85,6 @@ jobs:
           du -h -d 1 /opt/hostedtoolcache
           rm -rf /opt/hostedtoolcache/go /opt/hostedtoolcache/CodeQL
 
-
       - name: Build image
         env:
           BASE_IMAGE_TYPE: ${{ steps.get-image-tags.outputs.BASE_IMAGE_TYPE }}
@@ -97,14 +92,30 @@ jobs:
         run: |
           make image_build
 
-      - name: List pip packages
+      - name: List pip packages minimal
+        if: ${{ matrix.dockerfile == 'Dockerfile.minimal' }}
+        id: list-pip-packages-minimal
         run: |
           docker run --tty --rm ${{ steps.get-image-tags.outputs.platform_image_tag }} pip list
+          docker run --tty --rm ${{ steps.get-image-tags.outputs.platform_image_tag }} pip freeze > pip_dependencies.txt
+        env:
+          IMAGE_TAG: ${{ steps.get-image-tags.outputs.platform_image_tag }}
+
+      - name: List pip packages
+        if: ${{ matrix.dockerfile == 'Dockerfile' }}
+        id: list-pip-packages
+        run: |
+          docker run --tty --rm ${{ steps.get-image-tags.outputs.platform_image_tag }} pip list
+          docker run --tty --rm ${{ steps.get-image-tags.outputs.platform_image_tag }} pip freeze > pip_dependencies.txt
+          docker run --tty --rm ${{ steps.get-image-tags.outputs.platform_image_tag }} bash -c "source /opt/conda/bin/activate tf && pip freeze" > pip_dependencies_tf.txt
+          docker run --tty --rm ${{ steps.get-image-tags.outputs.platform_image_tag }} bash -c "source /opt/conda/bin/activate torch && pip freeze" > pip_dependencies_torch.txt
+        env:
+          IMAGE_TAG: ${{ steps.get-image-tags.outputs.platform_image_tag }}
 
       - name: Test image
         env:
           BASE_IMAGE_TYPE: ${{ steps.get-image-tags.outputs.BASE_IMAGE_TYPE }}
-          TEST_PRESET: gpu-1x3090
+          TEST_PRESET: gpu-l4-x1
         run: |
           source venv/bin/activate
           make e2e_neuro_push
@@ -122,9 +133,94 @@ jobs:
           if [[ $BASE_IMAGE_TYPE == runtime ]]; then
             export TARGET_IMAGE_TAGS="latest,$TARGET_IMAGE_TAGS";
           fi
+          echo "$TARGET_IMAGE_TAGS" > released_tags.txt
           make image_deploy
           if [[ $BASE_IMAGE_TYPE == runtime ]]; then
             # publish legacy images
             TARGET_IMAGE_NAME="neuromation/base"
             make image_deploy
           fi
+
+      - name: Append Docker images and dependencies to release notes
+        if: startsWith(github.ref, 'refs/tags/') && matrix.dockerfile == 'Dockerfile'
+        id: update-release
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const pipDependencies = fs.readFileSync('pip_dependencies.txt', 'utf8');
+            const pipDependenciesTorch = fs.readFileSync('pip_dependencies_torch.txt', 'utf8');
+            const pipDependenciesTF = fs.readFileSync('pip_dependencies_tf.txt', 'utf8');
+            const baseImage = "ghcr.io/neuro-inc/base";
+            const dockerTags = fs.readFileSync('released_tags.txt', 'utf8')
+              .split(',')
+              .map(tag => `- \`${tag.trim()}\``)
+              .join('\n');
+            // Generate the list of concatenated Docker image names with tags
+            const dockerImages = dockerTags.map(tag => `- \`${baseImage}:${tag}\``)
+              .join('\n');
+
+            const dockerImage = `${{ steps.get-image-tags.outputs.platform_image_tag }}`;
+            const releaseBody = `
+            ## Docker Images Released
+            \`\`\`
+            ${dockerImages}
+            \`\`\`
+
+            ## Pip Dependencies
+            \`\`\`
+            ${pipDependencies}
+            \`\`\`
+            ## Pip Dependencies torch env
+            \`\`\`
+            ${pipDependenciesTorch}
+            \`\`\`
+            ## Pip Dependencies tf env
+            \`\`\`
+            ${pipDependenciesTF}
+            \`\`\`
+            `;
+            const release_id = context.payload.release.id;
+            await github.rest.repos.updateRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: release_id,
+              body: releaseBody
+            });
+
+      - name: Append Docker images and dependencies to release notes minimal
+        if: startsWith(github.ref, 'refs/tags/') && matrix.dockerfile == 'Dockerfile.minimal'
+        id: update-release-minimal
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const pipDependencies = fs.readFileSync('pip_dependencies.txt', 'utf8');
+            const baseImage = "ghcr.io/neuro-inc/base";
+            const dockerTags = fs.readFileSync('released_tags.txt', 'utf8')
+              .split(',')
+              .map(tag => `- \`${tag.trim()}\``)
+              .join('\n');
+            // Generate the list of concatenated Docker image names with tags
+            const dockerImages = dockerTags.map(tag => `- \`${baseImage}:${tag}\``)
+              .join('\n');
+
+            const dockerImage = `${{ steps.get-image-tags.outputs.platform_image_tag }}`;
+            const releaseBody = `
+            ## Docker Images Released
+            \`\`\`
+            ${dockerImages}
+            \`\`\`
+
+            ## Pip Dependencies
+            \`\`\`
+            ${pipDependencies}
+            \`\`\`
+            `;
+            const release_id = context.payload.release.id;
+            await github.rest.repos.updateRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: release_id,
+              body: releaseBody
+            });

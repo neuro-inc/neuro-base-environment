@@ -1,2 +1,2 @@
-awscli==1.29.17
-neuro-all==23.7.1
+apolo-all==24.11.1
+awscli==1.36.4
