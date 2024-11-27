@@ -95,7 +95,7 @@ jobs:
       - name: List pip packages
         id: list-pip-packages
         run: |
-          docker run --tty --rm ${{ steps.get-image-tags.outputs.platform_image_tag }} bash -c "source /opt/conda/bin/activate base && pip list"
+          docker run --tty --rm ${{ steps.get-image-tags.outputs.platform_image_tag }} bash -c "source /opt/conda/bin/activate base && pip list || true"
           docker run --tty --rm ${{ steps.get-image-tags.outputs.platform_image_tag }} bash -c "source /opt/conda/bin/activate base && pip freeze" > pip_dependencies.txt
           docker run --tty --rm ${{ steps.get-image-tags.outputs.platform_image_tag }} bash -c "source /opt/conda/bin/activate tf && pip freeze" > pip_dependencies_tf.txt
           docker run --tty --rm ${{ steps.get-image-tags.outputs.platform_image_tag }} bash -c "source /opt/conda/bin/activate torch && pip freeze" > pip_dependencies_torch.txt
