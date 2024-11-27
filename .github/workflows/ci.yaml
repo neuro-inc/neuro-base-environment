@@ -20,7 +20,7 @@ jobs:
       matrix:
         base-image:
           - nvidia/cuda:12.6.2-cudnn-devel-ubuntu24.04
-          - nvidia/cuda:12.6.2-cudnn-devel-ubuntu24.04
+          - nvidia/cuda:12.6.2-cudnn-runtime-ubuntu24.04
         dockerfile:
           - Dockerfile
           - Dockerfile.minimal
@@ -97,6 +97,8 @@ jobs:
         run: |
           docker run --tty --rm ${{ steps.get-image-tags.outputs.platform_image_tag }} pip list
           docker run --tty --rm ${{ steps.get-image-tags.outputs.platform_image_tag }} pip freeze > pip_dependencies.txt
+          docker run --tty --rm ${{ steps.get-image-tags.outputs.platform_image_tag }} bash -c "conda activate tf && pip freeze" > pip_dependencies_tf.txt
+          docker run --tty --rm ${{ steps.get-image-tags.outputs.platform_image_tag }} bash -c "conda activate torch && pip freeze" > pip_dependencies_torch.txt
         env:
           IMAGE_TAG: ${{ steps.get-image-tags.outputs.platform_image_tag }}
 
@@ -137,6 +139,8 @@ jobs:
           script: |
             const fs = require('fs');
             const pipDependencies = fs.readFileSync('pip_dependencies.txt', 'utf8');
+            const pipDependenciesTorch = fs.readFileSync('pip_dependencies_torch.txt', 'utf8');
+            const pipDependenciesTF = fs.readFileSync('pip_dependencies_tf.txt', 'utf8');
             const baseImage = "ghcr.io/neuro-inc/base";
             const dockerTags = fs.readFileSync('released_tags.txt', 'utf8')
               .split(',')
@@ -156,6 +160,14 @@ jobs:
             ## Pip Dependencies
             \`\`\`
             ${pipDependencies}
+            \`\`\`
+            ## Pip Dependencies torch env
+            \`\`\`
+            ${pipDependenciesTorch}
+            \`\`\`
+            ## Pip Dependencies torch env
+            \`\`\`
+            ${pipDependenciesTF}
             \`\`\`
             `;
             const release_id = context.payload.release.id;
