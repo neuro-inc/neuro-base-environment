@@ -167,10 +167,12 @@ jobs:
               .join('\n');
             console.log('GitHub Context:', JSON.stringify(github, null, 2));
             console.log('Generated Docker images list:\n', dockerImages);
-            const tagRef = github.event.ref;
-            if (!tagRef) {
-              throw new Error('No tag reference found. Make sure the action is triggered by a tag event.');
+            // Use the GITHUB_REF environment variable to extract the tag name
+            const tagRef = process.env.GITHUB_REF;
+            if (!tagRef || !tagRef.startsWith('refs/tags/')) {
+              throw new Error('GITHUB_REF does not contain a tag reference. Ensure this action runs on a tag event.');
             }
+
             const tagName = tagRef.replace('refs/tags/', '');
             console.log('Tag name:', tagName);
 
@@ -255,9 +257,10 @@ jobs:
               .join('\n');
             console.log('GitHub Context:', JSON.stringify(github, null, 2));
             console.log('Generated Docker images list:\n', dockerImages);
-            const tagRef = github.event.ref;
-            if (!tagRef) {
-              throw new Error('No tag reference found. Make sure the action is triggered by a tag event.');
+            // Use the GITHUB_REF environment variable to extract the tag name
+            const tagRef = process.env.GITHUB_REF;
+            if (!tagRef || !tagRef.startsWith('refs/tags/')) {
+              throw new Error('GITHUB_REF does not contain a tag reference. Ensure this action runs on a tag event.');
             }
 
             const tagName = tagRef.replace('refs/tags/', '');
