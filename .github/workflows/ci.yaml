@@ -165,13 +165,12 @@ jobs:
               .split(',')
               .map(tag => `- \`${baseImage}:${tag.trim()}\``)
               .join('\n');
-
+            console.log('GitHub Context:', JSON.stringify(github, null, 2));
             console.log('Generated Docker images list:\n', dockerImages);
-            const tagRef = github.ref || github.event.ref;
+            const tagRef = github.event.ref;
             if (!tagRef) {
               throw new Error('No tag reference found. Make sure the action is triggered by a tag event.');
             }
-
             const tagName = tagRef.replace('refs/tags/', '');
             console.log('Tag name:', tagName);
 
@@ -254,9 +253,9 @@ jobs:
               .split(',')
               .map(tag => `- \`${baseImage}:${tag.trim()}\``)
               .join('\n');
-
+            console.log('GitHub Context:', JSON.stringify(github, null, 2));
             console.log('Generated Docker images list:\n', dockerImages);
-            const tagRef = github.ref || github.event.ref;
+            const tagRef = github.event.ref;
             if (!tagRef) {
               throw new Error('No tag reference found. Make sure the action is triggered by a tag event.');
             }
