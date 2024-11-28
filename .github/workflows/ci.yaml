@@ -152,6 +152,8 @@ jobs:
             const pipDependenciesTorch = fs.readFileSync('pip_dependencies_torch.txt', 'utf8');
             const pipDependenciesTF = fs.readFileSync('pip_dependencies_tf.txt', 'utf8');
             const baseImage = "ghcr.io/neuro-inc/base";
+            const releasedTagsContent = fs.readFileSync('released_tags.txt', 'utf8');
+            console.log('Raw released_tags.txt content:', releasedTagsContent);
             const dockerTags = releasedTagsContent
               .split(',')
               .map(tag => {
@@ -210,6 +212,8 @@ jobs:
             const fs = require('fs');
             const pipDependencies = fs.readFileSync('pip_dependencies.txt', 'utf8');
             const baseImage = "ghcr.io/neuro-inc/base";
+            const releasedTagsContent = fs.readFileSync('released_tags.txt', 'utf8');
+            console.log('Raw released_tags.txt content:', releasedTagsContent);
             const dockerTags = releasedTagsContent
               .split(',')
               .map(tag => {
