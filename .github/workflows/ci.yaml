@@ -167,8 +167,12 @@ jobs:
               .join('\n');
 
             console.log('Generated Docker images list:\n', dockerImages);
+            const tagRef = github.ref || github.event.ref;
+            if (!tagRef) {
+              throw new Error('No tag reference found. Make sure the action is triggered by a tag event.');
+            }
 
-            const tagName = github.ref.replace('refs/tags/', '');
+            const tagName = tagRef.replace('refs/tags/', '');
             console.log('Tag name:', tagName);
 
             const releaseBody = `
@@ -252,8 +256,12 @@ jobs:
               .join('\n');
 
             console.log('Generated Docker images list:\n', dockerImages);
+            const tagRef = github.ref || github.event.ref;
+            if (!tagRef) {
+              throw new Error('No tag reference found. Make sure the action is triggered by a tag event.');
+            }
 
-            const tagName = github.ref.replace('refs/tags/', '');
+            const tagName = tagRef.replace('refs/tags/', '');
             console.log('Tag name:', tagName);
 
             const releaseBody = `
