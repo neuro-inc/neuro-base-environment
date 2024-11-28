@@ -160,9 +160,9 @@ jobs:
                 return `- \`${trimmedTag}\``;
               })
               .join('\n');
-      
+
             console.log('Processed Docker tags:', dockerTags);
-      
+
             console.log('Generating list of Docker images...');
             const dockerImages = releasedTagsContent
               .split(',')
@@ -218,9 +218,9 @@ jobs:
                 return `- \`${trimmedTag}\``;
               })
               .join('\n');
-      
+
             console.log('Processed Docker tags:', dockerTags);
-      
+
             console.log('Generating list of Docker images...');
             const dockerImages = releasedTagsContent
               .split(',')
@@ -230,7 +230,7 @@ jobs:
                 return `- \`${baseImage}:${trimmedTag}\``;
               })
               .join('\n');
-      
+
             console.log('Generated Docker images list:\n', dockerImages);
             const dockerImage = `${{ steps.get-image-tags.outputs.platform_image_tag }}`;
             const releaseBody = `
