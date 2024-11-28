@@ -152,12 +152,25 @@ jobs:
             const pipDependenciesTorch = fs.readFileSync('pip_dependencies_torch.txt', 'utf8');
             const pipDependenciesTF = fs.readFileSync('pip_dependencies_tf.txt', 'utf8');
             const baseImage = "ghcr.io/neuro-inc/base";
-            const dockerTags = fs.readFileSync('released_tags.txt', 'utf8')
+            const dockerTags = releasedTagsContent
               .split(',')
-              .map(tag => `- \`${tag.trim()}\``)
+              .map(tag => {
+                const trimmedTag = tag.trim();
+                console.log('Processing tag:', trimmedTag);
+                return `- \`${trimmedTag}\``;
+              })
               .join('\n');
-            // Generate the list of concatenated Docker image names with tags
-            const dockerImages = dockerTags.map(tag => `- \`${baseImage}:${tag}\``)
+      
+            console.log('Processed Docker tags:', dockerTags);
+      
+            console.log('Generating list of Docker images...');
+            const dockerImages = releasedTagsContent
+              .split(',')
+              .map(tag => {
+                const trimmedTag = tag.trim();
+                console.log('Generating image for tag:', trimmedTag);
+                return `- \`${baseImage}:${trimmedTag}\``;
+              })
               .join('\n');
 
             const dockerImage = `${{ steps.get-image-tags.outputs.platform_image_tag }}`;
@@ -197,14 +210,28 @@ jobs:
             const fs = require('fs');
             const pipDependencies = fs.readFileSync('pip_dependencies.txt', 'utf8');
             const baseImage = "ghcr.io/neuro-inc/base";
-            const dockerTags = fs.readFileSync('released_tags.txt', 'utf8')
+            const dockerTags = releasedTagsContent
               .split(',')
-              .map(tag => `- \`${tag.trim()}\``)
+              .map(tag => {
+                const trimmedTag = tag.trim();
+                console.log('Processing tag:', trimmedTag);
+                return `- \`${trimmedTag}\``;
+              })
               .join('\n');
-            // Generate the list of concatenated Docker image names with tags
-            const dockerImages = dockerTags.map(tag => `- \`${baseImage}:${tag}\``)
+      
+            console.log('Processed Docker tags:', dockerTags);
+      
+            console.log('Generating list of Docker images...');
+            const dockerImages = releasedTagsContent
+              .split(',')
+              .map(tag => {
+                const trimmedTag = tag.trim();
+                console.log('Generating image for tag:', trimmedTag);
+                return `- \`${baseImage}:${trimmedTag}\``;
+              })
               .join('\n');
-
+      
+            console.log('Generated Docker images list:\n', dockerImages);
             const dockerImage = `${{ steps.get-image-tags.outputs.platform_image_tag }}`;
             const releaseBody = `
             ## Docker Images Released
