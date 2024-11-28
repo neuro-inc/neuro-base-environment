@@ -156,26 +156,21 @@ jobs:
             console.log('Raw released_tags.txt content:', releasedTagsContent);
             const dockerTags = releasedTagsContent
               .split(',')
-              .map(tag => {
-                const trimmedTag = tag.trim();
-                console.log('Processing tag:', trimmedTag);
-                return `- \`${trimmedTag}\``;
-              })
+              .map(tag => `- \`${tag.trim()}\``)
               .join('\n');
 
             console.log('Processed Docker tags:', dockerTags);
 
-            console.log('Generating list of Docker images...');
             const dockerImages = releasedTagsContent
               .split(',')
-              .map(tag => {
-                const trimmedTag = tag.trim();
-                console.log('Generating image for tag:', trimmedTag);
-                return `- \`${baseImage}:${trimmedTag}\``;
-              })
+              .map(tag => `- \`${baseImage}:${tag.trim()}\``)
               .join('\n');
 
-            const dockerImage = `${{ steps.get-image-tags.outputs.platform_image_tag }}`;
+            console.log('Generated Docker images list:\n', dockerImages);
+
+            const tagName = github.ref.replace('refs/tags/', '');
+            console.log('Tag name:', tagName);
+
             const releaseBody = `
             ## Docker Images Released
             \`\`\`
@@ -195,14 +190,43 @@ jobs:
             ${pipDependenciesTF}
             \`\`\`
             `;
-            const release_id = context.payload.release.id;
-            await github.rest.repos.updateRelease({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              release_id: release_id,
-              body: releaseBody
-            });
 
+            try {
+              // Check if release exists
+              const existingRelease = await github.rest.repos.getReleaseByTag({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                tag: tagName
+              });
+              console.log('Existing release found:', existingRelease.data.id);
+
+              // Update the release
+              await github.rest.repos.updateRelease({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                release_id: existingRelease.data.id,
+                body: releaseBody
+              });
+              console.log('Release updated successfully.');
+            } catch (error) {
+              if (error.status === 404) {
+                console.log('Release not found, creating a new release...');
+                // Create a new release
+                await github.rest.repos.createRelease({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  tag_name: tagName,
+                  name: `Release ${tagName}`,
+                  body: releaseBody,
+                  draft: false,
+                  prerelease: false
+                });
+                console.log('New release created successfully.');
+              } else {
+                console.error('Error checking or creating release:', error);
+                throw error;
+              }
+            }
       - name: Append Docker images and dependencies to release notes minimal
         if: startsWith(github.ref, 'refs/tags/') && matrix.dockerfile == 'Dockerfile.minimal'
         id: update-release-minimal
@@ -214,29 +238,24 @@ jobs:
             const baseImage = "ghcr.io/neuro-inc/base";
             const releasedTagsContent = fs.readFileSync('released_tags.txt', 'utf8');
             console.log('Raw released_tags.txt content:', releasedTagsContent);
+
             const dockerTags = releasedTagsContent
               .split(',')
-              .map(tag => {
-                const trimmedTag = tag.trim();
-                console.log('Processing tag:', trimmedTag);
-                return `- \`${trimmedTag}\``;
-              })
+              .map(tag => `- \`${tag.trim()}\``)
               .join('\n');
 
             console.log('Processed Docker tags:', dockerTags);
 
-            console.log('Generating list of Docker images...');
             const dockerImages = releasedTagsContent
               .split(',')
-              .map(tag => {
-                const trimmedTag = tag.trim();
-                console.log('Generating image for tag:', trimmedTag);
-                return `- \`${baseImage}:${trimmedTag}\``;
-              })
+              .map(tag => `- \`${baseImage}:${tag.trim()}\``)
               .join('\n');
 
             console.log('Generated Docker images list:\n', dockerImages);
-            const dockerImage = `${{ steps.get-image-tags.outputs.platform_image_tag }}`;
+
+            const tagName = github.ref.replace('refs/tags/', '');
+            console.log('Tag name:', tagName);
+
             const releaseBody = `
             ## Docker Images Released
             \`\`\`
@@ -248,10 +267,40 @@ jobs:
             ${pipDependencies}
             \`\`\`
             `;
-            const release_id = context.payload.release.id;
-            await github.rest.repos.updateRelease({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              release_id: release_id,
-              body: releaseBody
-            });
+
+            try {
+              // Check if release exists
+              const existingRelease = await github.rest.repos.getReleaseByTag({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                tag: tagName
+              });
+              console.log('Existing release found:', existingRelease.data.id);
+
+              // Update the release
+              await github.rest.repos.updateRelease({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                release_id: existingRelease.data.id,
+                body: releaseBody
+              });
+              console.log('Release updated successfully.');
+            } catch (error) {
+              if (error.status === 404) {
+                console.log('Release not found, creating a new release...');
+                // Create a new release
+                await github.rest.repos.createRelease({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  tag_name: tagName,
+                  name: `Release ${tagName}`,
+                  body: releaseBody,
+                  draft: false,
+                  prerelease: false
+                });
+                console.log('New release created successfully.');
+              } else {
+                console.error('Error checking or creating release:', error);
+                throw error;
+              }
+            }
