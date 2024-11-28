@@ -144,6 +144,7 @@ jobs:
       - name: Append Docker images and dependencies to release notes
         if: startsWith(github.ref, 'refs/tags/') && matrix.dockerfile == 'Dockerfile'
         id: update-release
+        continue-on-error: true
         uses: actions/github-script@v6
         with:
           script: |
@@ -235,6 +236,7 @@ jobs:
       - name: Append Docker images and dependencies to release notes minimal
         if: startsWith(github.ref, 'refs/tags/') && matrix.dockerfile == 'Dockerfile.minimal'
         id: update-release-minimal
+        continue-on-error: true
         uses: actions/github-script@v6
         with:
           script: |
