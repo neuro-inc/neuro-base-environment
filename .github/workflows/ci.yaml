@@ -149,7 +149,7 @@ jobs:
         with:
           script: |
             const MAX_BODY_LENGTH = 125000;
-
+      
             const fs = require('fs');
             const pipDependencies = fs.readFileSync('pip_dependencies.txt', 'utf8');
             const pipDependenciesTorch = fs.readFileSync('pip_dependencies_torch.txt', 'utf8');
@@ -157,47 +157,44 @@ jobs:
             const baseImage = "ghcr.io/neuro-inc/base";
             const releasedTagsContent = fs.readFileSync('released_tags.txt', 'utf8');
             console.log('Raw released_tags.txt content:', releasedTagsContent);
-            const dockerTags = releasedTagsContent
-              .split(',')
-              .map(tag => `- \`${tag.trim()}\``)
-              .join('\n');
-
-            console.log('Processed Docker tags:', dockerTags);
-
+      
             const dockerImages = releasedTagsContent
               .split(',')
               .map(tag => `- \`${baseImage}:${tag.trim()}\``)
               .join('\n');
+      
             console.log('Generated Docker images list:\n', dockerImages);
-            // Use the GITHUB_REF environment variable to extract the tag name
-            const tagRef = process.env.GITHUB_REF;
-            if (!tagRef || !tagRef.startsWith('refs/tags/')) {
-              throw new Error('GITHUB_REF does not contain a tag reference. Ensure this action runs on a tag event.');
-            }
-
-            const tagName = tagRef.replace('refs/tags/', '');
-            console.log('Tag name:', tagName);
-
-            const releaseBody = `
+      
+            const newReleaseContent = `
             ## Docker Images Released
             \`\`\`
             ${dockerImages}
             \`\`\`
-
+      
             ## Pip Dependencies
             \`\`\`
             ${pipDependencies}
             \`\`\`
+      
             ## Pip Dependencies torch env
             \`\`\`
             ${pipDependenciesTorch}
             \`\`\`
+      
             ## Pip Dependencies tf env
             \`\`\`
             ${pipDependenciesTF}
             \`\`\`
             `;
-
+      
+            const tagRef = process.env.GITHUB_REF;
+            if (!tagRef || !tagRef.startsWith('refs/tags/')) {
+              throw new Error('GITHUB_REF does not contain a tag reference. Ensure this action runs on a tag event.');
+            }
+      
+            const tagName = tagRef.replace('refs/tags/', '');
+            console.log('Tag name:', tagName);
+      
             try {
               // Fetch the existing release
               const existingRelease = await github.rest.repos.getReleaseByTag({
@@ -206,23 +203,23 @@ jobs:
                 tag: tagName
               });
               console.log('Existing release found:', existingRelease.data.id);
-
+      
               // Get the current release body
               let currentBody = existingRelease.data.body || '';
               console.log('Current release body length:', currentBody.length);
-
+      
               // Append the new content to the existing body
               let updatedBody = `${currentBody}\n${newReleaseContent}`;
-
+      
               // Truncate if the updated body exceeds the limit
               if (updatedBody.length > MAX_BODY_LENGTH) {
                 console.log('Release body exceeds the maximum allowed length. Truncating...');
                 currentBody = currentBody.slice(-(MAX_BODY_LENGTH - newReleaseContent.length)); // Keep the most recent content
                 updatedBody = `${currentBody}\n${newReleaseContent}`;
               }
-
+      
               console.log('Updated release body length:', updatedBody.length);
-
+      
               // Update the release with the appended and (if necessary) truncated content
               await github.rest.repos.updateRelease({
                 owner: context.repo.owner,
@@ -259,73 +256,61 @@ jobs:
         with:
           script: |
             const MAX_BODY_LENGTH = 125000;
-
+      
             const fs = require('fs');
             const pipDependencies = fs.readFileSync('pip_dependencies.txt', 'utf8');
             const baseImage = "ghcr.io/neuro-inc/base";
             const releasedTagsContent = fs.readFileSync('released_tags.txt', 'utf8');
             console.log('Raw released_tags.txt content:', releasedTagsContent);
-
-            const dockerTags = releasedTagsContent
-              .split(',')
-              .map(tag => `- \`${tag.trim()}\``)
-              .join('\n');
-
-            console.log('Processed Docker tags:', dockerTags);
-
+      
             const dockerImages = releasedTagsContent
               .split(',')
               .map(tag => `- \`${baseImage}:${tag.trim()}\``)
               .join('\n');
-
+      
             console.log('Generated Docker images list:\n', dockerImages);
-            // Use the GITHUB_REF environment variable to extract the tag name
+      
             const tagRef = process.env.GITHUB_REF;
             if (!tagRef || !tagRef.startsWith('refs/tags/')) {
               throw new Error('GITHUB_REF does not contain a tag reference. Ensure this action runs on a tag event.');
             }
-
-            const tagName = tagRef.replace('refs/tags/', '');
+      
+            const tagName = tagRef.replace('refs/tags/', '').trim();
             console.log('Tag name:', tagName);
-
-            const releaseBody = `
+      
+            const newReleaseContent = `
             ## Docker Images Released
             \`\`\`
             ${dockerImages}
             \`\`\`
-
+      
             ## Pip Dependencies
             \`\`\`
             ${pipDependencies}
             \`\`\`
             `;
-
+      
             try {
-              // Fetch the existing release
               const existingRelease = await github.rest.repos.getReleaseByTag({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 tag: tagName
               });
               console.log('Existing release found:', existingRelease.data.id);
-
-              // Get the current release body
+      
               let currentBody = existingRelease.data.body || '';
               console.log('Current release body length:', currentBody.length);
-
-              // Append the new content to the existing body
+      
               let updatedBody = `${currentBody}\n${newReleaseContent}`;
-
-              // Truncate if the updated body exceeds the limit
+      
               if (updatedBody.length > MAX_BODY_LENGTH) {
                 console.log('Release body exceeds the maximum allowed length. Truncating...');
-                currentBody = currentBody.slice(-(MAX_BODY_LENGTH - newReleaseContent.length)); // Keep the most recent content
+                currentBody = currentBody.slice(-(MAX_BODY_LENGTH - newReleaseContent.length));
                 updatedBody = `${currentBody}\n${newReleaseContent}`;
               }
-
+      
               console.log('Updated release body length:', updatedBody.length);
-
-              // Update the release with the appended and (if necessary) truncated content
+      
               await github.rest.repos.updateRelease({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -336,7 +321,6 @@ jobs:
             } catch (error) {
               if (error.status === 404) {
                 console.log('Release not found, creating a new release...');
-                // Create a new release if none exists
                 await github.rest.repos.createRelease({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
