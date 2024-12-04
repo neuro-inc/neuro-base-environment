@@ -86,6 +86,7 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py311_24.9.2-0-L
     $PIP_INSTALL pip pipx && \
     python3 -m pipx ensurepath && \
     $PIP_INSTALL -r /tmp/requirements/python.txt --extra-index-url https://download.pytorch.org/whl && \
+    conda install --channel conda-forge nb_conda_kernels==2.5.1 && \
 # ==================================================================
 # Create a Separate Conda Environment for TORCH
 # ------------------------------------------------------------------
