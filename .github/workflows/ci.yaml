@@ -140,7 +140,24 @@ jobs:
             TARGET_IMAGE_NAME="neuromation/base"
             make image_deploy
           fi
-
+      
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        if: github.event_name == 'pull_request'
+        with:
+          images: ghcr.io/neuro-inc/base
+          tags: |
+            type=ref,event=branch
+      - name: Push release for testing
+        env:
+          BASE_IMAGE_TYPE: ${{ steps.get-image-tags.outputs.BASE_IMAGE_TYPE }}
+        if: github.event_name == 'pull_request'
+        run: |
+          export TARGET_IMAGE_TAGS="${{ steps.meta.outputs.tags }}-$BASE_IMAGE_TYPE";
+          echo "$TARGET_IMAGE_TAGS"
+          make image_deploy
+      
       - name: Append Docker images and dependencies to release notes (with truncation)
         if: startsWith(github.ref, 'refs/tags/') && matrix.dockerfile == 'Dockerfile'
         id: update-release
