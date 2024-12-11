@@ -148,7 +148,7 @@ jobs:
         with:
           images: ghcr.io/neuro-inc/base
           tags: |
-            type=ref,event=branch
+            type=ref,event=pr
       - name: Push release for testing
         env:
           BASE_IMAGE_TYPE: ${{ steps.get-image-tags.outputs.BASE_IMAGE_TYPE }}
