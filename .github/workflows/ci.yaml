@@ -154,7 +154,7 @@ jobs:
           BASE_IMAGE_TYPE: ${{ steps.get-image-tags.outputs.BASE_IMAGE_TYPE }}
         if: github.event_name == 'pull_request'
         run: |
-          docker tag ghcr.io/neuro-inc/base:built-$BASE_IMAGE_TYPE;
+          docker tag ghcr.io/neuro-inc/base:built-$BASE_IMAGE_TYPE ${{ steps.meta.outputs.tags }}-$BASE_IMAGE_TYPE;
           docker push ${{ steps.meta.outputs.tags }}-$BASE_IMAGE_TYPE;
           echo "Pushed image: ${{ steps.meta.outputs.tags }}-$BASE_IMAGE_TYPE"
 
