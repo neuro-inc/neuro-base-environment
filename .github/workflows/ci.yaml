@@ -154,9 +154,9 @@ jobs:
           BASE_IMAGE_TYPE: ${{ steps.get-image-tags.outputs.BASE_IMAGE_TYPE }}
         if: github.event_name == 'pull_request'
         run: |
-          export TARGET_IMAGE_TAGS="${{ steps.meta.outputs.tags }}-$BASE_IMAGE_TYPE";
-          echo "$TARGET_IMAGE_TAGS"
-          make image_deploy
+          docker tag ghcr.io/neuro-inc/base:built-$BASE_IMAGE_TYPE;
+          docker push ${{ steps.meta.outputs.tags }}-$BASE_IMAGE_TYPE;
+          echo "Pushed image: ${{ steps.meta.outputs.tags }}-$BASE_IMAGE_TYPE"
 
       - name: Append Docker images and dependencies to release notes (with truncation)
         if: startsWith(github.ref, 'refs/tags/') && matrix.dockerfile == 'Dockerfile'
