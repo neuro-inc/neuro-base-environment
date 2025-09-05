@@ -145,7 +145,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/') && matrix.dockerfile == 'Dockerfile'
         id: update-release
         continue-on-error: true
-        uses: actions/github-script@v6
+        uses: actions/github-script@v8
         with:
           script: |
             const MAX_BODY_LENGTH = 125000;
@@ -252,7 +252,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/') && matrix.dockerfile == 'Dockerfile.minimal'
         id: update-release-minimal
         continue-on-error: true
-        uses: actions/github-script@v6
+        uses: actions/github-script@v8
         with:
           script: |
             const MAX_BODY_LENGTH = 125000;
