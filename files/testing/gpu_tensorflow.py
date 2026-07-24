@@ -11,7 +11,4 @@ z = tf.matmul(x, y)
 
 print(z)
 device = "GPU" if has_gpu else "CPU"
-print(
-    f"TensorFlow version {tf.__version__}: "
-    f"{device} availability test succeeded"
-)
+print(f"TensorFlow version {tf.__version__}: {device} test succeeded")
