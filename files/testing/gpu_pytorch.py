@@ -10,4 +10,7 @@ y = torch.randn(1_000, 10_000).to(device)
 z = torch.matmul(x, y)
 
 print(z)
-print(f"PyTorch version {torch.__version__}: {device.type} availability test succeeded")
+print(
+    f"PyTorch version {torch.__version__}: "
+    f"{device.type} availability test succeeded"
+)
