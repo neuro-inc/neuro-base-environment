@@ -70,6 +70,10 @@ COPY requirements/tf.txt /tmp/requirements/tf.txt
 # ==================================================================
 # Miniconda
 # ------------------------------------------------------------------
+# Split into separate RUN layers (one per conda env + code-server) so the
+# largest blob stays a few GB instead of a single ~8 GB layer, which chokes
+# registry/ingress on push/pull (IT-104). conda activation does not persist
+# across RUN instructions, so each layer re-sources conda.sh.
 RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py311_25.1.1-2-Linux-x86_64.sh -O ~/miniconda.sh && \
     /bin/bash ~/miniconda.sh -b -p /opt/conda && \
     rm ~/miniconda.sh && \
@@ -86,31 +90,30 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py311_25.1.1-2-L
     $PIP_INSTALL pip pipx && \
     python3 -m pipx ensurepath && \
     $PIP_INSTALL -r /tmp/requirements/python.txt --extra-index-url https://download.pytorch.org/whl && \
-    conda install --channel conda-forge nb_conda_kernels==2.5.1 && \
+    conda install --channel conda-forge nb_conda_kernels==2.5.1
 # ==================================================================
 # Create a Separate Conda Environment for TORCH
 # ------------------------------------------------------------------
+RUN . /opt/conda/etc/profile.d/conda.sh && \
+    PIP_INSTALL="python -m pip --no-cache-dir install --upgrade" && \
     conda create -y -n torch python=3.11 && \
     conda activate torch && \
     $PIP_INSTALL -r /tmp/requirements/python.txt && \
-    $PIP_INSTALL -r /tmp/requirements/torch.txt --extra-index-url https://download.pytorch.org/whl && \
-    conda deactivate && \
+    $PIP_INSTALL -r /tmp/requirements/torch.txt --extra-index-url https://download.pytorch.org/whl
 # ==================================================================
 # Create a Separate Conda Environment for TENSORFLOW
 # ------------------------------------------------------------------
+RUN . /opt/conda/etc/profile.d/conda.sh && \
+    PIP_INSTALL="python -m pip --no-cache-dir install --upgrade" && \
     conda create -y -n tf python=3.11 && \
     conda activate tf && \
     $PIP_INSTALL -r /tmp/requirements/python.txt && \
     $PIP_INSTALL -r /tmp/requirements/tf.txt && \
-    conda deactivate && \
-# ================================================================== \
-# Remove the requirements folder \
-# ------------------------------------------------------------------ \
-    rm -r /tmp/requirements && \
+    rm -r /tmp/requirements
 # ==================================================================
 # VSCode server
 # ------------------------------------------------------------------
-    wget -q https://github.com/cdr/code-server/releases/download/v3.11.1/code-server_3.11.1_amd64.deb && \
+RUN wget -q https://github.com/cdr/code-server/releases/download/v3.11.1/code-server_3.11.1_amd64.deb && \
     dpkg -i code-server_3.11.1_amd64.deb && \
     rm code-server_3.11.1_amd64.deb
 # ==================================================================
