@@ -88,7 +88,7 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py313_26.5.3-1-L
     $PIP_INSTALL pip pipx && \
     python3 -m pipx ensurepath && \
     $PIP_INSTALL -r /tmp/requirements/python.txt --extra-index-url https://download.pytorch.org/whl && \
-    conda install --override-channels --channel conda-forge nb_conda_kernels==2.5.1
+    conda install --override-channels --channel conda-forge nb_conda_kernels==2.5.1 'packaging<26'
 # ==================================================================
 # Create a Separate Conda Environment for TORCH
 # ------------------------------------------------------------------
