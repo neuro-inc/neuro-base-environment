@@ -88,13 +88,13 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py313_26.5.3-1-L
     $PIP_INSTALL pip pipx && \
     python3 -m pipx ensurepath && \
     $PIP_INSTALL -r /tmp/requirements/python.txt --extra-index-url https://download.pytorch.org/whl && \
-    conda install --channel conda-forge nb_conda_kernels==2.5.1
+    conda install --override-channels --channel conda-forge nb_conda_kernels==2.5.1
 # ==================================================================
 # Create a Separate Conda Environment for TORCH
 # ------------------------------------------------------------------
 RUN . /opt/conda/etc/profile.d/conda.sh && \
     PIP_INSTALL="python -m pip --no-cache-dir install --upgrade" && \
-    conda create -y -n torch python=3.13 && \
+    conda create -y -n torch --override-channels -c conda-forge python=3.13 && \
     conda activate torch && \
     $PIP_INSTALL -r /tmp/requirements/python.txt && \
     $PIP_INSTALL -r /tmp/requirements/torch.txt --extra-index-url https://download.pytorch.org/whl/cu126
@@ -103,7 +103,7 @@ RUN . /opt/conda/etc/profile.d/conda.sh && \
 # ------------------------------------------------------------------
 RUN . /opt/conda/etc/profile.d/conda.sh && \
     PIP_INSTALL="python -m pip --no-cache-dir install --upgrade" && \
-    conda create -y -n tf python=3.13 && \
+    conda create -y -n tf --override-channels -c conda-forge python=3.13 && \
     conda activate tf && \
     $PIP_INSTALL -r /tmp/requirements/python.txt && \
     $PIP_INSTALL -r /tmp/requirements/tf.txt && \
