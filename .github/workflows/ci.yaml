@@ -6,16 +6,13 @@ on:
     tags: [v*.*.*]
   pull_request:
     branches: [master]
-  pull_request_target:
-    branches: [master]
 
-concurrency: CI
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: true
 
 jobs:
   build:
-    if: |
-      (github.event_name != 'pull_request_target' && github.actor != 'dependabot[bot]') ||
-      (github.event_name == 'pull_request_target' && github.actor == 'dependabot[bot]')
     strategy:
       matrix:
         base-image:
@@ -336,3 +333,19 @@ jobs:
                 throw error;
               }
             }
+
+  # Stable required-status-check context; matrix job names are variant-suffixed.
+  check:
+    name: CI success
+    needs: build
+    # always() so a failed/cancelled build still reports this check as failed.
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail if any build matrix job did not succeed
+        if: needs.build.result != 'success'
+        run: |
+          echo "build matrix result: ${{ needs.build.result }}"
+          exit 1
+      - name: Success
+        run: echo "All build matrix jobs succeeded"
