@@ -5,6 +5,7 @@ jupyterlab==4.6.2
 matplotlib==3.11.1
 mlflow[extras]==3.14.0
 opencv-python-headless==5.0.0.93
+packaging==25.0
 pandas==2.3.3
 Pillow==12.3.0
 scikit-learn==1.9.0
