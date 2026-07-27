@@ -56,7 +56,6 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 # python
 # ------------------------------------------------------------------
 COPY requirements/python.txt /tmp/requirements/python.txt
-COPY libdevice_fix.sh /tmp/libdevice_fix.sh
 
 # ==================================================================
 # torch
@@ -74,7 +73,7 @@ COPY requirements/tf.txt /tmp/requirements/tf.txt
 # largest blob stays a few GB instead of a single ~8 GB layer, which chokes
 # registry/ingress on push/pull (IT-104). conda activation does not persist
 # across RUN instructions, so each layer re-sources conda.sh.
-RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py311_25.1.1-2-Linux-x86_64.sh -O ~/miniconda.sh && \
+RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py313_26.5.3-1-Linux-x86_64.sh -O ~/miniconda.sh && \
     /bin/bash ~/miniconda.sh -b -p /opt/conda && \
     rm ~/miniconda.sh && \
     ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
@@ -82,7 +81,6 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py311_25.1.1-2-L
     echo "conda activate base" >> ~/.bashrc && \
     . /opt/conda/etc/profile.d/conda.sh && \
     conda activate base && \
-    . /tmp/libdevice_fix.sh && \
 # ==================================================================
 # Python
 # ------------------------------------------------------------------
@@ -96,16 +94,16 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py311_25.1.1-2-L
 # ------------------------------------------------------------------
 RUN . /opt/conda/etc/profile.d/conda.sh && \
     PIP_INSTALL="python -m pip --no-cache-dir install --upgrade" && \
-    conda create -y -n torch python=3.11 && \
+    conda create -y -n torch python=3.13 && \
     conda activate torch && \
     $PIP_INSTALL -r /tmp/requirements/python.txt && \
-    $PIP_INSTALL -r /tmp/requirements/torch.txt --extra-index-url https://download.pytorch.org/whl
+    $PIP_INSTALL -r /tmp/requirements/torch.txt --extra-index-url https://download.pytorch.org/whl/cu126
 # ==================================================================
 # Create a Separate Conda Environment for TENSORFLOW
 # ------------------------------------------------------------------
 RUN . /opt/conda/etc/profile.d/conda.sh && \
     PIP_INSTALL="python -m pip --no-cache-dir install --upgrade" && \
-    conda create -y -n tf python=3.11 && \
+    conda create -y -n tf python=3.13 && \
     conda activate tf && \
     $PIP_INSTALL -r /tmp/requirements/python.txt && \
     $PIP_INSTALL -r /tmp/requirements/tf.txt && \
