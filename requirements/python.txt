@@ -5,10 +5,10 @@ jupyterlab==4.6.2
 matplotlib==3.11.1
 mlflow[extras]==3.14.0
 opencv-python-headless==5.0.0.93
-pandas==3.0.5
+pandas==2.3.3
 Pillow==12.3.0
 scikit-learn==1.9.0
 scipy==1.18.0
 tensorboardX==2.6.5
-tqdm==4.69.1
+tqdm==4.70.0
 wandb[aws]==0.28.1
