@@ -77,10 +77,12 @@ jobs:
           echo "::set-output name=BASE_IMAGE_TYPE::$BASE_IMAGE_TYPE"
           echo "::set-output name=platform_image_tag::ghcr.io/neuro-inc/base:built-$BASE_IMAGE_TYPE"
 
-      - name: Cleanup tool cache
+      - name: Free disk space
         run: |
-          du -h -d 1 /opt/hostedtoolcache
-          rm -rf /opt/hostedtoolcache/go /opt/hostedtoolcache/CodeQL
+          df -h /
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc \
+            /usr/local/.ghcup /opt/hostedtoolcache/go /opt/hostedtoolcache/CodeQL
+          df -h /
 
       - name: Build image
         env:

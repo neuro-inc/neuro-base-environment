@@ -56,11 +56,10 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 # python
 # ------------------------------------------------------------------
 COPY requirements/python.minimal.txt /tmp/requirements/python.txt
-COPY libdevice_fix.sh /tmp/libdevice_fix.sh
 # ==================================================================
 # Miniconda
 # ------------------------------------------------------------------
-RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py311_25.1.1-2-Linux-x86_64.sh -O ~/miniconda.sh && \
+RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py313_26.5.3-1-Linux-x86_64.sh -O ~/miniconda.sh && \
     /bin/bash ~/miniconda.sh -b -p /opt/conda && \
     rm ~/miniconda.sh && \
     ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
@@ -68,7 +67,6 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py311_25.1.1-2-L
     echo "conda activate base" >> ~/.bashrc && \
     . /opt/conda/etc/profile.d/conda.sh && \
     conda activate base && \
-    . /tmp/libdevice_fix.sh && \
 # ==================================================================
 # Python
 # ------------------------------------------------------------------
