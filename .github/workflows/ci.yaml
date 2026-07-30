@@ -140,201 +140,92 @@ jobs:
             make image_deploy
           fi
 
-      - name: Append Docker images and dependencies to release notes (with truncation)
-        if: startsWith(github.ref, 'refs/tags/') && matrix.dockerfile == 'Dockerfile'
-        id: update-release
-        continue-on-error: true
+      - name: Upload release metadata
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-meta-${{ steps.get-image-tags.outputs.BASE_IMAGE_TYPE }}
+          path: |
+            released_tags.txt
+            pip_dependencies.txt
+            pip_dependencies_tf.txt
+            pip_dependencies_torch.txt
+          if-no-files-found: ignore
+          retention-days: 1
+
+  # Single writer: compose the release notes once from all variants' metadata.
+  release-notes:
+    name: Update release notes
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download release metadata
+        uses: actions/download-artifact@v4
+        with:
+          pattern: release-meta-*
+          path: release-meta
+
+      - name: Compose and update release notes
         uses: actions/github-script@v6
         with:
           script: |
-            const MAX_BODY_LENGTH = 125000;
-
             const fs = require('fs');
-            const pipDependencies = fs.readFileSync('pip_dependencies.txt', 'utf8');
-            const pipDependenciesTorch = fs.readFileSync('pip_dependencies_torch.txt', 'utf8');
-            const pipDependenciesTF = fs.readFileSync('pip_dependencies_tf.txt', 'utf8');
-            const baseImage = "ghcr.io/neuro-inc/base";
-            const releasedTagsContent = fs.readFileSync('released_tags.txt', 'utf8');
-            console.log('Raw released_tags.txt content:', releasedTagsContent);
+            const path = require('path');
+            const MAX_BODY_LENGTH = 125000;
+            const baseImage = 'ghcr.io/neuro-inc/base';
+            const root = 'release-meta';
 
-            const dockerImages = releasedTagsContent
-              .split(',')
-              .map(tag => `- \`${baseImage}:${tag.trim()}\``)
+            // Aggregate the published image tags across every variant.
+            const tags = new Set();
+            for (const dir of fs.readdirSync(root)) {
+              const f = path.join(root, dir, 'released_tags.txt');
+              if (!fs.existsSync(f)) continue;
+              for (const t of fs.readFileSync(f, 'utf8').split(',')) {
+                const tag = t.trim();
+                if (tag) tags.add(tag);
+              }
+            }
+            const dockerImages = [...tags].sort()
+              .map(t => `- \`${baseImage}:${t}\``)
               .join('\n');
 
-            console.log('Generated Docker images list:\n', dockerImages);
+            // Pip freezes come from the full runtime image (base + tf + torch envs).
+            const read = (p) => {
+              try { return fs.readFileSync(path.join(root, p), 'utf8').trim(); }
+              catch (e) { return ''; }
+            };
+            const pipBase = read('release-meta-runtime/pip_dependencies.txt');
+            const pipTf = read('release-meta-runtime/pip_dependencies_tf.txt');
+            const pipTorch = read('release-meta-runtime/pip_dependencies_torch.txt');
 
-            const newReleaseContent = `
-            ## Docker Images Released
-            \`\`\`
-            ${dockerImages}
-            \`\`\`
+            const section = [
+              '## Docker Images Released', '```', dockerImages, '```', '',
+              '## Pip Dependencies', '```', pipBase, '```', '',
+              '## Pip Dependencies torch env', '```', pipTorch, '```', '',
+              '## Pip Dependencies tf env', '```', pipTf, '```',
+            ].join('\n');
 
-            ## Pip Dependencies
-            \`\`\`
-            ${pipDependencies}
-            \`\`\`
+            const tagName = process.env.GITHUB_REF.replace('refs/tags/', '');
+            const rel = await github.rest.repos.getReleaseByTag({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag: tagName,
+            });
 
-            ## Pip Dependencies torch env
-            \`\`\`
-            ${pipDependenciesTorch}
-            \`\`\`
+            // Keep the hand-written notes above the auto section and replace any
+            // previous auto section, so re-runs stay idempotent.
+            const head = (rel.data.body || '').split('## Docker Images Released')[0].replace(/\s+$/, '');
+            let body = head ? `${head}\n\n${section}` : section;
+            if (body.length > MAX_BODY_LENGTH) body = body.slice(0, MAX_BODY_LENGTH);
 
-            ## Pip Dependencies tf env
-            \`\`\`
-            ${pipDependenciesTF}
-            \`\`\`
-            `;
-
-            const tagRef = process.env.GITHUB_REF;
-            if (!tagRef || !tagRef.startsWith('refs/tags/')) {
-              throw new Error('GITHUB_REF does not contain a tag reference. Ensure this action runs on a tag event.');
-            }
-
-            const tagName = tagRef.replace('refs/tags/', '');
-            console.log('Tag name:', tagName);
-
-            try {
-              // Fetch the existing release
-              const existingRelease = await github.rest.repos.getReleaseByTag({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                tag: tagName
-              });
-              console.log('Existing release found:', existingRelease.data.id);
-
-              // Get the current release body
-              let currentBody = existingRelease.data.body || '';
-              console.log('Current release body length:', currentBody.length);
-
-              // Append the new content to the existing body
-              let updatedBody = `${currentBody}\n${newReleaseContent}`;
-
-              // Truncate if the updated body exceeds the limit
-              if (updatedBody.length > MAX_BODY_LENGTH) {
-                console.log('Release body exceeds the maximum allowed length. Truncating...');
-                currentBody = currentBody.slice(-(MAX_BODY_LENGTH - newReleaseContent.length)); // Keep the most recent content
-                updatedBody = `${currentBody}\n${newReleaseContent}`;
-              }
-
-              console.log('Updated release body length:', updatedBody.length);
-
-              // Update the release with the appended and (if necessary) truncated content
-              await github.rest.repos.updateRelease({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                release_id: existingRelease.data.id,
-                body: updatedBody
-              });
-              console.log('Release updated successfully with appended content.');
-            } catch (error) {
-              if (error.status === 404) {
-                console.log('Release not found, creating a new release...');
-                // Create a new release if none exists
-                await github.rest.repos.createRelease({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  tag_name: tagName,
-                  name: `Release ${tagName}`,
-                  body: newReleaseContent,
-                  draft: false,
-                  prerelease: false
-                });
-                console.log('New release created successfully.');
-              } else {
-                console.error('Error checking or creating release:', error);
-                throw error;
-              }
-            }
-
-      - name: Append Docker images and dependencies to release notes minimal
-        if: startsWith(github.ref, 'refs/tags/') && matrix.dockerfile == 'Dockerfile.minimal'
-        id: update-release-minimal
-        continue-on-error: true
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const MAX_BODY_LENGTH = 125000;
-
-            const fs = require('fs');
-            const pipDependencies = fs.readFileSync('pip_dependencies.txt', 'utf8');
-            const baseImage = "ghcr.io/neuro-inc/base";
-            const releasedTagsContent = fs.readFileSync('released_tags.txt', 'utf8');
-            console.log('Raw released_tags.txt content:', releasedTagsContent);
-
-            const dockerImages = releasedTagsContent
-              .split(',')
-              .map(tag => `- \`${baseImage}:${tag.trim()}\``)
-              .join('\n');
-
-            console.log('Generated Docker images list:\n', dockerImages);
-
-            const tagRef = process.env.GITHUB_REF;
-            if (!tagRef || !tagRef.startsWith('refs/tags/')) {
-              throw new Error('GITHUB_REF does not contain a tag reference. Ensure this action runs on a tag event.');
-            }
-
-            const tagName = tagRef.replace('refs/tags/', '').trim();
-            console.log('Tag name:', tagName);
-
-            const newReleaseContent = `
-            ## Docker Images Released
-            \`\`\`
-            ${dockerImages}
-            \`\`\`
-
-            ## Pip Dependencies
-            \`\`\`
-            ${pipDependencies}
-            \`\`\`
-            `;
-
-            try {
-              const existingRelease = await github.rest.repos.getReleaseByTag({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                tag: tagName
-              });
-              console.log('Existing release found:', existingRelease.data.id);
-
-              let currentBody = existingRelease.data.body || '';
-              console.log('Current release body length:', currentBody.length);
-
-              let updatedBody = `${currentBody}\n${newReleaseContent}`;
-
-              if (updatedBody.length > MAX_BODY_LENGTH) {
-                console.log('Release body exceeds the maximum allowed length. Truncating...');
-                currentBody = currentBody.slice(-(MAX_BODY_LENGTH - newReleaseContent.length));
-                updatedBody = `${currentBody}\n${newReleaseContent}`;
-              }
-
-              console.log('Updated release body length:', updatedBody.length);
-
-              await github.rest.repos.updateRelease({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                release_id: existingRelease.data.id,
-                body: updatedBody
-              });
-              console.log('Release updated successfully with appended content.');
-            } catch (error) {
-              if (error.status === 404) {
-                console.log('Release not found, creating a new release...');
-                await github.rest.repos.createRelease({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  tag_name: tagName,
-                  name: `Release ${tagName}`,
-                  body: newReleaseContent,
-                  draft: false,
-                  prerelease: false
-                });
-                console.log('New release created successfully.');
-              } else {
-                console.error('Error checking or creating release:', error);
-                throw error;
-              }
-            }
+            await github.rest.repos.updateRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: rel.data.id,
+              body,
+            });
+            console.log(`Updated ${tagName} notes: ${tags.size} image tags, ${body.length} chars.`);
 
   # Stable required-status-check context; matrix job names are variant-suffixed.
   check:
