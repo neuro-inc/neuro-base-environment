@@ -1,2 +1,2 @@
 apolo-all==26.1.0
-awscli==1.38.14
+awscli==1.44.78
