@@ -3,7 +3,7 @@ name: CI
 on:
   push:
     branches: [master]
-    tags: [v*.*.*]
+    tags: ["v*"]
   pull_request:
     branches: [master]
 
@@ -12,7 +12,47 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
+  test:
+    name: All checks are passed
+    uses: ./.github/workflows/test.yaml
+    secrets: inherit
+    permissions:
+      contents: read
+      packages: read
+
+  approve:
+    name: Approve bot PR
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && endsWith(github.actor, '[bot]')
+    needs: test
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: metadata
+        id: metadata
+        if: github.actor == 'dependabot[bot]'
+        uses: dependabot/fetch-metadata@v3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Enable auto-merge for bot PRs
+        run: gh pr merge --auto --squash --delete-branch "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  release:
+    name: Publish tested image
+    needs: test
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    permissions:
+      actions: read
+      contents: read
+      packages: write
     strategy:
       matrix:
         base-image:
@@ -24,41 +64,19 @@ jobs:
     env:
       IMAGE_NAME: ghcr.io/neuro-inc/base
       BASE_IMAGE: ${{ matrix.base-image }}
-    name: Build, test and publish image
-    runs-on: ubuntu-latest
-    timeout-minutes: 150
     steps:
       - name: Checkout commit
-        uses: actions/checkout@v3
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-
-      - name: Install python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.13"
-
-      - name: Install dependencies
-        run: |
-          python -m venv venv
-          source venv/bin/activate
-          pip install -U apolo-cli
-
-      - name: Configure environment
-        run: |
-          source venv/bin/activate
-          apolo config login-with-token ${{ secrets.CLIENT_TEST_E2E_USER_NAME }} https://api.dev.apolo.us/api/v1
-          apolo config show
+        uses: actions/checkout@v7
 
       - name: Login ghcr.io
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Login DockerHub
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
@@ -67,84 +85,65 @@ jobs:
         id: get-image-tags
         run: |
           if [[ ${{ matrix.base-image }} =~ runtime ]]; then
-            export BASE_IMAGE_TYPE="runtime";
+            base_image_type="runtime"
           elif [[ ${{ matrix.base-image }} =~ devel ]]; then
-            export BASE_IMAGE_TYPE="devel";
+            base_image_type="devel"
           fi
           if [[ ${{ matrix.dockerfile }} =~ minimal ]]; then
-            export BASE_IMAGE_TYPE="$BASE_IMAGE_TYPE-minimal";
+            base_image_type="$base_image_type-minimal"
           fi
-          echo "::set-output name=BASE_IMAGE_TYPE::$BASE_IMAGE_TYPE"
-          echo "::set-output name=platform_image_tag::ghcr.io/neuro-inc/base:built-$BASE_IMAGE_TYPE"
+          echo "base_image_type=$base_image_type" >> "$GITHUB_OUTPUT"
+          echo "platform_image_tag=ghcr.io/neuro-inc/base:built-$base_image_type" >> "$GITHUB_OUTPUT"
 
-      - name: Free disk space
-        run: |
-          df -h /
-          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc \
-            /usr/local/.ghcup /opt/hostedtoolcache/go /opt/hostedtoolcache/CodeQL
-          df -h /
+      - name: Download tested image
+        uses: actions/download-artifact@v8
+        with:
+          name: tested-image-${{ steps.get-image-tags.outputs.base_image_type }}
 
-      - name: Build image
+      - name: Load tested image
         env:
-          BASE_IMAGE_TYPE: ${{ steps.get-image-tags.outputs.BASE_IMAGE_TYPE }}
-          DOCKERFILE: ${{ matrix.dockerfile }}
+          PLATFORM_IMAGE_TAG: ${{ steps.get-image-tags.outputs.platform_image_tag }}
         run: |
-          make image_build
+          zstd --decompress --stdout tested-image.tar.zst | docker load
+          docker image inspect "$PLATFORM_IMAGE_TAG" >/dev/null
 
       - name: List pip packages minimal
-        if: ${{ matrix.dockerfile == 'Dockerfile.minimal' }}
-        id: list-pip-packages-minimal
+        if: matrix.dockerfile == 'Dockerfile.minimal'
         run: |
-          docker run --tty --rm ${{ steps.get-image-tags.outputs.platform_image_tag }} pip list
-          docker run --tty --rm ${{ steps.get-image-tags.outputs.platform_image_tag }} pip freeze > pip_dependencies.txt
+          docker run --tty --rm "$IMAGE_TAG" pip list
+          docker run --tty --rm "$IMAGE_TAG" pip freeze > pip_dependencies.txt
         env:
           IMAGE_TAG: ${{ steps.get-image-tags.outputs.platform_image_tag }}
 
       - name: List pip packages
-        if: ${{ matrix.dockerfile == 'Dockerfile' }}
-        id: list-pip-packages
+        if: matrix.dockerfile == 'Dockerfile'
         run: |
-          docker run --tty --rm ${{ steps.get-image-tags.outputs.platform_image_tag }} pip list
-          docker run --tty --rm ${{ steps.get-image-tags.outputs.platform_image_tag }} pip freeze > pip_dependencies.txt
-          docker run --tty --rm ${{ steps.get-image-tags.outputs.platform_image_tag }} bash -c "source /opt/conda/bin/activate tf && pip freeze" > pip_dependencies_tf.txt
-          docker run --tty --rm ${{ steps.get-image-tags.outputs.platform_image_tag }} bash -c "source /opt/conda/bin/activate torch && pip freeze" > pip_dependencies_torch.txt
+          docker run --tty --rm "$IMAGE_TAG" pip list
+          docker run --tty --rm "$IMAGE_TAG" pip freeze > pip_dependencies.txt
+          docker run --tty --rm "$IMAGE_TAG" bash -c "source /opt/conda/bin/activate tf && pip freeze" > pip_dependencies_tf.txt
+          docker run --tty --rm "$IMAGE_TAG" bash -c "source /opt/conda/bin/activate torch && pip freeze" > pip_dependencies_torch.txt
         env:
           IMAGE_TAG: ${{ steps.get-image-tags.outputs.platform_image_tag }}
 
-      - name: Test image
-        env:
-          BASE_IMAGE_TYPE: ${{ steps.get-image-tags.outputs.BASE_IMAGE_TYPE }}
-          TEST_PRESET: cpu-large
-        run: |
-          source venv/bin/activate
-          make e2e_neuro_push
-          if [[ ${{ matrix.dockerfile }} =~ minimal ]]; then
-            export TEST_CMD="bash /var/storage/dependencies.minimal.sh";
-          fi
-          make test_dependencies
-
       - name: Push release
         env:
-          BASE_IMAGE_TYPE: ${{ steps.get-image-tags.outputs.BASE_IMAGE_TYPE }}
-        if: startsWith(github.ref, 'refs/tags/')
+          BASE_IMAGE_TYPE: ${{ steps.get-image-tags.outputs.base_image_type }}
         run: |
-          export TARGET_IMAGE_TAGS="latest-$BASE_IMAGE_TYPE,${GITHUB_REF#refs/tags/}-$BASE_IMAGE_TYPE";
+          export TARGET_IMAGE_TAGS="latest-$BASE_IMAGE_TYPE,${GITHUB_REF#refs/tags/}-$BASE_IMAGE_TYPE"
           if [[ $BASE_IMAGE_TYPE == runtime ]]; then
-            export TARGET_IMAGE_TAGS="latest,$TARGET_IMAGE_TAGS";
+            export TARGET_IMAGE_TAGS="latest,$TARGET_IMAGE_TAGS"
           fi
           echo "$TARGET_IMAGE_TAGS" > released_tags.txt
           make image_deploy
           if [[ $BASE_IMAGE_TYPE == runtime ]]; then
-            # publish legacy images
             TARGET_IMAGE_NAME="neuromation/base"
             make image_deploy
           fi
 
       - name: Upload release metadata
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
-          name: release-meta-${{ steps.get-image-tags.outputs.BASE_IMAGE_TYPE }}
+          name: release-meta-${{ steps.get-image-tags.outputs.base_image_type }}
           path: |
             released_tags.txt
             pip_dependencies.txt
@@ -153,21 +152,23 @@ jobs:
           if-no-files-found: ignore
           retention-days: 1
 
-  # Single writer: compose the release notes once from all variants' metadata.
   release-notes:
     name: Update release notes
-    needs: build
-    if: startsWith(github.ref, 'refs/tags/')
+    needs: release
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: write
     steps:
       - name: Download release metadata
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: release-meta-*
           path: release-meta
 
       - name: Compose and update release notes
-        uses: actions/github-script@v6
+        uses: actions/github-script@v9
         with:
           script: |
             const fs = require('fs');
@@ -176,7 +177,6 @@ jobs:
             const baseImage = 'ghcr.io/neuro-inc/base';
             const root = 'release-meta';
 
-            // Aggregate the published image tags across every variant.
             const tags = new Set();
             for (const dir of fs.readdirSync(root)) {
               const f = path.join(root, dir, 'released_tags.txt');
@@ -190,7 +190,6 @@ jobs:
               .map(t => `- \`${baseImage}:${t}\``)
               .join('\n');
 
-            // Pip freezes come from the full runtime image (base + tf + torch envs).
             const read = (p) => {
               try { return fs.readFileSync(path.join(root, p), 'utf8').trim(); }
               catch (e) { return ''; }
@@ -213,8 +212,6 @@ jobs:
               tag: tagName,
             });
 
-            // Keep the hand-written notes above the auto section and replace any
-            // previous auto section, so re-runs stay idempotent.
             const head = (rel.data.body || '').split('## Docker Images Released')[0].replace(/\s+$/, '');
             let body = head ? `${head}\n\n${section}` : section;
             if (body.length > MAX_BODY_LENGTH) body = body.slice(0, MAX_BODY_LENGTH);
@@ -226,19 +223,3 @@ jobs:
               body,
             });
             console.log(`Updated ${tagName} notes: ${tags.size} image tags, ${body.length} chars.`);
-
-  # Stable required-status-check context; matrix job names are variant-suffixed.
-  check:
-    name: CI success
-    needs: build
-    # always() so a failed/cancelled build still reports this check as failed.
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
-      - name: Fail if any build matrix job did not succeed
-        if: needs.build.result != 'success'
-        run: |
-          echo "build matrix result: ${{ needs.build.result }}"
-          exit 1
-      - name: Success
-        run: echo "All build matrix jobs succeeded"
