@@ -167,7 +167,7 @@ jobs:
           path: release-meta
 
       - name: Compose and update release notes
-        uses: actions/github-script@v6
+        uses: actions/github-script@v9
         with:
           script: |
             const fs = require('fs');
